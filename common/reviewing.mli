@@ -6,7 +6,7 @@ open! Import
 type t =
   [ `All
   | `Whole_feature_reviewers
-  | `Only    of User_name.Set.t
+  | `Only of User_name.Set.t
   | `All_but of User_name.Set.t
   ]
 [@@deriving bin_io, compare, sexp]
@@ -18,8 +18,8 @@ val add : t -> User_name.Set.t -> whole_feature_reviewers:User_name.Set.t -> t
 val mem
   :  t
   -> User_name.t
-  -> whole_feature_reviewers : User_name.Set.t
-  -> whole_feature_followers : User_name.Set.t
+  -> whole_feature_reviewers:User_name.Set.t
+  -> whole_feature_followers:User_name.Set.t
   -> is_seconded:bool
   -> bool
 

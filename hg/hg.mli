@@ -4,15 +4,14 @@ open! Import
 
 (** A 40-char hg node id, which uniquely identifies a revision. *)
 module Node_hash : sig
-
   (** The first 12 characters of a node hash.  We prefer to use the full 40-char node id,
       but hydra only has the 12-char hash. *)
   module First_12 : sig
     type t [@@deriving sexp_of]
 
-    include Invariant.S        with type t := t
+    include Invariant.S with type t := t
     include Comparable.S_plain with type t := t
-    include Hashable.S_plain   with type t := t
+    include Hashable.S_plain with type t := t
 
     val of_string : string -> t
     val to_string : t -> string
@@ -25,7 +24,7 @@ module Node_hash : sig
   type t [@@deriving sexp_of]
 
   include Comparable.S_plain with type t := t
-  include Hashable.S         with type t := t
+  include Hashable.S with type t := t
 
   val to_string : t -> string
   val to_file_name : t -> File_name.t
@@ -38,39 +37,38 @@ end
 
 (** A node hash and an optional human-readable name. *)
 module Rev : sig
-
   type t [@@deriving sexp_of]
 
-  include Invariant. S with type t := t
+  include Invariant.S with type t := t
 
   module Compare_by_hash : sig
     type nonrec t = t [@@deriving compare, sexp_of]
 
-    include Invariant.S        with type t := t
+    include Invariant.S with type t := t
     include Comparable.S_plain with type t := t
-    include Hashable.S_plain   with type t := t
+    include Hashable.S_plain with type t := t
   end
 
   val compare : [ `Do_not_use ]
-  val equal   : [ `Do_not_use ]
-
+  val equal : [ `Do_not_use ]
   val equal_node_hash : t -> t -> bool
   val has_prefix : t -> Node_hash.First_12.t -> bool
-
-  val node_hash     : t -> Node_hash.t
-  val to_first_12   : t -> Node_hash.First_12.t
-  val to_string_12  : t -> string
-  val to_string_40  : t -> string
+  val node_hash : t -> Node_hash.t
+  val to_first_12 : t -> Node_hash.First_12.t
+  val to_string_12 : t -> string
+  val to_string_40 : t -> string
   val to_string_hum : ?lossy:bool -> t -> string
-
   val of_string_40 : string -> t
-
-  val with_human_readable    : t -> human_readable:string -> t
+  val with_human_readable : t -> human_readable:string -> t
   val without_human_readable : t -> t
-  val human_readable         : t -> string option
+  val human_readable : t -> string option
 
   module Stable : sig
-    module V1 : Stable_without_comparator with type t = t
+    module V1 : sig
+      include Stable_without_comparator with type t = t
+
+      val hash_fold_t : t Hash.folder
+    end
   end
 end
 
@@ -101,12 +99,13 @@ module Revset : sig
   val to_string : t -> string
 
   (** singletons *)
-  val dot         : t
-  val of_rev      : Rev.t          -> t
+  val dot : t
+
+  val of_rev : Rev.t -> t
   val feature_tip : Feature_path.t -> t
-  val bookmark    : Bookmark.t     -> t
-  val tag         : Tag.t          -> t
-  val all_tags    : t
+  val bookmark : Bookmark.t -> t
+  val tag : Tag.t -> t
+  val all_tags : t
 
   (** [for_feature ~base ~tip] returns the revisions that are, under the simple
       feature-tree model, unique to the feature with the given [base] and [tip].  I.e.
@@ -114,25 +113,20 @@ module Revset : sig
   val for_feature : base:Rev.t -> tip:Rev.t -> t
 
   val range : from:Rev.t -> to_:Rev.t -> t
-
-  val ancestors   : t -> t
+  val ancestors : t -> t
   val descendants : t -> t
 
   (** boolean operations *)
-  val and_       : t list -> t
-  val or_        : t list -> t
+  val and_ : t list -> t
+
+  val or_ : t list -> t
   val difference : t -> t -> t
-  val not        : t -> t
-
+  val not : t -> t
   val first_greatest_common_ancestor : Rev.t list -> t
-
   val max : t -> t
   val min : t -> t
-
   val merge : t
-
   val limit : t -> limit:int -> t
-
   val reverse : t -> t
 end
 
@@ -168,26 +162,17 @@ val create_revs
     [current_bookmark] is significantly faster, since it is just looking a file, while
     [active_bookmark] calls [hg], and takes about .3s.
 *)
-val active_bookmark  : Repo_root.t -> string Or_error.t Deferred.t
-val current_bookmark : Repo_root.t -> string Or_error.t Deferred.t
+val active_bookmark : Repo_root.t -> string Or_error.t Deferred.t
 
+val current_bookmark : Repo_root.t -> string Or_error.t Deferred.t
 val bookmark_exists : Repo_root.t -> Bookmark.t -> bool Deferred.t
 
 val phase
-  : Repo_root.t
-  -> [ `Rev     of Rev.t
-     | `Feature of Feature_path.t
-     ]
-  -> [ `Public
-     | `Draft
-     | `Secret
-     ] Deferred.t
-
-val cat_one
   :  Repo_root.t
-  -> Rev.t
-  -> Path_in_repo.t
-  -> string Or_error.t Deferred.t
+  -> [ `Rev of Rev.t | `Feature of Feature_path.t ]
+  -> [ `Public | `Draft | `Secret ] Deferred.t
+
+val cat_one : Repo_root.t -> Rev.t -> Path_in_repo.t -> string Or_error.t Deferred.t
 
 val cat
   :  Repo_root.t
@@ -211,9 +196,7 @@ val cat_from_scaffold
   :  Repo_root.t
   -> Path_in_repo.t
   -> scaffold_requires_global_tag_or_rev_hash:bool
-  -> [ `No_scaffold     of Relpath.t
-     | `Scaffold_exists of string Or_error.t
-     ] Deferred.t
+  -> [ `No_scaffold of Relpath.t | `Scaffold_exists of string Or_error.t ] Deferred.t
 
 (** The [key, value] pairs of [metadata] will be added to the metadata in the changeset,
     which is accessible from python hg extensions and viewable with, e.g., [hg log
@@ -225,10 +208,8 @@ val commit
   -> unit Or_error.t Deferred.t
 
 val first_greatest_common_ancestor : Repo_root.t -> Rev.t -> Rev.t -> Rev.t Deferred.t
-
-val greatest_common_ancestor  : Repo_root.t -> Rev.t -> Rev.t -> Rev.t      Deferred.t
+val greatest_common_ancestor : Repo_root.t -> Rev.t -> Rev.t -> Rev.t Deferred.t
 val greatest_common_ancestors : Repo_root.t -> Rev.t -> Rev.t -> Rev.t list Deferred.t
-
 val is_ancestor : Repo_root.t -> ancestor:Rev.t -> descendant:Rev.t -> bool Deferred.t
 
 module Cleanliness_witness : sig
@@ -260,15 +241,11 @@ val diff
   -> args:string list
   -> string Or_error.t Deferred.t
 
-val distclean
-  :  Repo_root.t
-  -> unit Or_error.t Deferred.t
+val distclean : Repo_root.t -> unit Or_error.t Deferred.t
 
 val get_remote_rev
-  : Remote_repo_path.t
-  -> [ `Numeric_rev of int
-     | `Feature of Feature_path.t
-     ]
+  :  Remote_repo_path.t
+  -> [ `Numeric_rev of int | `Feature of Feature_path.t ]
   -> Node_hash.First_12.t Deferred.t
 
 val ensure_can_access_remote_repo : Remote_repo_path.t -> unit Deferred.t
@@ -280,31 +257,19 @@ val ensure_local_repo_is_in_family
   -> unit Deferred.t
 
 val grep_conflicts_exn
-  : ?below:Path_in_repo.t  (** default is [Path_in_repo.root] *)
+  :  ?below:Path_in_repo.t (** default is [Path_in_repo.root] *)
   -> Repo_root.t
   -> grep_display_option:string
   -> string Deferred.t
 
 val is_conflict_free_exn : Repo_root.t -> bool Deferred.t
-
-val infer_tag
-  :  Repo_root.t
-  -> root : Feature_name.t
-  -> Rev.t
-  -> Rev.t option Deferred.t
-
-val list_bookmarks
-  :  Repo_root.t
-  -> string list Deferred.t
-
-val files
-  :  ?include_ : Path_in_repo.t
-  -> Repo_root.t
-  -> Path_in_repo.t list Deferred.t
+val infer_tag : Repo_root.t -> root:Feature_name.t -> Rev.t -> Rev.t option Deferred.t
+val list_bookmarks : Repo_root.t -> string list Deferred.t
+val files : ?include_:Path_in_repo.t -> Repo_root.t -> Path_in_repo.t list Deferred.t
 
 val log
-  :  ?args     : string list
-  -> ?template : string
+  :  ?args:string list
+  -> ?template:string
   -> Repo_root.t
   -> Revset.t
   -> string Or_error.t Deferred.t
@@ -316,24 +281,23 @@ val manifest
 
 val outgoing
   :  Repo_root.t
-  -> [ `Feature of Feature_path.t
-     ]
-  -> to_ : Remote_repo_path.t
+  -> [ `Feature of Feature_path.t ]
+  -> to_:Remote_repo_path.t
   -> [ `Nothing | `Hg_out of string ] Or_error.t Deferred.t
 
 val parent : Repo_root.t -> Rev.t Deferred.t
 
 val pull
-  :  ?even_if_unclean:bool  (** default is [false] *)
+  :  ?even_if_unclean:bool (** default is [false] *)
   -> ?repo_is_clean:Cleanliness_witness.t
   -> Repo_root.t
   -> from:Remote_repo_path.t
-  -> [ `Rev       of Rev.t
-     | `Revs      of Rev.t list
-     | `Revset    of Revset.t
+  -> [ `Rev of Rev.t
+     | `Revs of Rev.t list
+     | `Revset of Revset.t
      | `Bookmarks of Bookmark.t list
-     | `Feature   of Feature_path.t
-     | `Features  of Feature_path.t list
+     | `Feature of Feature_path.t
+     | `Features of Feature_path.t list
      | `All_revs
      ]
   -> unit Deferred.t
@@ -341,21 +305,21 @@ val pull
 val push
   :  Repo_root.t
   -> Bookmark.t list
-  -> to_                : Remote_repo_path.t
-  -> overwrite_bookmark : bool
+  -> to_:Remote_repo_path.t
+  -> overwrite_bookmark:bool
   -> unit Or_error.t Deferred.t
 
 val rebase
-  :  ?merge_tool    : Merge_tool.t  (** default is [/usr/bin/merge -A] *)
-  -> ?repo_is_clean : Cleanliness_witness.t
-  -> ?abort_on_merge_conflicts: bool
+  :  ?merge_tool:Merge_tool.t (** default is [/usr/bin/merge -A] *)
+  -> ?repo_is_clean:Cleanliness_witness.t
+  -> ?abort_on_merge_conflicts:bool
   -> ?post_merge_validation_hook:(unit -> unit Or_error.t Deferred.t)
   -> Repo_root.t
   -> Feature_path.t
-  -> feature_id     : Feature_id.t  (** for commit metadata *)
-  -> old_tip        : Rev.t
-  -> old_base       : Rev.t
-  -> new_base       : Rev.t
+  -> feature_id:Feature_id.t (** for commit metadata *)
+  -> old_tip:Rev.t
+  -> old_base:Rev.t
+  -> new_base:Rev.t
   -> unit Or_error.t Deferred.t
 
 val rename
@@ -366,24 +330,20 @@ val rename
   -> unit Deferred.t
 
 val revs_exist : Repo_root.t -> Rev.t list -> bool Deferred.t
-val rev_exists : Repo_root.t -> Rev.t      -> bool Deferred.t
+val rev_exists : Repo_root.t -> Rev.t -> bool Deferred.t
 
 val delete_bookmarks
   :  Repo_root.t
   -> Bookmark.t list
-  -> [ `Do_not_push
-     | `Push_to of Remote_repo_path.t
-     ]
+  -> [ `Do_not_push | `Push_to of Remote_repo_path.t ]
   -> unit Deferred.t
 
 val set_bookmark
   :  Repo_root.t
   -> Bookmark.t
-  -> to_:[ `Rev     of Rev.t
-         | `Feature of Feature_path.t
-         ]
+  -> to_:[ `Rev of Rev.t | `Feature of Feature_path.t ]
   -> [ `Do_not_push
-     | `Push_to_and_advance   of Remote_repo_path.t
+     | `Push_to_and_advance of Remote_repo_path.t
      | `Push_to_and_overwrite of Remote_repo_path.t
      ]
   -> unit Deferred.t
@@ -392,11 +352,11 @@ val set_bookmark
 
 val share
   :  Repo_root.t
-  -> dst_repo_root_abspath__delete_if_exists : Abspath.t
+  -> dst_repo_root_abspath__delete_if_exists:Abspath.t
   -> Repo_root.t Or_error.t Deferred.t
 
-val with_temp_share :
-  ?in_dir : Abspath.t
+val with_temp_share
+  :  ?in_dir:Abspath.t
   -> Repo_root.t
   -> f:(Repo_root.t -> 'a Deferred.t)
   -> 'a Deferred.t
@@ -404,7 +364,7 @@ val with_temp_share :
 (** [hg clone -U]. *)
 val clone
   :  Remote_repo_path.t
-  -> dst_repo_root_abspath__delete_if_exists : Abspath.t
+  -> dst_repo_root_abspath__delete_if_exists:Abspath.t
   -> Repo_root.t Or_error.t Deferred.t
 
 val create_bookmark_and_update_to_it
@@ -419,11 +379,15 @@ val tags : Repo_root.t -> Rev.t -> Tag.t list Or_error.t Deferred.t
 
 module Status : sig
   type t =
-    | Added    of Path_in_repo.t
-    | Removed  of Path_in_repo.t
+    | Added of Path_in_repo.t
+    | Removed of Path_in_repo.t
     | Modified of Path_in_repo.t
-    | Copied   of copied
-  and copied = { src : Path_in_repo.t; dst : Path_in_repo.t }
+    | Copied of copied
+
+  and copied =
+    { src : Path_in_repo.t
+    ; dst : Path_in_repo.t
+    }
   [@@deriving sexp_of]
 
   val src_path_in_repo : t list -> Path_in_repo.t list
@@ -440,10 +404,7 @@ module Status : sig
 end
 
 (** Doesn't show missing, unknown and ignored files. *)
-val status
-  :  Repo_root.t
-  -> Status.Changed.t
-  -> Status.t list Deferred.t
+val status : Repo_root.t -> Status.Changed.t -> Status.t list Deferred.t
 
 module Shelve_description : sig
   type t [@@deriving sexp_of]
@@ -467,18 +428,18 @@ end
 (** When updating to [`Rev], no bookmark will be active, so make sure [`Feature] is not
     what you want. *)
 val update
-  :  ?discard_uncommitted_changes : bool  (** default is [false] *)
+  :  ?discard_uncommitted_changes:bool (** default is [false] *)
   -> clean_after_update:Clean_after_update.t
   -> Repo_root.t
-  -> [ `Rev of Rev.t
-     | `Revset  of Revset.t
-     | `Feature of Feature_path.t
-     ]
+  -> [ `Rev of Rev.t | `Revset of Revset.t | `Feature of Feature_path.t ]
   -> unit Deferred.t
 
 val whats_new
-  : Repo_root.t -> from:Rev.t -> to_:Rev.t -> args:string list -> unit Deferred.t
+  :  Repo_root.t
+  -> from:Rev.t
+  -> to_:Rev.t
+  -> args:string list
+  -> unit Deferred.t
 
 val hg_path_command : Command.t
-
 val hg_command : Command.t

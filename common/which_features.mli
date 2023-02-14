@@ -3,7 +3,7 @@ open! Import
 
 module Feature : sig
   type t =
-    { feature_path        : Feature_path.t
+    { feature_path : Feature_path.t
     ; include_descendants : bool
     }
   [@@deriving sexp_of]
@@ -15,7 +15,6 @@ type t =
 [@@deriving sexp_of]
 
 val these_features : Feature_path.t list -> t
-
 val mem : t -> Feature_path.t -> bool
 
 module Stable : sig
@@ -25,6 +24,7 @@ module Stable : sig
 
   module V1 : sig
     include Stable_without_comparator with type t = t
+
     val to_model : t -> t
   end
 end

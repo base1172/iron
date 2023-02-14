@@ -3,8 +3,8 @@ open! Async
 open! Import
 
 type t =
-  { start                          : unit Ivar.t
-  ; finished                       : unit Deferred.t
+  { start : unit Ivar.t
+  ; finished : unit Deferred.t
   ; mutable to_run_at_shutdown_elt : t Bag.Elt.t option
   }
 [@@deriving sexp_of]
@@ -28,13 +28,11 @@ let () =
 
 let create f =
   let start = Ivar.create () in
-  let finished = let%bind () = Ivar.read start in f () in
-  let t =
-    { start
-    ; finished
-    ; to_run_at_shutdown_elt = None
-    }
+  let finished =
+    let%bind () = Ivar.read start in
+    f ()
   in
+  let t = { start; finished; to_run_at_shutdown_elt = None } in
   t.to_run_at_shutdown_elt <- Some (Bag.add to_run_at_shutdown t);
   Shutdown.don't_finish_before t.finished;
   t

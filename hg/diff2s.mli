@@ -20,10 +20,8 @@ type t = Diff2.t list [@@deriving compare, sexp_of]
 include Invariant.S with type t := t
 
 val restrict_to_may_review_or_follow : t -> Reviewer.t -> t
-
 val num_lines_for_feature_size : t -> int
-
-val may_reviewers  : t -> include_file_followers:bool -> User_name.Set.t
+val may_reviewers : t -> include_file_followers:bool -> User_name.Set.t
 
 module Stable : sig
   module V2 : Stable_without_comparator with type t = t

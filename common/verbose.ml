@@ -1,13 +1,12 @@
 open Core
 open! Import
-
 include Iron_options.Verbose
 
 module Message = struct
   type 'a t =
     { elapsed_since_program_start : Time.Span.t
-    ; elapsed_since_last_message  : Time.Span.t option
-    ; message                     : string * 'a
+    ; elapsed_since_last_message : Time.Span.t option
+    ; message : string * 'a
     }
   [@@deriving sexp_of]
 end
@@ -23,13 +22,12 @@ let message string a sexp_of_a =
   in
   let elapsed_since_program_start = Time.diff now program_started_at in
   last_message_at := Some now;
-  Core.eprintf "%s\n%!"
-    ({ Message.
-       elapsed_since_program_start
+  Core.eprintf
+    "%s\n%!"
+    ({ Message.elapsed_since_program_start
      ; elapsed_since_last_message
-     ; message = (string, a)
+     ; message = string, a
      }
-     |> [%sexp_of: a Message.t]
-     |> Sexp.to_string_hum)
+    |> [%sexp_of: a Message.t]
+    |> Sexp.to_string_hum)
 ;;
-

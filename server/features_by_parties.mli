@@ -15,7 +15,5 @@ module Parties : sig
 end
 
 val set_users : t -> Feature_id.t -> Parties.t -> User_name.Set.t -> unit
-
 val remove_feature : t -> Feature_id.t -> unit
-
 val find : t -> User_name.t -> Parties.t -> Feature_id.t list

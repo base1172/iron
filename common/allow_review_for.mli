@@ -11,13 +11,11 @@ open! Import
 module Users : sig
   type t [@@deriving sexp_of]
 
-  val empty     : t
+  val empty : t
   val all_users : t
-
   val users : User_name.Set.t -> t
-
-  val add   : t -> User_name.t -> t
-  val mem   : t -> User_name.t -> bool
+  val add : t -> User_name.t -> t
+  val mem : t -> User_name.t -> bool
   val union : t -> t -> t
   val union_list : t list -> t
 end
@@ -25,32 +23,23 @@ end
 type t [@@deriving sexp_of]
 
 val none : t
-val all  : t
-
-val also_allow
-  :  t
-  -> reviewed_for : Users.t
-  -> reviewed_by  : Users.t
-  -> t
-
+val all : t
+val also_allow : t -> reviewed_for:Users.t -> reviewed_by:Users.t -> t
 val may_be_reviewed_by : t -> reviewed_for:User_name.t -> Users.t
-
-val check
-  :  t
-  -> reviewed_for       : User_name.t
-  -> reviewed_by        : User_name.t
-  -> unit Or_error.t
+val check : t -> reviewed_for:User_name.t -> reviewed_by:User_name.t -> unit Or_error.t
 
 module Stable : sig
   module V1 : sig
-    include Stable_without_comparator with type t = t
-    val hash : t -> int
+    type nonrec t = t [@@deriving hash]
+
+    include Stable_without_comparator with type t := t
   end
 
   module Users : sig
     module V1 : sig
-      include Stable_without_comparator with type t = Users.t
-      val hash : t -> int
+      type t = Users.t [@@deriving hash]
+
+      include Stable_without_comparator with type t := Users.t
     end
   end
 end

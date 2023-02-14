@@ -1,0 +1,15 @@
+(library
+  (name        pdiff4)
+  (public_name iron.pdiff4)
+  (libraries
+   async
+   core
+   iron_common
+   iron_hg
+   patdiff
+   patience_diff
+   re2
+   textutils.ascii_table
+   textutils.console)
+  (preprocess (
+    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))

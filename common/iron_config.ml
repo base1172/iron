@@ -1,38 +1,24 @@
 open! Core
 open! Async
 open! Import
-
-module Host   = String
+module Host = String
 module Office = String
 
 let env_var = "IRON_CONFIG"
 let env_var_has_been_read = ref false
-
 let prod_basedir = Abspath.of_string "/j/office/app/fe/prod"
-
 let prod_etc = Abspath.extend prod_basedir (File_name.of_string "etc")
-
 let prod_var = Abspath.extend prod_basedir (File_name.of_string "var")
 
 let deploy_offices : Office.t list =
-  [ "etot"
-  ; "fen"
-  ; "hk1"
-  ; "hkg"
-  ; "igm"
-  ; "ldn"
-  ; "tot"
-  ; "ves"
-  ]
+  [ "etot"; "fen"; "hk1"; "hkg"; "igm"; "ldn"; "tot"; "ves" ]
 ;;
 
 module Rpc_proxy_config : sig
-
   type t [@@deriving sexp]
 
   val no_proxy : t
   val find_proxy_host_for_local_office : t -> Host.t option
-
 end = struct
   type t = Host.t Office.Map.t
 
@@ -53,17 +39,18 @@ end = struct
     Hashtbl.to_alist hosts
   ;;
 
-  include Sexpable.Of_sexpable (Syntax) (struct
-      type nonrec t = t
-      let to_sexpable = syntax_of_t
-      let of_sexpable = t_of_syntax
-    end)
+  include
+    Sexpable.Of_sexpable
+      (Syntax)
+      (struct
+        type nonrec t = t
+
+        let to_sexpable = syntax_of_t
+        let of_sexpable = t_of_syntax
+      end)
 
   let no_proxy = Office.Map.empty
-
-  let office_of_host_heuristic host =
-    Option.map ~f:fst (String.lsplit2 host ~on:'-')
-  ;;
+  let office_of_host_heuristic host = Option.map ~f:fst (String.lsplit2 host ~on:'-')
 
   let find_proxy_host_for_local_office t =
     let my_host = Unix.gethostname () in
@@ -83,16 +70,14 @@ let default_hydra_user = User_name.of_string "as-hydra"
 (* Serialization must have adequate backward and forward compatibility properties, given
    the clients that need consume that type. *)
 type t =
-  { host                     : string
-  ; async_rpc_port           : Async_rpc_port.t
-  ; rpc_proxy_config         : Rpc_proxy_config.t [@default Rpc_proxy_config.no_proxy]
-  ; hgrc                     : Abspath.t
-  ; hydra_user               : User_name.t [@default default_hydra_user]
+  { host : string
+  ; async_rpc_port : Async_rpc_port.t
+  ; rpc_proxy_config : Rpc_proxy_config.t [@default Rpc_proxy_config.no_proxy]
+  ; hgrc : Abspath.t
+  ; hydra_user : User_name.t [@default default_hydra_user]
   ; serializer_pause_timeout : Time.Span.t [@default serializer_pause_timeout_default]
   }
-[@@deriving fields, sexp]
-
-let t_of_sexp = Sexp.of_sexp_allow_extra_fields t_of_sexp
+[@@deriving fields, sexp] [@@sexp.allow_extra_fields]
 
 let config_file_relative_to_basedir = Relpath.of_string "etc/iron-config.sexp"
 
@@ -113,13 +98,15 @@ let load_as_per_IRON_CONFIG () =
   | Some ("prod" | "PROD") -> prod ()
   | Some s -> return (Sexp.of_string_conv_exn s t_of_sexp)
   | None ->
-    if String.is_prefix Core.Sys.executable_name ~prefix:"/j/office/app"
+    if String.is_prefix Sys_unix.executable_name ~prefix:"/j/office/app"
     then prod ()
     else
-      failwithf "\
-must define %s environment variable or call [Iron_config.use_prod_IRON_CONFIG] prior
-to forcing [as_per_IRON_CONFIG]"
-        env_var ()
+      failwithf
+        "must define %s environment variable or call [Iron_config.use_prod_IRON_CONFIG] \
+         prior\n\
+         to forcing [as_per_IRON_CONFIG]"
+        env_var
+        ()
 ;;
 
 let as_per_IRON_CONFIG = lazy (load_as_per_IRON_CONFIG ())
@@ -143,15 +130,15 @@ end
 let use_prod_IRON_CONFIG () =
   if !env_var_has_been_read
   then failwithf "use_prod_IRON_CONFIG must be called before %s has been read" env_var ();
-  Unix.putenv ~key:env_var ~data:"prod";
+  Unix.putenv ~key:env_var ~data:"prod"
 ;;
 
 let for_checking_invariants =
-  { host                     = "localhost"
-  ; async_rpc_port           = Static 1
-  ; rpc_proxy_config         = Rpc_proxy_config.no_proxy
-  ; hgrc                     = Abspath.of_string "/"
-  ; hydra_user               = default_hydra_user
+  { host = "localhost"
+  ; async_rpc_port = Static 1
+  ; rpc_proxy_config = Rpc_proxy_config.no_proxy
+  ; hgrc = Abspath.of_string "/"
+  ; hydra_user = default_hydra_user
   ; serializer_pause_timeout = serializer_pause_timeout_default
   }
 ;;
@@ -164,6 +151,5 @@ let invariant t =
       ~rpc_proxy_config:ignore
       ~hgrc:ignore
       ~hydra_user:ignore
-      ~serializer_pause_timeout:ignore
-  )
+      ~serializer_pause_timeout:ignore)
 ;;

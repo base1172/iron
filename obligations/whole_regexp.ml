@@ -1,31 +1,28 @@
 open! Core
 open! Import
 
-module Regex = Re2.Regex
-
 module T = struct
-  type t = Regex.t
-  [@@deriving bin_io, compare]
+  type t = Re2.Stable.V2.t [@@deriving bin_io, compare]
 
-  let of_string s = Regex.create (String.concat ["\\A"; s; "\\z"]) |> ok_exn
+  let of_string s = Re2.create (String.concat [ "\\A"; s; "\\z" ]) |> ok_exn
 
   let to_string re =
-    let s = Regex.pattern re in
-    String.slice s 2 ((String.length s) - 2)
+    let s = Re2.pattern re in
+    String.slice s 2 (String.length s - 2)
   ;;
 
   let module_name = "Iron_obligations.Whole_regexp"
-
-  let hash r = String.hash (to_string r)
+  let hash t = String.hash (to_string t)
+  let hash_fold_t state t = String.hash_fold_t state (to_string t)
 end
 
 include T
-include Identifiable.Make
-    (struct
-      include T
-      include Sexpable.Of_stringable (T)
-    end)
 
-let matches = Regex.matches
-let rewrite = Regex.rewrite
-let valid_rewrite_template = Regex.valid_rewrite_template
+include Identifiable.Make (struct
+  include T
+  include Sexpable.Of_stringable (T)
+end)
+
+let matches = Re2.matches
+let rewrite = Re2.rewrite
+let valid_rewrite_template = Re2.valid_rewrite_template

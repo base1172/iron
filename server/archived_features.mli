@@ -19,28 +19,25 @@ type t [@@deriving sexp_of]
 
 include Invariant.S with type t := t
 
-val deserializer
-  : dynamic_upgrade_state:Dynamic_upgrade.State.t
-  -> t Deserializer.t
+val deserializer : dynamic_upgrade_state:Dynamic_upgrade.State.t -> t Deserializer.t
 
 (** [feature_dir archived_feature] returns the directory where [archived_feature] is
     serialized, which is of the form [$YYYY/$MM/$DD/$FEATURE_ID]. *)
 val feature_dir : Archived_feature.t -> Relpath.t
 
-val add                : t -> _ Query.t -> Archived_feature.t -> unit
-val remove             : t -> _ Query.t -> Archived_feature.t -> unit
+val add : t -> _ Query.t -> Archived_feature.t -> unit
+val remove : t -> _ Query.t -> Archived_feature.t -> unit
 val set_max_cache_size : t -> _ Query.t -> max_size:int -> unit
-
-val find_by_id   : t -> Feature_id.t   -> Archived_feature.t Or_error.t
+val find_by_id : t -> Feature_id.t -> Archived_feature.t Or_error.t
 val find_by_path : t -> Feature_path.t -> Archived_feature.t list
 
 module Cache : sig
   type data = Iron_protocol.Feature.t
 
-  val find         : t -> Feature_id.t -> data option
-  val add          : t -> data -> unit
-  val remove       : t -> Feature_id.t -> unit
-  val clear        : t -> unit
+  val find : t -> Feature_id.t -> data option
+  val add : t -> data -> unit
+  val remove : t -> Feature_id.t -> unit
+  val clear : t -> unit
 
   module What_to_dump : sig
     type t =
@@ -54,7 +51,6 @@ module Cache : sig
 end
 
 val mem_feature_path : t -> Feature_path.t -> bool
-
 val iteri : t -> f:(Feature_path.t -> Archived_feature.t list -> unit) -> unit
 
 val list_features

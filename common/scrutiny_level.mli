@@ -7,17 +7,17 @@
 open! Core
 open! Import
 
-type t [@@deriving sexp_of]
+type t [@@deriving sexp_of, hash]
 
 include Comparable.S with type t := t
-include Invariant.S  with type t := t
+include Invariant.S with type t := t
 
 val hash : t -> int
-
 val of_int : int -> t
 val to_int : t -> int
 
-val ignored : t (** Zero -- this scrutiny level means "ignore the file." *)
+(** Zero -- this scrutiny level means "ignore the file." *)
+val ignored : t
 
 val to_string_hum : t -> string
 
@@ -27,7 +27,8 @@ end
 
 module Stable : sig
   module V1 : sig
-    include Stable_without_comparator with type t = t
-    val hash : t -> int
+    type nonrec t = t [@@deriving hash]
+
+    include Stable_without_comparator with type t := t
   end
 end

@@ -14,7 +14,6 @@ end
 
 open! Core
 open! Import
-
 module T = Stable.V1
 include T
 include Comparable.Make (T)

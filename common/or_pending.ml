@@ -1,10 +1,8 @@
 module Stable = struct
   open Core.Core_stable
-
   module Time = Iron_time.Stable
 
   module V1 = struct
-
     type 'a t =
       | Pending_since of Time.V1_round_trippable.t
       | Known of 'a
@@ -19,13 +17,12 @@ module Stable = struct
       match t with
       | Pending_since _ as t -> t
       | Known a -> Known (f a)
-
+    ;;
   end
 
   module Or_error = struct
     module V1 = struct
-      type 'a t = 'a Or_error.V1.t V1.t
-      [@@deriving bin_io, compare, sexp]
+      type 'a t = 'a Or_error.V1.t V1.t [@@deriving bin_io, compare, sexp]
 
       let%expect_test _ =
         print_endline [%bin_digest: Bin_digest_type_variable.tick_a t];
@@ -39,17 +36,16 @@ end
 
 open! Core
 open! Import
-
 include Stable.V1
 
 let is_known = function
   | Pending_since _ -> false
-  | Known         _ -> true
+  | Known _ -> true
 ;;
 
 let is_pending = function
   | Pending_since _ -> true
-  | Known         _ -> false
+  | Known _ -> false
 ;;
 
 let pending_for_sexp since = [%sexp "pending for", (how_long ~since : Time.Span.t)]
@@ -67,42 +63,49 @@ let pending_error t =
 ;;
 
 let or_pending_error = function
-  | Known (Ok ok)       -> Ok ok
-  | Known (Error err)   -> Error (Known err)
+  | Known (Ok ok) -> Ok ok
+  | Known (Error err) -> Error (Known err)
   | Pending_since since -> Error (Pending_since since)
 ;;
 
 include Monad.Make (struct
+  type nonrec 'a t = 'a t
 
-    type nonrec 'a t = 'a t
+  let return x = Known x
+  let map = `Custom map
 
-    let return x = Known x
-
-    let map = `Custom map
-
-    let bind t ~f =
-      match t with
-      | Pending_since time -> Pending_since time
-      | Known x -> f x
-    ;;
-  end)
+  let bind t ~f =
+    match t with
+    | Pending_since time -> Pending_since time
+    | Known x -> f x
+  ;;
+end)
 
 include Container.Make (struct
+  type nonrec 'a t = 'a t
 
-    type nonrec 'a t = 'a t
+  let fold t ~init ~f =
+    match t with
+    | Pending_since _ -> init
+    | Known x -> f init x
+  ;;
 
-    let fold t ~init ~f =
-      match t with
-      | Pending_since _ -> init
-      | Known x -> f init x
-    ;;
+  let iter =
+    `Custom
+      (fun t ~f ->
+        match t with
+        | Pending_since _ -> ()
+        | Known x -> f x)
+  ;;
 
-    let iter = `Custom (fun t ~f ->
-      match t with
-      | Pending_since _ -> ()
-      | Known x -> f x)
-    ;;
-  end)
+  let length =
+    `Custom
+      (fun t ->
+        match t with
+        | Pending_since _ -> 0
+        | Known _ -> 1)
+  ;;
+end)
 
 let invariant invariant_a t =
   match t with
@@ -117,47 +120,52 @@ module Or_error = struct
 
   let map t ~f =
     match t with
-    | Pending_since _
-    | Known (Error _) as z -> z
+    | (Pending_since _ | Known (Error _)) as z -> z
     | Known (Ok a) -> Known (Ok (f a))
   ;;
 
   include Monad.Make (struct
+    type nonrec 'a t = 'a t
 
-      type nonrec 'a t = 'a t
+    let return x = Known (Ok x)
+    let map = `Custom map
 
-      let return x = Known (Ok x)
-
-      let map = `Custom map
-
-      let bind t ~f =
-        match t with
-        | Pending_since time -> Pending_since time
-        | Known ((Error _) as error) -> Known error
-        | Known (Ok x) -> f x
-      ;;
-    end)
+    let bind t ~f =
+      match t with
+      | Pending_since time -> Pending_since time
+      | Known (Error _ as error) -> Known error
+      | Known (Ok x) -> f x
+    ;;
+  end)
 
   include Container.Make (struct
+    type nonrec 'a t = 'a t
 
-      type nonrec 'a t = 'a t
+    let fold t ~init ~f =
+      match t with
+      | Pending_since _ -> init
+      | Known (Error _) -> init
+      | Known (Ok x) -> f init x
+    ;;
 
-      let fold t ~init ~f =
-        match t with
-        | Pending_since _ -> init
-        | Known (Error _) -> init
-        | Known (Ok x) -> f init x
-      ;;
+    let iter =
+      `Custom
+        (fun t ~f ->
+          match t with
+          | Pending_since _ -> ()
+          | Known (Error _) -> ()
+          | Known (Ok x) -> f x)
+    ;;
 
-      let iter = `Custom (fun t ~f ->
-        match t with
-        | Pending_since _ -> ()
-        | Known (Error _) -> ()
-        | Known (Ok x) -> f x)
-      ;;
-    end)
+    let length =
+      `Custom
+        (fun t ->
+          match t with
+          | Pending_since _ -> 0
+          | Known (Error _) -> 0
+          | Known (Ok _) -> 1)
+    ;;
+  end)
 
   let invariant invariant_a t = iter ~f:invariant_a t
-  ;;
-
 end

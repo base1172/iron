@@ -8,10 +8,9 @@ let char_value_for_alphabetic_compare =
     incr r;
     let i = Char.to_int c in
     assert (Int.equal result.(i) (-1));
-    result.(i) <- !r;
+    result.(i) <- !r
   in
-  String.iter ~f:assign
-    "/.aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
+  String.iter ~f:assign "/.aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
   for i = Char.to_int Char.min_value to Char.to_int Char.max_value do
     if Int.equal result.(i) (-1) then assign (Char.of_int_exn i)
   done;
@@ -25,56 +24,49 @@ let alphabetic_compare t1 t2 =
   let min_length = min n1 n2 in
   let result = ref 0 in
   let r = ref 0 in
-  while !r < min_length && !result = 0; do
+  while !r < min_length && !result = 0 do
     let c1 = t1.[!r] in
     let c2 = t2.[!r] in
     incr r;
-    result :=
-      Int.compare
-        (char_value_for_alphabetic_compare.(Char.to_int c1))
-        (char_value_for_alphabetic_compare.(Char.to_int c2))
+    result
+      := Int.compare
+           char_value_for_alphabetic_compare.(Char.to_int c1)
+           char_value_for_alphabetic_compare.(Char.to_int c2)
   done;
-  if !result <> 0
-  then !result
-  else Int.compare n1 n2
+  if !result <> 0 then !result else Int.compare n1 n2
 ;;
 
 let%test_unit _ =
   List.iter
-    [ ""     , `equal, ""
-    ; ""     , `less , "a"
-    ; "a"    , `equal, "a"
-    ; "a"    , `less , "aa"
-    ; "a"    , `less , "b"
-    ; "a"    , `less , "A"
-    ; "A"    , `less , "b"
-    ; "b"    , `less , "B"
-    ; "b"    , `less , "ba"
-    ; "B"    , `less , "z"
-    ; "z"    , `less , "Z"
-    ; "ab"   , `equal, "ab"
-    ; "ab"   , `less , "aba"
-    ; "foo/b", `less , "fooa"
+    [ "", `equal, ""
+    ; "", `less, "a"
+    ; "a", `equal, "a"
+    ; "a", `less, "aa"
+    ; "a", `less, "b"
+    ; "a", `less, "A"
+    ; "A", `less, "b"
+    ; "b", `less, "B"
+    ; "b", `less, "ba"
+    ; "B", `less, "z"
+    ; "z", `less, "Z"
+    ; "ab", `equal, "ab"
+    ; "ab", `less, "aba"
+    ; "foo/b", `less, "fooa"
     ]
     ~f:(fun (s1, relation, s2) ->
       let c = alphabetic_compare s1 s2 in
       let is_correct =
         match relation with
-        | `less  -> c < 0
+        | `less -> c < 0
         | `equal -> c = 0
       in
       if not is_correct
-      then raise_s
-             [%sexp "bug"
-                  , { s1       : string
-                    ; relation : [ `less | `equal ]
-                    ; s2       : string
-                    ; c        : int
-                    }])
+      then
+        raise_s
+          [%sexp
+            "bug", { s1 : string; relation : [ `less | `equal ]; s2 : string; c : int }])
 ;;
 
 include String
 
-let try_chop_suffix str ~suffix =
-  Option.value (chop_suffix str ~suffix) ~default:str
-;;
+let try_chop_suffix str ~suffix = Option.value (chop_suffix str ~suffix) ~default:str

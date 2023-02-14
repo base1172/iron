@@ -9,6 +9,6 @@ open! Core
 open! Async
 
 val simple_server
-  :  where_to_listen : Tcp.Where_to_listen.inet
-  -> real_server     : Host_and_port.t
+  :  where_to_listen:Tcp.Where_to_listen.inet
+  -> real_server:Host_and_port.t
   -> (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t

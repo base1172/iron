@@ -15,7 +15,6 @@ type t =
 include Enum.S with type t := t
 
 module State : sig
-
   type t [@@deriving sexp_of]
 
   include Invariant.S with type t := t
@@ -27,7 +26,6 @@ module State : sig
   end
 
   val dump : t -> Sexp.t
-
   val deserializer : t Deserializer.t
 end
 
@@ -36,14 +34,12 @@ end
     hand enabling a new upgrade always succeeds. *)
 val set_exn : State.t -> t -> unit
 
-val commit_to_upgrade
-  : State.t
-  -> allowed_from:t
-  -> [ `Ok | `Not_allowed_yet ]
+val commit_to_upgrade : State.t -> allowed_from:t -> [ `Ok | `Not_allowed_yet ]
 
 module Stable : sig
   module V1 : sig
     include Stable_without_comparator with type t = t
+
     val hash : t -> int
   end
 end

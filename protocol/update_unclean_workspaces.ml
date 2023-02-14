@@ -1,16 +1,16 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V3 = struct
       type t =
-        { for_               : User_name.V1.t
-        ; machine_name       : Machine_name.V1.t
+        { for_ : User_name.V1.t
+        ; machine_name : Machine_name.V1.t
         ; unclean_workspaces : Unclean_workspace.V2.t list
-        ; clean_workspaces   : [ `Complement_of_those_listed_as_unclean
-                               | `At_least_these of Feature_path.V1.t list
-                               ]
+        ; clean_workspaces :
+            [ `Complement_of_those_listed_as_unclean
+            | `At_least_these of Feature_path.V1.t list
+            ]
         }
       [@@deriving bin_io, fields, sexp]
 
@@ -24,12 +24,13 @@ module Stable = struct
 
     module V2 = struct
       type t =
-        { for_               : User_name.V1.t
-        ; machine            : Machine_name.V1.t
+        { for_ : User_name.V1.t
+        ; machine : Machine_name.V1.t
         ; unclean_workspaces : Unclean_workspace.V2.t list
-        ; clean_workspaces   : [ `Complement_of_those_listed_as_unclean
-                               | `At_least_these of Feature_path.V1.t list
-                               ]
+        ; clean_workspaces :
+            [ `Complement_of_those_listed_as_unclean
+            | `At_least_these of Feature_path.V1.t list
+            ]
         }
       [@@deriving bin_io]
 
@@ -41,28 +42,20 @@ module Stable = struct
       open! Core
       open! Import
 
-      let to_model { for_
-                   ; machine
-                   ; unclean_workspaces
-                   ; clean_workspaces
-                   } =
-        V3.to_model
-          { for_
-          ; machine_name = machine
-          ; unclean_workspaces
-          ; clean_workspaces
-          }
+      let to_model { for_; machine; unclean_workspaces; clean_workspaces } =
+        V3.to_model { for_; machine_name = machine; unclean_workspaces; clean_workspaces }
       ;;
     end
 
     module V1 = struct
       type t =
-        { for_               : User_name.V1.t
-        ; machine            : Machine_name.V1.t
+        { for_ : User_name.V1.t
+        ; machine : Machine_name.V1.t
         ; unclean_workspaces : Unclean_workspace.V1.t list
-        ; clean_workspaces   : [ `Complement_of_those_listed_as_unclean
-                               | `At_least_these of Feature_path.V1.t list
-                               ]
+        ; clean_workspaces :
+            [ `Complement_of_those_listed_as_unclean
+            | `At_least_these of Feature_path.V1.t list
+            ]
         }
       [@@deriving bin_io]
 
@@ -74,20 +67,11 @@ module Stable = struct
       open! Core
       open! Import
 
-      let to_model { for_
-                   ; machine
-                   ; unclean_workspaces
-                   ; clean_workspaces
-                   } =
+      let to_model { for_; machine; unclean_workspaces; clean_workspaces } =
         let unclean_workspaces =
           List.map unclean_workspaces ~f:Unclean_workspace.Stable.V1.to_v2
         in
-        V2.to_model
-          { for_
-          ; machine
-          ; unclean_workspaces
-          ; clean_workspaces
-          }
+        V2.to_model { for_; machine; unclean_workspaces; clean_workspaces }
       ;;
     end
 
@@ -100,21 +84,32 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "update-unclean-workspaces" end)
-    (struct let version = 3 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "update-unclean-workspaces"
+    end)
+    (struct
+      let version = 3
+    end)
     (Stable.Action.V3)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 2 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

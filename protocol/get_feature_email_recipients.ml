@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Sent_upon = struct
@@ -23,7 +22,7 @@ module Stable = struct
     module V1 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; sent_upon    : Sent_upon.V1.t
+        ; sent_upon : Sent_upon.V1.t
         }
       [@@deriving bin_io, fields, sexp]
 
@@ -55,15 +54,19 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "get-feature-email-recipients" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "get-feature-email-recipients"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
 open! Core
 open! Import
-
-module Sent_upon = Stable.Sent_upon. Model
-module Action    = Stable.Action.    Model
-module Reaction  = Stable.Reaction.  Model
+module Sent_upon = Stable.Sent_upon.Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

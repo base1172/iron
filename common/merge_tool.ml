@@ -3,7 +3,6 @@ open! Import
 
 type t =
   { executable : Abspath.t
-  ; args       : string
+  ; args : string
   }
 [@@deriving sexp]
-

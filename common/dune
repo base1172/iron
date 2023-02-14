@@ -1,0 +1,20 @@
+(library
+  (name        iron_common)
+  (public_name iron.common)
+  (libraries
+   async
+   async_interactive
+   core
+   core_kernel.ansi_kernel
+   core_kernel.uuid
+   core_kernel.version_util
+   core_unix.daemon
+   core_unix.lock_file_blocking
+   expect_test_helpers_async
+   incremental
+   re2
+   sexp_macro
+   textutils.ascii_table
+   textutils.console)
+  (preprocess (
+    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))

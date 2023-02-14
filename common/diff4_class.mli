@@ -45,10 +45,11 @@ type t =
 (** sexp is used in .patdiff4 config files *)
 
 include Comparable with type t := t
-include Hashable   with type t := t
+include Hashable with type t := t
 
 module Shown_class : sig
   type class_ = t
+
   type t =
     [ `b1_b2_f1
     | `b1_b2_f2
@@ -65,16 +66,14 @@ module Shown_class : sig
   [@@deriving sexp, compare, enumerate]
 
   include Comparable with type t := t
-  include Hashable   with type t := t
+  include Hashable with type t := t
 
   val to_class : t -> class_
   val of_class : class_ -> t option
 end
 
 val classify : equal:('a -> 'a -> bool) -> b1:'a -> b2:'a -> f1:'a -> f2:'a -> t
-
 val is_shown : t -> bool
-
 val to_groups : t -> [ `b1 | `b2 | `f1 | `f2 ] list list
 
 (** Outputs a human representation of the equivalence sets Example:

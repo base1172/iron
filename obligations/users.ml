@@ -1,27 +1,26 @@
 open Core
 open Import
 
-type ('syntax, 'semantics) eval_user
-  =  'syntax
+type ('syntax, 'semantics) eval_user =
+  'syntax
   -> Error_context.t
-  -> aliases       : User_name_by_alternate_name.t
-  -> allowed_users : Unresolved_name.Set.t
+  -> aliases:User_name_by_alternate_name.t
+  -> allowed_users:Unresolved_name.Set.t
   -> 'semantics
 
-type ('syntax, 'semantics) eval
-  = ('syntax,  known_groups:Groups.t -> 'semantics) eval_user
+type ('syntax, 'semantics) eval = ('syntax, known_groups:Groups.t -> 'semantics) eval_user
 
 let eval_users users e ~aliases ~allowed_users =
   let missing = List.filter users ~f:(fun user -> not (Set.mem allowed_users user)) in
   if List.is_empty missing
   then
-    List.map users ~f:(fun user ->
-      User_name_by_alternate_name.to_user_name aliases user)
+    List.map users ~f:(fun user -> User_name_by_alternate_name.to_user_name aliases user)
   else
-    Error_context.raise_s e
-      [%sexp "users not in obligations-global.sexp or obligations-repo.sexp",
-             (missing : Unresolved_name.t list)
-      ]
+    Error_context.raise_s
+      e
+      [%sexp
+        "users not in obligations-global.sexp or obligations-repo.sexp"
+        , (missing : Unresolved_name.t list)]
 ;;
 
 let eval_user user e ~aliases ~allowed_users =
@@ -31,9 +30,9 @@ let eval_user user e ~aliases ~allowed_users =
 ;;
 
 type t =
-  | Users of Unresolved_name.t sexp_list
+  | Users of Unresolved_name.t list [@sexp.list]
   | Group of Group_name.t
-  | Union of t sexp_list
+  | Union of t list [@sexp.list]
 [@@deriving sexp]
 
 let eval_group group e ~aliases ~allowed_users:_ ~known_groups =
@@ -59,17 +58,18 @@ let synthesize users =
 module Allow_review_for = struct
   type t =
     | All_users
-    | Users of Unresolved_name.t sexp_list
+    | Users of Unresolved_name.t list [@sexp.list]
     | Group of Group_name.t
-    | Union of t sexp_list
+    | Union of t list [@sexp.list]
   [@@deriving sexp]
 
   module Users = Allow_review_for.Users
 
   let rec eval t e ~aliases ~allowed_users ~known_groups =
     match t with
-    | All_users   -> Users.all_users
-    | Group group -> Users.users (eval_group group e ~aliases ~allowed_users ~known_groups)
+    | All_users -> Users.all_users
+    | Group group ->
+      Users.users (eval_group group e ~aliases ~allowed_users ~known_groups)
     | Users users ->
       Users.users (User_name.Set.of_list (eval_users users e ~aliases ~allowed_users))
     | Union ts ->

@@ -49,18 +49,15 @@ module Repo_root_kind : sig
   [@@deriving sexp_of]
 end
 
-val repo_for_hg_operations_exn
-  :  Feature_path.t
-  -> use : use
-  -> Repo_root.t Deferred.t
+val repo_for_hg_operations_exn : Feature_path.t -> use:use -> Repo_root.t Deferred.t
 
 val repo_for_hg_operations_and_kind_exn
   :  Feature_path.t
-  -> use : use
+  -> use:use
   -> (Repo_root.t * Repo_root_kind.t) Deferred.t
 
 val run_concurrent_actions_exn
-  : get_feature_path: ('a -> Feature_path.t)
+  :  get_feature_path:('a -> Feature_path.t)
   -> action:string
   -> max_concurrent_jobs:int
   -> 'a list
@@ -70,17 +67,16 @@ val run_concurrent_actions_exn
 (** If workspaces are enabled, returns the clone of the common root of the features in the
     given list.  Returns [Repo_root.program_started_in] if workspaces are not enabled, or
     the list is empty, or the features don't have a common root. *)
-val repo_for_hg_operations_use_clone_exn
-  : Feature_path.t list -> Repo_root.t Deferred.t
+val repo_for_hg_operations_use_clone_exn : Feature_path.t list -> Repo_root.t Deferred.t
 
 (** Commands *)
-val workspace_commands                 : (string * Command.t) list
+val workspace_commands : (string * Command.t) list
+
 val check_workspaces_invariant_command : Command.t
-val repo_for_hg_operations_command     : Command.t
+val repo_for_hg_operations_command : Command.t
 
 (** Perform the said operation only if workspaces are enabled, no op otherwise. *)
 module If_enabled : sig
-
   (** Creates a workspace if it doesn't already exist. *)
   val create_workspace : Workspace_hgrc.Feature.t -> unit Deferred.t
 

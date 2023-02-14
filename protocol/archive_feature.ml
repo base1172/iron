@@ -1,13 +1,12 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V3 = struct
       type t =
-        { feature_path         : Feature_path.V1.t
-        ; rev_zero             : Rev.V1.t
-        ; for_                 : User_name.V1.t
+        { feature_path : Feature_path.V1.t
+        ; rev_zero : Rev.V1.t
+        ; for_ : User_name.V1.t
         ; reason_for_archiving : string
         }
       [@@deriving bin_io, fields, sexp]
@@ -23,8 +22,8 @@ module Stable = struct
     module V2 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; rev_zero     : Rev.V1.t
-        ; for_         : User_name.V1.t
+        ; rev_zero : Rev.V1.t
+        ; for_ : User_name.V1.t
         }
       [@@deriving bin_io]
 
@@ -33,16 +32,8 @@ module Stable = struct
         [%expect {| 32b2a30be1ac1a96c251f3b7e5b5366a |}]
       ;;
 
-      let to_model { feature_path
-                   ; rev_zero
-                   ; for_
-                   } =
-        V3.to_model
-          { feature_path
-          ; rev_zero
-          ; for_
-          ; reason_for_archiving = ""
-          }
+      let to_model { feature_path; rev_zero; for_ } =
+        V3.to_model { feature_path; rev_zero; for_; reason_for_archiving = "" }
       ;;
     end
 
@@ -53,7 +44,7 @@ module Stable = struct
     module V2 = struct
       type t =
         { remote_repo_path : Remote_repo_path.V1.t
-        ; send_email_to    : Email_address.V1.Set.t
+        ; send_email_to : Email_address.V1.Set.t
         }
       [@@deriving bin_io, sexp_of]
 
@@ -66,10 +57,7 @@ module Stable = struct
     end
 
     module V1 = struct
-      type t =
-        { remote_repo_path      : Remote_repo_path.V1.t
-        }
-      [@@deriving bin_io]
+      type t = { remote_repo_path : Remote_repo_path.V1.t } [@@deriving bin_io]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -77,7 +65,7 @@ module Stable = struct
       ;;
 
       let of_model m =
-        let { V2. remote_repo_path; _ } = V2.of_model m in
+        let { V2.remote_repo_path; _ } = V2.of_model m in
         { remote_repo_path }
       ;;
     end
@@ -86,21 +74,32 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "archive-feature" end)
-    (struct let version = 4 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "archive-feature"
+    end)
+    (struct
+      let version = 4
+    end)
     (Stable.Action.V3)
     (Stable.Reaction.V2)
 
-include Register_old_rpc
-    (struct let version = 3 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 3
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V2)
 
-include Register_old_rpc
-    (struct let version = 2 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

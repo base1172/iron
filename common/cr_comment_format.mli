@@ -8,5 +8,4 @@ type t =
 include Equal.S with type t := t
 
 val latest : t
-
 val is_after_format : t -> format:t -> bool

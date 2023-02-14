@@ -1,7 +1,7 @@
 open Core
 
 module Ansi_terminal = struct
-  include Textutils.Console.Ansi
+  include Console.Ansi
 
   let apply_string attributes string =
     if Iron_common.Iron_options.display_ascii_always
@@ -12,16 +12,16 @@ end
 
 module Source = struct
   type t =
-    { name        : string
+    { name : string
     ; other_names : string list
-    ; range       : (int * int) option
+    ; range : (int * int) option
     }
 
   let add_hunk_break t (pos, len) =
     let range =
       match t.range with
-      | Some (base, _) -> base+pos, base+pos+len
-      | None -> pos, pos+len
+      | Some (base, _) -> base + pos, base + pos + len
+      | None -> pos, pos + len
     in
     { t with range = Some range }
   ;;
@@ -29,16 +29,16 @@ module Source = struct
   let sort_heuristic list =
     let value = function
       | "old base" -> 1
-      | "base"     -> 2
-      | "old tip"  -> 3
+      | "base" -> 2
+      | "old tip" -> 3
       | "new base" -> 4
-      | "tip"      -> 5
-      | "new tip"  -> 6
-      | _          -> 10
+      | "tip" -> 5
+      | "new tip" -> 6
+      | _ -> 10
     in
     list
     |> List.map ~f:(fun v -> value v, v)
-    |> List.sort ~cmp:[%compare: int * string]
+    |> List.sort ~compare:[%compare: int * string]
     |> List.map ~f:snd
   ;;
 
@@ -62,8 +62,7 @@ end
 
 let separator =
   let module A = Ansi_terminal in
-  "@@@@@@@@"
-  |> A.apply_string [ `Bright; `Blue ]
+  "@@@@@@@@" |> A.apply_string [ `Bright; `Blue ]
 ;;
 
 let center size string =
@@ -75,7 +74,6 @@ let center size string =
 ;;
 
 let filename_bar_size = 84
-;;
 
 let filename_header ~filename =
   let module A = Ansi_terminal in
@@ -85,79 +83,59 @@ let filename_header ~filename =
 
 let filename_separator ~length =
   let module A = Ansi_terminal in
-  String.make length '@'
-  |> A.apply_string [ `Bright; `Blue ]
+  String.make length '@' |> A.apply_string [ `Bright; `Blue ]
 ;;
 
 let errors =
   let module A = Ansi_terminal in
-  String.concat ~sep:" " [
-    separator;
-    "Errors"  |> A.apply_string [ `Red ];
-    separator;
-  ]
+  String.concat ~sep:" " [ separator; "Errors" |> A.apply_string [ `Red ]; separator ]
 ;;
 
 let make_hint str =
   let module A = Ansi_terminal in
-  String.concat ~sep:" " [
-    separator;
-    str |> A.apply_string [ `Magenta ];
-    separator;
-  ]
+  String.concat ~sep:" " [ separator; str |> A.apply_string [ `Magenta ]; separator ]
 ;;
 
 let title = make_hint
 
 let forget =
-  make_hint "\
-Forget this diff -- this file no longer has a diff you should know"
+  make_hint "Forget this diff -- this file no longer has a diff you should know"
 ;;
 
 module Hint = struct
-  let b1_b2_f2 =
-    make_hint "A change in the feature was reverted"
-  ;;
-  let b1_f1_f2 =
-    make_hint "A change present only in the new-base was dropped"
-  ;;
+  let b1_b2_f2 = make_hint "A change in the feature was reverted"
+  let b1_f1_f2 = make_hint "A change present only in the new-base was dropped"
+
   let b1_f2__b2_f1 =
     make_hint "The same change from the old-tip and the new-base was dropped"
   ;;
+
   let b1_f2 =
     make_hint "Diverging changes in the old-tip and the new-base were both dropped"
   ;;
+
   let b2_f2_story =
-    make_hint "This feature change was dropped... :"
-  , make_hint "... in favor of this base change:"
+    ( make_hint "This feature change was dropped... :"
+    , make_hint "... in favor of this base change:" )
   ;;
-  let b2_f2 =
-    make_hint "A feature change was dropped in favor of a base change"
-  ;;
-  let b2_f2_dropped =
-    make_hint "The following feature change was dropped:"
-  ;;
-  let b2_f2_kept =
-    make_hint "The following base change was kept:"
-  ;;
+
+  let b2_f2 = make_hint "A feature change was dropped in favor of a base change"
+  let b2_f2_dropped = make_hint "The following feature change was dropped:"
+  let b2_f2_kept = make_hint "The following base change was kept:"
+
   let f1_f2_story =
-    make_hint "This base change was dropped... :"
-  , make_hint "... in favor of this feature change:"
+    ( make_hint "This base change was dropped... :"
+    , make_hint "... in favor of this feature change:" )
   ;;
-  let f1_f2 =
-    make_hint "A base change was dropped in favor of a feature change"
-  ;;
-  let f1_f2_dropped =
-    make_hint "The following base change was dropped:"
-  ;;
-  let f1_f2_kept =
-    make_hint "The following feature change was kept:"
-  ;;
+
+  let f1_f2 = make_hint "A base change was dropped in favor of a feature change"
+  let f1_f2_dropped = make_hint "The following base change was dropped:"
+  let f1_f2_kept = make_hint "The following feature change was kept:"
 end
 
 type 'a diff =
   { minus : 'a
-  ; plus  : 'a
+  ; plus : 'a
   }
 
 module Diff2 = struct
@@ -165,20 +143,21 @@ module Diff2 = struct
 
   let add_hunk_break t minus plus =
     { minus = Source.add_hunk_break t.minus minus
-    ; plus  = Source.add_hunk_break t.plus  plus
+    ; plus = Source.add_hunk_break t.plus plus
     }
   ;;
 
   let to_string t =
     let minus_file, minus_lines = Source.filename_and_lines t.minus in
-    let plus_file, plus_lines   = Source.filename_and_lines t.plus in
+    let plus_file, plus_lines = Source.filename_and_lines t.plus in
     let module A = Ansi_terminal in
-    String.concat ~sep:" "
+    String.concat
+      ~sep:" "
       [ separator
-      ; (minus_file       |> A.apply_string [ `Red ])
-      ; (minus_lines      |> A.apply_string [ `Blue ])
-      ; (plus_file        |> A.apply_string [ `Green ])
-      ; (plus_lines       |> A.apply_string [ `Blue ])
+      ; minus_file |> A.apply_string [ `Red ]
+      ; minus_lines |> A.apply_string [ `Blue ]
+      ; plus_file |> A.apply_string [ `Green ]
+      ; plus_lines |> A.apply_string [ `Blue ]
       ; separator
       ]
   ;;
@@ -189,34 +168,36 @@ module Diff4 = struct
 
   let add_hunk_break t minus plus =
     { minus = Diff2.add_hunk_break t.minus minus plus
-    ; plus  = Diff2.add_hunk_break t.plus  minus plus
+    ; plus = Diff2.add_hunk_break t.plus minus plus
     }
   ;;
 
   let to_string (t : t) =
-    let { minus = a ; plus = b } = t in
-    let minus_a_file , minus_a_lines = Source.filename_and_lines a.minus in
-    let minus_b_file , minus_b_lines = Source.filename_and_lines b.minus in
-    let plus_a_file  , plus_a_lines  = Source.filename_and_lines a.plus  in
-    let plus_b_file  , plus_b_lines  = Source.filename_and_lines b.plus  in
+    let { minus = a; plus = b } = t in
+    let minus_a_file, minus_a_lines = Source.filename_and_lines a.minus in
+    let minus_b_file, minus_b_lines = Source.filename_and_lines b.minus in
+    let plus_a_file, plus_a_lines = Source.filename_and_lines a.plus in
+    let plus_b_file, plus_b_lines = Source.filename_and_lines b.plus in
     let module A = Ansi_terminal in
-    let dd color = [ `Bright ; `Bg color ; `White ] in
-    [ String.concat ~sep:" "
+    let dd color = [ `Bright; `Bg color; `White ] in
+    [ String.concat
+        ~sep:" "
         [ separator
-        ; ("--"             |> A.apply_string (dd `Magenta))
-        ; (minus_a_file     |> A.apply_string [ `Red ])
-        ; (minus_a_lines    |> A.apply_string [ `Blue ])
-        ; (plus_a_file      |> A.apply_string [ `Green ])
-        ; (plus_a_lines     |> A.apply_string [ `Blue ])
+        ; "--" |> A.apply_string (dd `Magenta)
+        ; minus_a_file |> A.apply_string [ `Red ]
+        ; minus_a_lines |> A.apply_string [ `Blue ]
+        ; plus_a_file |> A.apply_string [ `Green ]
+        ; plus_a_lines |> A.apply_string [ `Blue ]
         ; separator
         ]
-    ; String.concat ~sep:" "
+    ; String.concat
+        ~sep:" "
         [ separator
-        ; ("++"            |> A.apply_string (dd `Cyan))
-        ; (minus_b_file     |> A.apply_string [ `Red ])
-        ; (minus_b_lines    |> A.apply_string [ `Blue ])
-        ; (plus_b_file      |> A.apply_string [ `Green ])
-        ; (plus_b_lines     |> A.apply_string [ `Blue ])
+        ; "++" |> A.apply_string (dd `Cyan)
+        ; minus_b_file |> A.apply_string [ `Red ]
+        ; minus_b_lines |> A.apply_string [ `Blue ]
+        ; plus_b_file |> A.apply_string [ `Green ]
+        ; plus_b_lines |> A.apply_string [ `Blue ]
         ; separator
         ]
     ]
@@ -226,7 +207,6 @@ end
 type t =
   | Diff2 of Diff2.t
   | Diff4 of Source.t diff diff
-;;
 
 let add_hunk_break t minus plus =
   match t with

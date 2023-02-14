@@ -1,11 +1,8 @@
 open! Core
 open! Async
 open! Import
-
 include Unix
 
-let exec = Core.Unix.exec
-
-let stdin_isatty  = Core.Unix.(isatty stdin)
-let stdout_isatty = Core.Unix.(isatty stdout)
-
+let exec = Core_unix.exec
+let stdin_isatty = Core_unix.(isatty stdin)
+let stdout_isatty = Core_unix.(isatty stdout)

@@ -11,11 +11,12 @@ open! Import
     v}
 *)
 module Scope : sig
-  module Key : Identifiable.S
+  module Key : Validated_string.S
+
   type t = string Key.Map.t [@@deriving sexp]
 
   include Comparable with type t := t
-  include Hashable   with type t := t
+  include Hashable with type t := t
   include Stringable with type t := t
 end
 
@@ -37,23 +38,23 @@ end
 *)
 
 module Spec : sig
-  module Id : Identifiable.S
+  module Id : Validated_string.S
 
   module Authorization_rule : sig
     type t =
-      { asserters          : User_name.Set.t
-      (** Optionally, an authorization rule may limit the values in scopes that an
+      { asserters : User_name.Set.t
+          (** Optionally, an authorization rule may limit the values in scopes that an
           asserter can act over, e.g. [user1] may only be able to assert facts on [(repo
           live)] while [user2] can assert facts on [(repo live)] and [(repo jane)]. *)
-      ; scope_restrictions : String.Set.t Scope.Key.Map.t sexp_option
+      ; scope_restrictions : String.Set.t Scope.Key.Map.t option [@sexp.option]
       }
     [@@deriving fields, sexp_of]
   end
 
   type t = private
-    { scope_keys          : Scope.Key.Set.t
+    { scope_keys : Scope.Key.Set.t
     ; authorization_rules : Authorization_rule.t list
-    ; description         : string
+    ; description : string
     }
   [@@deriving fields, sexp]
 end
@@ -62,9 +63,9 @@ end
     asserter. *)
 module Evidence : sig
   type t = private
-    { asserter       : User_name.t
+    { asserter : User_name.t
     ; assertion_time : Iron_time.t
-    ; comment        : string
+    ; comment : string
     }
   [@@deriving sexp_of]
 end
@@ -74,7 +75,7 @@ module Action : sig
     Spec.Id.t
     * [ `add_spec of Spec.t
       | `remove_spec
-      | `add_fact of Scope.t * User_name.t * [`comment of string] * Iron_time.t
+      | `add_fact of Scope.t * User_name.t * [ `comment of string ] * Iron_time.t
       | `remove_fact of Scope.t
       ]
   [@@deriving sexp_of]
@@ -94,10 +95,11 @@ module Db : sig
   val handle_action : t -> Action.t -> unit Or_error.t
 
   (** Readonly queries *)
-  val evidence       : t -> Spec.Id.t -> Scope.t -> Evidence.t Or_error.t
+  val evidence : t -> Spec.Id.t -> Scope.t -> Evidence.t Or_error.t
+
   val list_evidences : t -> Spec.Id.t -> (Scope.t * Evidence.t) list Or_error.t
-  val spec           : t -> Spec.Id.t -> Spec.t Or_error.t
-  val list_specs     : t -> (Spec.Id.t * Spec.t) list
+  val spec : t -> Spec.Id.t -> Spec.t Or_error.t
+  val list_specs : t -> (Spec.Id.t * Spec.t) list
 end
 
 module Stable : sig
@@ -105,6 +107,7 @@ module Stable : sig
     module Key : sig
       module V1 : Stable_without_comparator with type t = Scope.Key.t
     end
+
     module V1 : Stable_without_comparator with type t = Scope.t
   end
 
@@ -112,6 +115,7 @@ module Stable : sig
     module Id : sig
       module V1 : Stable_without_comparator with type t = Spec.Id.t
     end
+
     module V1 : Stable_without_comparator with type t = Spec.t
   end
 
@@ -121,10 +125,11 @@ module Stable : sig
 
   module Action : sig
     module V2 : Stable_without_comparator with type t = Action.t
+
     module V1 : sig
       include Stable_without_comparator
+
       val to_model : t -> V2.t
     end
   end
 end
-

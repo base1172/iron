@@ -1,12 +1,11 @@
 module Stable = struct
   open! Core.Core_stable
-
   module Session_id = Session_id.Stable
 
   module V1 = struct
     type t =
       | Current_session
-      | This_session    of Session_id.V1.t
+      | This_session of Session_id.V1.t
     [@@deriving bin_io, compare, sexp]
 
     let%expect_test _ =

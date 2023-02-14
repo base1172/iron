@@ -1,10 +1,9 @@
 open! Core
 open! Import
 
-
 module Data_point : sig
   type t =
-    { at    : Time.t
+    { at : Time.t
     ; value : float
     }
   [@@deriving fields, sexp_of]
@@ -16,13 +15,14 @@ type t [@@deriving sexp_of]
 
 include Invariant.S with type t := t
 
-val create      : unit -> t
-val add         : t -> Data_point.t -> unit
+val create : unit -> t
+val add : t -> Data_point.t -> unit
 val data_points : t -> Data_point.t list
 
 module Stable : sig
   module Data_point : sig
     module Model : T with type t = Data_point.t
+
     module V1 : sig
       type t = Model.t [@@deriving bin_io, sexp]
     end

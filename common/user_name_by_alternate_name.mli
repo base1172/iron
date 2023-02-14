@@ -8,10 +8,8 @@ type t [@@deriving compare, sexp_of]
 include Invariant.S with type t := t
 
 val not_available : t
-
-val to_user_name      : t -> Unresolved_name.t -> User_name.t
-val to_user_name_opt  : t -> Unresolved_name.t -> User_name.t option
-
+val to_user_name : t -> Unresolved_name.t -> User_name.t
+val to_user_name_opt : t -> Unresolved_name.t -> User_name.t option
 val remove_if_present : t -> alternate_name:Alternate_name.t -> t option
 
 (** Trying to add a binding from an alternate name to a user name fails if there is

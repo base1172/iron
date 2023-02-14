@@ -3,9 +3,7 @@ module Stable = struct
 
   module Action = struct
     module V1 = struct
-      type t =
-        | Set of Dynamic_upgrade.V1.t
-      [@@deriving bin_io, sexp]
+      type t = Set of Dynamic_upgrade.V1.t [@@deriving bin_io, sexp]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -27,11 +25,16 @@ end
 open! Core
 open! Import
 
-include Iron_versioned_rpc.Make
-    (struct let name = "with-dynamic-upgrade-state" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "with-dynamic-upgrade-state"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

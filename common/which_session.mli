@@ -3,7 +3,7 @@ open! Import
 
 type t =
   | Current_session
-  | This_session    of Session_id.t
+  | This_session of Session_id.t
 [@@deriving sexp_of]
 
 module Stable : sig

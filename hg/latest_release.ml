@@ -1,13 +1,12 @@
 module Stable = struct
   open! Core.Core_stable
   open! Import_stable
-
-  module Diff2s           = Diff2s.           Stable
-  module Released_feature = Released_feature. Stable
+  module Diff2s = Diff2s.Stable
+  module Released_feature = Released_feature.Stable
 
   module V1 = struct
     type t =
-      { released_feature      : Released_feature.V3.t
+      { released_feature : Released_feature.V3.t
       ; diff_from_base_to_tip : Diff2s.V2.t
       }
     [@@deriving bin_io, compare, fields, sexp]
@@ -27,7 +26,6 @@ end
 open! Core
 open! Async
 open! Import
-
 include Stable.Model
 
 let invariant t =
@@ -35,6 +33,5 @@ let invariant t =
     let check f = Invariant.check_field t f in
     Fields.iter
       ~released_feature:(check Released_feature.invariant)
-      ~diff_from_base_to_tip:(check Diff2s.invariant)
-  )
+      ~diff_from_base_to_tip:(check Diff2s.invariant))
 ;;

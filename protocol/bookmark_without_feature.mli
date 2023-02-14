@@ -2,7 +2,7 @@ open! Core
 open! Import
 
 type t =
-  { bookmark        : string
+  { bookmark : string
   ; first_12_of_rev : Node_hash.First_12.t
   }
 [@@deriving fields, sexp_of]

@@ -8,7 +8,21 @@ open! Import
 type t
 
 include Identifiable with type t := t
-include Invariant.S  with type t := t
+include Invariant.S with type t := t
+
+module Map : sig
+  module Key : sig
+    type nonrec t = t [@@deriving bin_io, sexp]
+    type nonrec comparator_witness = comparator_witness
+
+    val comparator : (t, comparator_witness) Comparator.t
+  end
+
+  include Core.Map.S with module Key := Key
+  include Core.Binable.S1 with type 'a t := 'a t
+
+  val hash_fold_t : 'a Hash.folder -> 'a t Hash.folder
+end
 
 val alphabetic_compare : t -> t -> int
 
@@ -17,14 +31,16 @@ val alphabetic_compare : t -> t -> int
 val default_review_compare : t -> t -> int
 
 (** Special Unix filenames *)
-val dot    : t
+val dot : t
+
 val dotdot : t
-
 val dot_fe : t
-
 val scaffold_sexp : t
 
 module Stable : sig
-  module V1 : Stable_without_comparator with type t = t
-end
+  module V1 : sig
+    type nonrec t = t [@@deriving hash]
 
+    include Stable_without_comparator with type t := t
+  end
+end

@@ -1,17 +1,14 @@
 open! Core
 open! Import
-
 module Action : Unit
 
 module Key : sig
   type t =
-    { by          : User_name.t
-    ; rpc_name    : string
+    { by : User_name.t
+    ; rpc_name : string
     ; rpc_version : int
     }
-  [@@deriving compare, fields, sexp_of]
-
-  val hash : t -> int
+  [@@deriving compare, fields, sexp_of, hash]
 end
 
 module Data : sig
@@ -23,10 +20,7 @@ module Data : sig
 end
 
 module Reaction : sig
-  type t = (Key.t * Data.t) list
-  [@@deriving sexp_of]
+  type t = (Key.t * Data.t) list [@@deriving sexp_of]
 end
 
-include Iron_versioned_rpc.S
-  with type action   = Action.t
-  with type reaction = Reaction.t
+include Iron_versioned_rpc.S with type action = Action.t with type reaction = Reaction.t

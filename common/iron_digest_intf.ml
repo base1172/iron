@@ -5,14 +5,17 @@ module type S = sig
   type t [@@deriving sexp_of]
 
   include Comparable.S with type t := t
-  include Hashable.S   with type t := t
-  include Invariant.S  with type t := t
+  include Hashable.S with type t := t
+  include Invariant.S with type t := t
 
-  val create   : string -> t
-
+  val create : string -> t
   val of_empty_string : t
 
   module Stable : sig
-    module V1 : Stable_without_comparator with type t = t
+    module V1 : sig
+      type nonrec t = t [@@deriving hash]
+
+      include Stable_without_comparator with type t := t
+    end
   end
 end

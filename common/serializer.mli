@@ -16,14 +16,14 @@ type t [@@deriving sexp_of]
 include Invariant.S with type t := t
 
 (** Accessors *)
-val root_directory   : t -> Abspath.t
-val relative_to_root : t -> Relpath.t
+val root_directory : t -> Abspath.t
 
+val relative_to_root : t -> Relpath.t
 val do_nothing : t
 
 (** All side effects will take place under [root_directory]. *)
 val create
-  :  ?should_do_effects:bool  (** default is [true] *)
+  :  ?should_do_effects:bool (** default is [true] *)
   -> root_directory:Abspath.t
   -> unit
   -> t
@@ -42,13 +42,13 @@ val relativize : t -> dir:Relpath.t -> t
     performed on the serializer will invalidate all dependents of all present
     invalidators. *)
 val add_cache_invalidator : t -> Cached.Invalidator.t -> unit
-val invalidate_dependents : t -> unit
 
-val add_subtree    : t -> dir:Relpath.t                           -> unit
-val remove_subtree : t -> dir:Relpath.t                           -> unit
-val append_to      : t -> file:Relpath.t -> 'a -> 'a Persistent.Writer.t -> unit
-val rename         : t -> from_:Relpath.t -> to_:Relpath.t -> unit
-val set_contents   : t -> file:Relpath.t -> 'a -> 'a Persistent.Writer.t -> unit
+val invalidate_dependents : t -> unit
+val add_subtree : t -> dir:Relpath.t -> unit
+val remove_subtree : t -> dir:Relpath.t -> unit
+val append_to : t -> file:Relpath.t -> 'a -> 'a Persistent.Writer.t -> unit
+val rename : t -> from_:Relpath.t -> to_:Relpath.t -> unit
+val set_contents : t -> file:Relpath.t -> 'a -> 'a Persistent.Writer.t -> unit
 
 (** [uncompress_subtree_if_needed ~dir] uncompresses the file named "${dir}.tar.xz", which
     must result in a directory named ${dir} (and will if using [compress_subtree]). The
@@ -68,7 +68,6 @@ val uncompress_subtree_if_needed : t -> dir:Relpath.t -> unit
 val compress_subtree_if_needed : t -> dir:Relpath.t -> unit
 
 val clear_sequence : t -> file:Relpath.t -> unit
-
 val prior_changes_synced_to_file_system : t -> unit Deferred.t
 
 (** [pause_exn] returns a deferred that becomes determined when all previously enqueued
@@ -80,13 +79,9 @@ val prior_changes_synced_to_file_system : t -> unit Deferred.t
 
     Pausing is useful for backups, which temporarily pause serialization so that they can
     snapshot a consistent state. *)
-val pause_exn
-  :  t
-  -> query        : unit Query.t
-  -> with_timeout : Time.Span.t
-  -> unit Deferred.t
+val pause_exn : t -> query:unit Query.t -> with_timeout:Time.Span.t -> unit Deferred.t
 
-val resume_exn   : t -> unit
+val resume_exn : t -> unit
 
 (** [pause_status t] returns a description intended for humans of whether [t] is paused or
     not. *)

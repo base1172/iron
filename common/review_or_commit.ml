@@ -1,5 +1,6 @@
 module Stable = struct
   open Core.Core_stable
+
   module V1 = struct
     type t =
       | Num of int
@@ -14,12 +15,12 @@ module Stable = struct
     let to_model m = m
     let of_model m = m
   end
+
   module Model = V1
 end
 
 open! Core
 open! Import
-
 include Stable.Model
 
 let count = function
@@ -28,7 +29,7 @@ let count = function
 ;;
 
 let to_string_hum = function
-  | Num i  -> Int.to_string_hum i
+  | Num i -> Int.to_string_hum i
   | Commit -> "commit session"
 ;;
 

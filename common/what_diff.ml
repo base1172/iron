@@ -30,9 +30,9 @@ module Stable = struct
     ;;
 
     let to_v2 = function
-      | Whole_diff              -> V2.Whole_diff
+      | Whole_diff -> V2.Whole_diff
       | Whole_diff_plus_ignored -> Whole_diff_plus_ignored
-      | For user                -> For user
+      | For user -> For user
     ;;
 
     let to_model t = V2.to_model (to_v2 t)
@@ -43,5 +43,4 @@ end
 
 open! Core
 open! Import
-
 include Stable.Model

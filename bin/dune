@@ -1,0 +1,38 @@
+(executables
+  (names fe)
+  (libraries
+   async
+   core
+   core_unix.command_unix
+   iron_client
+   iron_common
+   iron_hg
+   iron_obligations
+   iron_protocol
+   iron_server)
+  (preprocess (
+    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))
+
+(install (section bin) (files (fe.exe as fe)))
+
+(rule
+  (deps fe.exe)
+  (mode promote)
+  (action (
+    with-stdout-to
+    supported-internal-rpcs-for-review
+    (bash
+     "./fe.exe internal rpc-to-server supported-by-client -max-output-columns 500"))))
+
+(rule
+  (deps fe.exe)
+  (mode promote)
+  (action (
+    with-stdout-to
+    supported-public-rpcs-for-review
+    (bash
+     "./fe.exe internal show-supported-iron-rpcs -max-output-columns 500"))))
+
+(alias
+  (name DEFAULT)
+  (deps supported-internal-rpcs-for-review supported-public-rpcs-for-review))

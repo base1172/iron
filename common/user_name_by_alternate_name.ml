@@ -14,7 +14,6 @@ end
 
 open! Core
 open! Import
-
 include Stable.V1
 
 let invariant t =
@@ -24,7 +23,7 @@ let invariant t =
       User_name.invariant user_name))
 ;;
 
-let not_available = Alternate_name.Map.empty
+let not_available : t = Map.empty (module Alternate_name)
 
 let alternate_name_of_unresolved_name unresolved_name =
   Alternate_name.of_string (Unresolved_name.to_string unresolved_name)
@@ -40,27 +39,24 @@ let to_user_name_opt t unresolved_name =
 
 let to_user_name t unresolved_name =
   match to_user_name_opt t unresolved_name with
-  | None           -> user_name_of_unresolved_name unresolved_name
+  | None -> user_name_of_unresolved_name unresolved_name
   | Some user_name -> user_name
 ;;
 
 let remove_if_present t ~alternate_name =
-  if Map.mem t alternate_name
-  then Some (Map.remove t alternate_name)
-  else None
+  if Map.mem t alternate_name then Some (Map.remove t alternate_name) else None
 ;;
 
 let no_duplicate_exn alternate_name u u' ~on_error =
-  if User_name.(<>) u u'
-  then never_returns (on_error alternate_name [ u; u' ]);
+  if User_name.( <> ) u u' then never_returns (on_error alternate_name [ u; u' ])
 ;;
 
 let add_exn t ~alternate_name ~user_name ~on_error =
-  match Map.find t alternate_name with
-  | Some user_name' ->
-    no_duplicate_exn alternate_name user_name user_name' ~on_error;
+  match Map.add t ~key:alternate_name ~data:user_name with
+  | `Ok map -> map
+  | `Duplicate ->
+    no_duplicate_exn alternate_name user_name (Map.find_exn t alternate_name) ~on_error;
     t
-  | None -> Map.add t ~key:alternate_name ~data:user_name
 ;;
 
 let merge_exn t t' ~on_error =

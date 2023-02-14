@@ -1,12 +1,11 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V2 = struct
       type t =
-        { root_feature   : Feature_name.V1.t
-        ; for_or_all     : User_name.Or_all.V1.t
+        { root_feature : Feature_name.V1.t
+        ; for_or_all : User_name.Or_all.V1.t
         ; include_active : bool
         }
       [@@deriving bin_io, fields, sexp]
@@ -18,6 +17,7 @@ module Stable = struct
 
       let to_model t = t
     end
+
     module Model = V2
   end
 
@@ -32,15 +32,21 @@ module Stable = struct
 
       let of_model t = t
     end
+
     module Model = V1
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "get-cr-soons" end)
-    (struct let version = 2 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "get-cr-soons"
+    end)
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

@@ -1,21 +1,18 @@
 module Stable = struct
-
   open! Core.Core_stable
   open! Iron_common.Stable
-
   module Rev = Rev.Stable
 
   module Attributes = struct
-
     module V1 = struct
       type t =
-        { hash                               : File_contents_hash.V1.t
-        ; owner                              : User_name.V1.t
-        ; file_reviewers                     : User_name.V1.t list
-        ; followers                          : User_name.V1.t list
-        ; scrutiny_level                     : Scrutiny_level.V1.t
+        { hash : File_contents_hash.V1.t
+        ; owner : User_name.V1.t
+        ; file_reviewers : User_name.V1.t list
+        ; followers : User_name.V1.t list
+        ; scrutiny_level : Scrutiny_level.V1.t
         ; is_read_by_whole_feature_reviewers : bool
-        ; num_lines                          : int
+        ; num_lines : int
         }
       [@@deriving sexp]
     end
@@ -27,15 +24,15 @@ module Stable = struct
        [V2] will still be able to read the [V1] format. *)
     module V2 = struct
       type t =
-        { hash                               : File_contents_hash.V1.t
-        ; owner                              : User_name.V1.t
-        ; review_obligation                  : Review_obligation.V1.t
-        ; followers                          : User_name.V1.Set.t
-        ; scrutiny                           : File_scrutiny.V1.t
-        ; is_read_by_whole_feature_reviewers : bool
-        ; num_lines                          : int
+        { hash : File_contents_hash.V1.t
+        ; owner : User_name.V1.t [@hash.ignore]
+        ; review_obligation : Review_obligation.V1.t [@hash.ignore]
+        ; followers : User_name.V1.Set.t [@hash.ignore]
+        ; scrutiny : File_scrutiny.V1.t [@hash.ignore]
+        ; is_read_by_whole_feature_reviewers : bool [@hash.ignore]
+        ; num_lines : int [@hash.ignore]
         }
-      [@@deriving bin_io, compare, fields, sexp]
+      [@@deriving bin_io, compare, fields, sexp, hash]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -45,14 +42,21 @@ module Stable = struct
       open Core
       open Import
 
-      let of_v1 { V1. hash; owner; followers; scrutiny_level
-                ; is_read_by_whole_feature_reviewers; num_lines; file_reviewers
-                } =
+      let of_v1
+        { V1.hash
+        ; owner
+        ; followers
+        ; scrutiny_level
+        ; is_read_by_whole_feature_reviewers
+        ; num_lines
+        ; file_reviewers
+        }
+        =
         let scrutiny_name =
           Scrutiny_name.of_string
             (* The only obligations-global.sexp is the one in jane. *)
             (match Scrutiny_level.to_int scrutiny_level with
-             | 0  -> "ignore"
+             | 0 -> "ignore"
              | 50 -> "normal"
              | 85 -> "critical_path"
              | value -> sprintf "level%d" value)
@@ -64,7 +68,7 @@ module Stable = struct
         { hash
         ; owner
         ; review_obligation
-        ; followers                          = User_name.Set.of_list followers
+        ; followers = User_name.Set.of_list followers
         ; scrutiny
         ; is_read_by_whole_feature_reviewers
         ; num_lines
@@ -72,30 +76,25 @@ module Stable = struct
       ;;
 
       let t_of_sexp sexp =
-        try of_v1 (V1.t_of_sexp sexp)
-        with
+        try of_v1 (V1.t_of_sexp sexp) with
         | exn_v1 ->
-          try t_of_sexp sexp
-          with
-          | exn_v2 ->
-            raise_s
-              [%sexp
-                "Attributes.V2.t_of_sexp",
-                { v1 = (exn_v1 : Exn.t)
-                ; v2 = (exn_v2 : Exn.t)
-                }
-              ]
+          (try t_of_sexp sexp with
+           | exn_v2 ->
+             raise_s
+               [%sexp
+                 "Attributes.V2.t_of_sexp"
+                 , { v1 = (exn_v1 : Exn.t); v2 = (exn_v2 : Exn.t) }])
       ;;
     end
   end
 
   module V2 = struct
     type t =
-      { path_in_repo   : Path_in_repo.V1.t
-      ; rev            : Rev.V1.t
-      ; attributes     : [ `Absent | `Present of Attributes.V2.t ]
+      { path_in_repo : Path_in_repo.V1.t
+      ; rev : Rev.V1.t
+      ; attributes : [ `Absent | `Present of Attributes.V2.t ]
       }
-    [@@deriving bin_io, compare, fields, sexp]
+    [@@deriving bin_io, compare, fields, sexp, hash]
 
     let%expect_test _ =
       print_endline [%bin_digest: t];
@@ -124,19 +123,21 @@ module Attributes = struct
         ~num_lines:(check ([%test_pred: int] (fun num_lines -> num_lines >= 0))))
   ;;
 
-  let create { Review_attributes.
-               build_projections                  = _
-             ; tags                               = _
-             ; fewer_than_min_reviewers           = _
-             ; followers
-             ; is_read_by_whole_feature_reviewers
-             ; more_than_max_reviewers            = _
-             ; owner
-             ; review_obligation
-             ; scrutiny_level
-             ; scrutiny_name
-             }
-        ~hash ~num_lines =
+  let create
+    { Review_attributes.build_projections = _
+    ; tags = _
+    ; fewer_than_min_reviewers = _
+    ; followers
+    ; is_read_by_whole_feature_reviewers
+    ; more_than_max_reviewers = _
+    ; owner
+    ; review_obligation
+    ; scrutiny_level
+    ; scrutiny_name
+    }
+    ~hash
+    ~num_lines
+    =
     let scrutiny = File_scrutiny.create scrutiny_name scrutiny_level in
     { hash
     ; owner
@@ -153,23 +154,22 @@ module Attributes = struct
     then
       t.is_read_by_whole_feature_reviewers
       || Review_obligation.has_a_may_reviewer t.review_obligation
-    else
-      Review_obligation.may_review t.review_obligation reviewer.user_name
+    else Review_obligation.may_review t.review_obligation reviewer.user_name
   ;;
 
   let may_follow t (reviewer : Reviewer.t) =
     Set.mem t.followers reviewer.user_name
-    || reviewer.is_whole_feature_follower
-       && may_review_internal t { reviewer with is_whole_feature_reviewer = true }
+    || (reviewer.is_whole_feature_follower
+       && may_review_internal t { reviewer with is_whole_feature_reviewer = true })
   ;;
 
   let may_review t ~include_may_follow (reviewer : Reviewer.t) =
-    may_review_internal t reviewer
-    || ( include_may_follow && may_follow t reviewer )
+    may_review_internal t reviewer || (include_may_follow && may_follow t reviewer)
   ;;
 
   let may_reviewers t ~include_file_followers =
-    Set.union (Review_obligation.may_reviewers t.review_obligation)
+    Set.union
+      (Review_obligation.may_reviewers t.review_obligation)
       (if include_file_followers then t.followers else User_name.Set.empty)
   ;;
 
@@ -177,18 +177,19 @@ module Attributes = struct
 
   let de_alias t user_name_by_alias =
     let de_alias user_name =
-      User_name_by_alternate_name.to_user_name user_name_by_alias
+      User_name_by_alternate_name.to_user_name
+        user_name_by_alias
         (User_name.to_unresolved_name user_name)
     in
     let de_alias_set user_names = User_name.Set.map user_names ~f:de_alias in
-    { hash                               = t.hash
-    ; owner                              = de_alias t.owner
-    ; review_obligation                  = Review_obligation.de_alias t.review_obligation
-                                             user_name_by_alias
-    ; followers                          = de_alias_set t.followers
-    ; scrutiny                           = t.scrutiny
+    { hash = t.hash
+    ; owner = de_alias t.owner
+    ; review_obligation =
+        Review_obligation.de_alias t.review_obligation user_name_by_alias
+    ; followers = de_alias_set t.followers
+    ; scrutiny = t.scrutiny
     ; is_read_by_whole_feature_reviewers = t.is_read_by_whole_feature_reviewers
-    ; num_lines                          = t.num_lines
+    ; num_lines = t.num_lines
     }
   ;;
 end
@@ -201,10 +202,10 @@ let invariant t =
     Fields.iter
       ~path_in_repo:ignore
       ~rev:ignore
-      ~attributes:(check (function
-        | `Absent -> ()
-        | `Present attributes -> Attributes.invariant attributes))
-  )
+      ~attributes:
+        (check (function
+          | `Absent -> ()
+          | `Present attributes -> Attributes.invariant attributes)))
 ;;
 
 let create ~path_in_repo ~rev ~file review_attributes =
@@ -212,19 +213,18 @@ let create ~path_in_repo ~rev ~file review_attributes =
   let hash = File_contents_hash.create contents in
   let num_lines = line_count contents in
   let attributes = Attributes.create review_attributes ~hash ~num_lines in
-  { path_in_repo
-  ; rev
-  ; attributes   = `Present attributes
-  }
+  { path_in_repo; rev; attributes = `Present attributes }
 ;;
 
 let with_path_in_repo t path_in_repo =
   match t.attributes with
   | `Present _ ->
-    raise_s [%sexp "with_path_in_repo should only be used on absent files"
-                 , (t : t), (path_in_repo : Path_in_repo.t)]
-  | `Absent ->
-    { t with path_in_repo }
+    raise_s
+      [%sexp
+        "with_path_in_repo should only be used on absent files"
+        , (t : t)
+        , (path_in_repo : Path_in_repo.t)]
+  | `Absent -> { t with path_in_repo }
 ;;
 
 let absent ~path_in_repo ~rev = { path_in_repo; rev; attributes = `Absent }
@@ -232,13 +232,17 @@ let absent ~path_in_repo ~rev = { path_in_repo; rev; attributes = `Absent }
 module Ignoring_rev = struct
   module T = struct
     type nonrec t = t [@@deriving sexp]
+
     let compare t1 t2 = compare t1 { t2 with rev = t1.rev }
-    let hash t =
-      Path_in_repo.hash t.path_in_repo
-      lxor (match t.attributes with
-        | `Absent -> Hashtbl.hash attributes
-        | `Present { Attributes. hash; _ } -> File_contents_hash.hash hash)
+
+    let hash_fold_t state t =
+      let state = Path_in_repo.hash_fold_t state t.path_in_repo in
+      match t.attributes with
+      | `Absent -> [%hash_fold: [ `Absent | `Present of Attributes.t ]] state t.attributes
+      | `Present { Attributes.hash; _ } -> File_contents_hash.hash_fold_t state hash
     ;;
+
+    let hash t = Ppx_hash_lib.Std.Hash.run hash_fold_t t
   end
 
   include T
@@ -248,41 +252,39 @@ end
 
 let file_digest t =
   match t.attributes with
-  | `Absent       -> None
+  | `Absent -> None
   | `Present attr -> Some attr.hash
 ;;
 
 let equal_file_contents t1 t2 =
   match t1.attributes, t2.attributes with
-  | `Absent    , `Absent     -> true
-  | `Present _ , `Absent
-  | `Absent    , `Present _  -> false
+  | `Absent, `Absent -> true
+  | `Present _, `Absent | `Absent, `Present _ -> false
   | `Present t1, `Present t2 -> Attributes.equal_file_contents t1 t2
 ;;
 
 let scrutiny t =
   match t.attributes with
   | `Present t -> t.scrutiny
-  | `Absent    -> File_scrutiny.ignored
+  | `Absent -> File_scrutiny.ignored
 ;;
 
 let num_lines t =
   match t.attributes with
-  | `Absent    -> 0
+  | `Absent -> 0
   | `Present t -> t.num_lines
 ;;
 
 let is_present t =
   match t.attributes with
   | `Present _ -> true
-  | `Absent    -> false
+  | `Absent -> false
 ;;
 
 let status ~src:t1 ~dst:t2 =
   match t1.attributes, t2.attributes with
-  | `Absent   , `Absent
-  | `Present _, `Absent    -> `Removed t2
-  | `Absent   , `Present _ -> `Added t1
+  | `Absent, `Absent | `Present _, `Absent -> `Removed t2
+  | `Absent, `Present _ -> `Added t1
   | `Present _, `Present _ -> `Modified (t1, t2)
 ;;
 
@@ -296,9 +298,8 @@ let present_paths_in_repo ts =
 let normalize_paths ~base ~tip =
   match base.attributes, tip.attributes with
   | `Present _, `Present _ -> base, tip
-  | `Present _, `Absent    -> base, with_path_in_repo tip base.path_in_repo
-  | `Absent   , `Present _
-  | `Absent   , `Absent    -> with_path_in_repo base tip.path_in_repo, tip
+  | `Present _, `Absent -> base, with_path_in_repo tip base.path_in_repo
+  | `Absent, `Present _ | `Absent, `Absent -> with_path_in_repo base tip.path_in_repo, tip
 ;;
 
 let de_alias t user_name_by_alias =
@@ -307,8 +308,5 @@ let de_alias t user_name_by_alias =
     | `Absent -> `Absent
     | `Present attributes -> `Present (Attributes.de_alias attributes user_name_by_alias)
   in
-  { path_in_repo = t.path_in_repo
-  ; rev          = t.rev
-  ; attributes
-  }
+  { path_in_repo = t.path_in_repo; rev = t.rev; attributes }
 ;;

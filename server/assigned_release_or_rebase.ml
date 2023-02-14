@@ -8,18 +8,16 @@ type t =
 [@@deriving sexp_of]
 
 module Make (Feature : sig
+  type t
 
-    type t
-
-    val continuous_release_status : t -> Continuous_release_status.t
-    val first_owner               : t -> User_name.t
-    val next_steps                : t -> Next_step.t list
-    val owners                    : t -> User_name.t list
-    val release_process           : t -> Release_process.t
-    val who_can_release_into_me   : t -> Who_can_release_into_me.t
-
-  end) = struct
-
+  val continuous_release_status : t -> Continuous_release_status.t
+  val first_owner : t -> User_name.t
+  val next_steps : t -> Next_step.t list
+  val owners : t -> User_name.t list
+  val release_process : t -> Release_process.t
+  val who_can_release_into_me : t -> Who_can_release_into_me.t
+end) =
+struct
   let create feature ~parent =
     let next_steps = Feature.next_steps feature in
     let has_next_step_release = List.mem next_steps Release ~equal:Next_step.equal in
@@ -53,10 +51,10 @@ module Make (Feature : sig
           in
           let assignee, (assigned : Next_step.t list) =
             match owner_assignee, must_call_fe_rebase_separately with
-            | Some assignee, true  -> assignee                  , [ Rebase; Release ]
-            | Some assignee, false -> assignee                  , [ Release         ]
-            | None         , true  -> feature_first_owner       , [ Rebase          ]
-            | None         , false -> Feature.first_owner parent, [ Release         ]
+            | Some assignee, true -> assignee, [ Rebase; Release ]
+            | Some assignee, false -> assignee, [ Release ]
+            | None, true -> feature_first_owner, [ Rebase ]
+            | None, false -> Feature.first_owner parent, [ Release ]
           in
           Some { assignee; assigned }))
   ;;
@@ -66,14 +64,13 @@ include Make (Feature)
 
 let%test_module "" =
   (module struct
-
     module Feature = struct
       type t =
         { continuous_release_status : Continuous_release_status.t
-        ; next_steps                : Next_step.t sexp_list
-        ; owners                    : User_name.t list
-        ; release_process           : Release_process.t
-        ; who_can_release_into_me   : Who_can_release_into_me.t
+        ; next_steps : Next_step.t list [@sexp.list]
+        ; owners : User_name.t list
+        ; release_process : Release_process.t
+        ; who_can_release_into_me : Who_can_release_into_me.t
         }
       [@@deriving fields]
 
@@ -82,25 +79,17 @@ let%test_module "" =
 
     include Make (Feature)
 
-    let both_owner    = User_name.of_string "both"
+    let both_owner = User_name.of_string "both"
     let feature_owner = User_name.of_string "child"
-    let parent_owner  = User_name.of_string "parent"
+    let parent_owner = User_name.of_string "parent"
 
     let features =
       let open List.Let_syntax in
       let%map continuous_release_status =
         [ `Not_working_on_it; `Pending_or_working_on_it ]
-      and next_steps =
-        [ [ Next_step.Rebase; Release ]
-        ; [ Release ]
-        ]
-      and owners =
-        [ [ feature_owner ]
-        ; [ feature_owner ; both_owner ]
-        ]
-      in
-      { Feature.
-        continuous_release_status
+      and next_steps = [ [ Next_step.Rebase; Release ]; [ Release ] ]
+      and owners = [ [ feature_owner ]; [ feature_owner; both_owner ] ] in
+      { Feature.continuous_release_status
       ; next_steps
       ; owners
       ; release_process = Direct
@@ -111,10 +100,8 @@ let%test_module "" =
     let parents =
       let open List.Let_syntax in
       let%map release_process = Release_process.all
-      and who_can_release_into_me = Who_can_release_into_me.all
-      in
-      { Feature.
-        continuous_release_status = `Not_working_on_it
+      and who_can_release_into_me = Who_can_release_into_me.all in
+      { Feature.continuous_release_status = `Not_working_on_it
       ; next_steps = []
       ; owners = [ parent_owner; both_owner ]
       ; release_process
@@ -124,67 +111,67 @@ let%test_module "" =
 
     module Input = struct
       type t =
-        { process    : string
-        ; status     : string
-        ; who_can    : string
+        { process : string
+        ; status : string
+        ; who_can : string
         ; is_rebased : bool
-        ; co_owned   : bool
+        ; co_owned : bool
         }
       [@@deriving compare]
     end
 
     module Line = struct
       type nonrec t =
-        { input  : Input.t
+        { input : Input.t
         ; result : t option
         }
 
       let columns =
         let open Ascii_table in
         let status =
-          Column.of_to_string ~header:"status" Fn.id
+          Column.of_to_string
+            ~header:"status"
+            Fn.id
             (Column.cell (fun t -> t.input.status))
         and who_can =
-          Column.of_to_string ~header:"who can" Fn.id
+          Column.of_to_string
+            ~header:"who can"
+            Fn.id
             (Column.cell (fun t -> t.input.who_can))
         and process =
-          Column.of_to_string ~header:"process" Fn.id
+          Column.of_to_string
+            ~header:"process"
+            Fn.id
             (Column.cell (fun t -> t.input.process))
         and is_rebased =
-          Column.of_to_string ~header:"rebased" Fn.id
-            (Column.cell (fun t ->
-               if t.input.is_rebased
-               then "rebased"
-               else "no"))
+          Column.of_to_string
+            ~header:"rebased"
+            Fn.id
+            (Column.cell (fun t -> if t.input.is_rebased then "rebased" else "no"))
         and co_owned =
-          Column.of_to_string ~header:"co-owned" Fn.id
-            (Column.cell (fun t ->
-               if t.input.co_owned
-               then "co-owned"
-               else "no"))
+          Column.of_to_string
+            ~header:"co-owned"
+            Fn.id
+            (Column.cell (fun t -> if t.input.co_owned then "co-owned" else "no"))
         and assignee =
-          Column.of_to_string ~header:"assignee" Fn.id
+          Column.of_to_string
+            ~header:"assignee"
+            Fn.id
             (Column.cell (fun t ->
                match t.result with
                | None -> ""
                | Some t -> User_name.to_string t.assignee))
         and assigned =
-          Column.of_to_string ~header:"assigned" Fn.id
+          Column.of_to_string
+            ~header:"assigned"
+            Fn.id
             (Column.cell (fun t ->
                match t.result with
                | None -> ""
                | Some t ->
-                 List.map t.assigned ~f:Next_step.to_string_hum
-                 |> String.concat ~sep:", "))
+                 List.map t.assigned ~f:Next_step.to_string_hum |> String.concat ~sep:", "))
         in
-        [ process
-        ; status
-        ; who_can
-        ; is_rebased
-        ; co_owned
-        ; assignee
-        ; assigned
-        ]
+        [ process; status; who_can; is_rebased; co_owned; assignee; assigned ]
       ;;
 
       let create (feature : Feature.t) ~(parent : Feature.t option) =
@@ -192,16 +179,16 @@ let%test_module "" =
           match parent with
           | None -> "child"
           | Some parent ->
-            match parent.who_can_release_into_me with
-            | My_owners -> "parent"
-            | My_owners_and_child_owners -> "all"
+            (match parent.who_can_release_into_me with
+             | My_owners -> "parent"
+             | My_owners_and_child_owners -> "all")
         and process =
           match parent with
           | None -> "direct"
           | Some parent ->
-            match parent.release_process with
-            | Direct -> "direct"
-            | Continuous -> "continuous"
+            (match parent.release_process with
+             | Direct -> "direct"
+             | Continuous -> "continuous")
         and is_rebased =
           match feature.next_steps with
           | Rebase :: _ -> false
@@ -210,8 +197,8 @@ let%test_module "" =
           match parent with
           | None -> false
           | Some parent ->
-            List.find feature.owners
-              ~f:(fun t -> List.mem ~equal:User_name.equal parent.owners t)
+            List.find feature.owners ~f:(fun t ->
+              List.mem ~equal:User_name.equal parent.owners t)
             |> Option.is_some
         and status =
           match feature.continuous_release_status with
@@ -219,13 +206,7 @@ let%test_module "" =
           | `Not_working_on_it -> "idle"
         in
         { result = create feature ~parent
-        ; input =
-            { status
-            ; who_can
-            ; process
-            ; is_rebased
-            ; co_owned
-            }
+        ; input = { status; who_can; process; is_rebased; co_owned }
         }
       ;;
     end
@@ -234,14 +215,14 @@ let%test_module "" =
       let rows =
         List.concat_map features ~f:(fun feature ->
           Line.create feature ~parent:None
-          :: List.map parents ~f:(fun parent ->
-            Line.create feature ~parent:(Some parent)))
-        |> List.sort ~cmp:(fun t1 t2 -> Input.compare t1.Line.input t2.input)
+          :: List.map parents ~f:(fun parent -> Line.create feature ~parent:(Some parent)))
+        |> List.sort ~compare:(fun t1 t2 -> Input.compare t1.Line.input t2.input)
       in
       let table = Ascii_table.create ~columns:Line.columns ~rows in
-      print_endline (Ascii_table.to_string table
-                       ~display_ascii:true ~max_output_columns:500);
-      [%expect {|
+      print_endline
+        (Ascii_table.to_string table ~display_ascii:true ~max_output_columns:500);
+      [%expect
+        {|
         |---------------------------------------------------------------------------------|
         | process    | status | who can | rebased | co-owned | assignee | assigned        |
         |------------+--------+---------+---------+----------+----------+-----------------|

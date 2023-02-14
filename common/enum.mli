@@ -3,6 +3,7 @@ open! Import
 
 module type S = sig
   type t [@@deriving sexp_of]
+
   val all : t list
 end
 

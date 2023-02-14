@@ -9,10 +9,10 @@ val create : ?by:User_name.t -> ?at:Time.t -> 'a -> 'a t
 
 (** Accessors. *)
 val action : 'a t -> 'a
-val at     : _ t -> Time.t
-val by     : _ t -> User_name.t
-val uuid   : _ t -> Uuid.t
 
+val at : _ t -> Time.t
+val by : _ t -> User_name.t
+val uuid : _ t -> Uuid.t
 val with_action : 'a t -> 'b -> 'b t
 
 module Stable : sig

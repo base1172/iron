@@ -1,17 +1,15 @@
 module Stable = struct
-
   open! Core.Core_stable
   module Time = Iron_time.Stable
 
   module V1 = struct
-
     module Time = Time.V1_round_trippable
 
     type 'a t =
-      { query_uuid                  : Uuid.V1.t
-      ; server_received_query_at    : Time.t
+      { query_uuid : Uuid.Stable.V1.t
+      ; server_received_query_at : Time.t
       ; server_computed_reaction_at : Time.t
-      ; reaction                    : 'a
+      ; reaction : 'a
       }
     [@@deriving bin_io, compare, fields, sexp]
 
@@ -21,13 +19,11 @@ module Stable = struct
     ;;
 
     let map t ~f = { t with reaction = f t.reaction }
-
   end
 end
 
 open! Core
 open! Import
-
 include Stable.V1
 
 let invariant invariant_reaction t =

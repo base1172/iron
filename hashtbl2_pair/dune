@@ -1,0 +1,6 @@
+(library
+  (name        hashtbl2_pair)
+  (public_name iron.hashtbl2_pair)
+  (libraries core hashtbl2)
+  (preprocess (
+    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))

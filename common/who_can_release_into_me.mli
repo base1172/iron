@@ -6,7 +6,7 @@ type t =
   | My_owners_and_child_owners
 [@@deriving sexp_of]
 
-include Enum.S     with type t := t
+include Enum.S with type t := t
 include Comparable with type t := t
 
 val to_string_hum_as_parent : t -> string

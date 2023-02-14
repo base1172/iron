@@ -1,14 +1,13 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V4 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; for_         : User_name.V1.t
-        ; lock_names   : Lock_name.V3.t list
-        ; reason       : string
+        ; for_ : User_name.V1.t
+        ; lock_names : Lock_name.V3.t list
+        ; reason : string
         ; is_permanent : bool
         }
       [@@deriving bin_io, fields, sexp]
@@ -24,9 +23,9 @@ module Stable = struct
     module V3 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; for_         : User_name.V1.t
-        ; lock_names   : Lock_name.V2.t list
-        ; reason       : string
+        ; for_ : User_name.V1.t
+        ; lock_names : Lock_name.V2.t list
+        ; reason : string
         ; is_permanent : bool
         }
       [@@deriving bin_io]
@@ -36,12 +35,7 @@ module Stable = struct
         [%expect {| 7493838d427f39cedd2026b98a693f96 |}]
       ;;
 
-      let to_model { feature_path
-                   ; for_
-                   ; lock_names
-                   ; reason
-                   ; is_permanent
-                   } =
+      let to_model { feature_path; for_; lock_names; reason; is_permanent } =
         V4.to_model
           { feature_path
           ; for_
@@ -55,9 +49,9 @@ module Stable = struct
     module V2 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; for_         : User_name.V1.t
-        ; lock_names   : Lock_name.V1.t list
-        ; reason       : string
+        ; for_ : User_name.V1.t
+        ; lock_names : Lock_name.V1.t list
+        ; reason : string
         ; is_permanent : bool
         }
       [@@deriving bin_io]
@@ -67,12 +61,7 @@ module Stable = struct
         [%expect {| f89840d2616659599e4b6c9cb83086f7 |}]
       ;;
 
-      let to_model { feature_path
-                   ; for_
-                   ; lock_names
-                   ; reason
-                   ; is_permanent
-                   } =
+      let to_model { feature_path; for_; lock_names; reason; is_permanent } =
         V3.to_model
           { feature_path
           ; for_
@@ -86,9 +75,9 @@ module Stable = struct
     module V1 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; for_         : User_name.V1.t
-        ; lock_names   : Lock_name.V1.t list
-        ; reason       : string
+        ; for_ : User_name.V1.t
+        ; lock_names : Lock_name.V1.t list
+        ; reason : string
         }
       [@@deriving bin_io]
 
@@ -97,18 +86,8 @@ module Stable = struct
         [%expect {| 1d57d16005424054a5a5f2d9baf0e849 |}]
       ;;
 
-      let to_model { feature_path
-                   ; for_
-                   ; lock_names
-                   ; reason
-                   } =
-        V2.to_model
-          { feature_path
-          ; for_
-          ; lock_names
-          ; reason
-          ; is_permanent = false
-          }
+      let to_model { feature_path; for_; lock_names; reason } =
+        V2.to_model { feature_path; for_; lock_names; reason; is_permanent = false }
       ;;
     end
 
@@ -117,15 +96,13 @@ module Stable = struct
 
   module Reaction = struct
     module V3 = struct
-      type t = (Lock_name.V3.t * unit Or_error.V2.t) list
-      [@@deriving bin_io, sexp]
+      type t = (Lock_name.V3.t * unit Or_error.V2.t) list [@@deriving bin_io, sexp]
 
       let of_model t = t
     end
 
     module V2 = struct
-      type t = (Lock_name.V2.t * unit Or_error.V1.t) list
-      [@@deriving bin_io, sexp_of]
+      type t = (Lock_name.V2.t * unit Or_error.V1.t) list [@@deriving bin_io, sexp_of]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -147,8 +124,7 @@ module Stable = struct
     end
 
     module V1 = struct
-      type t = (Lock_name.V1.t * unit Or_error.V1.t) list
-      [@@deriving bin_io]
+      type t = (Lock_name.V1.t * unit Or_error.V1.t) list [@@deriving bin_io]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -173,26 +149,40 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "lock-feature" end)
-    (struct let version = 4 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "lock-feature"
+    end)
+    (struct
+      let version = 4
+    end)
     (Stable.Action.V4)
     (Stable.Reaction.V3)
 
-include Register_old_rpc
-    (struct let version = 3 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 3
+    end)
     (Stable.Action.V3)
     (Stable.Reaction.V2)
 
-include Register_old_rpc
-    (struct let version = 2 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

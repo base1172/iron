@@ -4,39 +4,32 @@ open! Core
 open! Async
 open! Import
 
-type abspath (** For forward reference to Abspath.t from Relpath module. *)
+(** For forward reference to Abspath.t from Relpath module. *)
+type abspath [@@deriving hash]
 
 module Relpath : sig
-
-  type t
+  type t [@@deriving hash]
 
   include Identifiable with type t := t
-  include Invariant.S  with type t := t
+  include Invariant.S with type t := t
 
-  val empty : t (** AKA "dot" *)
+  (** AKA "dot" *)
+  val empty : t
 
   val is_empty : t -> bool
-
   val of_list : File_name.t list -> t
-
   val append : t -> t -> t
-
   val is_prefix : prefix:t -> t -> bool
-
   val extend : t -> File_name.t -> t
-
   val split_first : t -> (File_name.t * t) option
-
   val split_dir_file_exn : t -> t * File_name.t
-
   val parts : t -> File_name.t list
 
   (** Drop the last element of the path: /a/b/c -> /a/b. *)
-  val parent     : t -> t option
+  val parent : t -> t option
+
   val parent_exn : t -> t
-
   val last_exn : t -> File_name.t
-
   val alphabetic_compare : t -> t -> int
 
   (** [default_review_compare] is like [alphabetic_compare], but has domain-specific rules
@@ -47,45 +40,38 @@ module Relpath : sig
 
   module Stable : sig
     module V1 : sig
-      type nonrec t = t
+      type nonrec t = t [@@deriving hash]
+
       include Stable_without_comparator with type t := t
-      include Stringable.S           with type t := t
+      include Stringable.S with type t := t
+      include Hashable.Stable.V1.S with type key := t
     end
   end
 end
 
 module Abspath : sig
+  type t = abspath [@@deriving hash]
 
-  type t = abspath
-
-  include Invariant.S  with type t := t
+  include Invariant.S with type t := t
   include Identifiable with type t := t
 
   val alphabetic_compare : t -> t -> int
 
-  val root : t (** The root path: / *)
+  (** The root path: / *)
+  val root : t
 
   val dev_null : t
-
   val program_started_in : t Or_error.t
-
   val append : t -> Relpath.t -> t
-
   val extend : t -> File_name.t -> t
-
   val last_exn : t -> File_name.t
-
   val parent : t -> t option
   val parent_exn : t -> t
-
   val split_dir_file_exn : t -> t * File_name.t
-
   val of_list : File_name.t list -> t
-
   val to_list : t -> File_name.t list
-
-  val chop_prefix : prefix:t -> t                -> Relpath.t Or_error.t
-  val chop_suffix : t        -> suffix:Relpath.t -> t         Or_error.t
+  val chop_prefix : prefix:t -> t -> Relpath.t Or_error.t
+  val chop_suffix : t -> suffix:Relpath.t -> t Or_error.t
 
   (** Simplify the path by attempting to simplify all the ".." parts.  This function is
       purely syntactic -- it does not look at all at the state of the filesystem.
@@ -99,17 +85,18 @@ module Abspath : sig
   val simplify_dotdots_syntax : t -> t Or_error.t
 
   val is_prefix : prefix:t -> t -> bool
-
   val file_exists_exn : t -> bool Deferred.t
-
   val rm_rf_exn : t -> unit Deferred.t
-
   val in_dir : t -> f:(unit -> 'a Deferred.t) -> 'a Deferred.t
-
   val rename_exn : src:t -> dst__delete_if_exists:t -> unit Deferred.t
 
   module Stable : sig
-    module V1 : Stable_without_comparator with type t = t
+    module V1 : sig
+      type nonrec t = t [@@deriving hash]
+
+      include Stable_without_comparator with type t := t
+      include Hashable.Stable.V1.S with type key := t
+    end
   end
 end
 
@@ -122,9 +109,11 @@ include Identifiable with type t := t
 
 val alphabetic_compare : t -> t -> int
 
-val root  : t  (** abspath *)
+(** abspath *)
+val root : t
 
-val empty : t  (** relative *)
+(** relative *)
+val empty : t
 
 (** Relocate p2, if it's relative, to p1. If p2 is abspath, just return p2.
     Examples: "a/b"  "c/d"  -> "a/b/c/d"         rel + rel -> rel
@@ -136,7 +125,7 @@ val empty : t  (** relative *)
 *)
 val append : t -> t -> t
 
-val is_prefix   : prefix:t -> t -> bool
+val is_prefix : prefix:t -> t -> bool
 
 (** If (1) the prefix & main path are either both Relpath, or both Abspath, and
     (2) the prefix is truly a prefix of the main path,

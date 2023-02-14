@@ -2,7 +2,7 @@ open! Core
 open! Async
 open! Import
 
-let main  { Fe.Unarchive.Action. feature_path; feature_id } =
+let main { Fe.Unarchive.Action.feature_path; feature_id } =
   let%bind repo_root =
     Cmd_workspace.repo_for_hg_operations_exn feature_path ~use:`Clone
   in
@@ -24,9 +24,8 @@ let main  { Fe.Unarchive.Action. feature_path; feature_id } =
       let%map feature =
         Get_feature.Maybe_archived.rpc_to_server_exn
           { what_diff = None
-          ; what_feature = { feature_spec = `Feature_path feature_path
-                           ; namespace    = `Archived
-                           }
+          ; what_feature =
+              { feature_spec = `Feature_path feature_path; namespace = `Archived }
           }
       in
       feature.feature_id
@@ -38,7 +37,10 @@ let main  { Fe.Unarchive.Action. feature_path; feature_id } =
     Hg.pull repo_root ~repo_is_clean ~from:remote_repo_path (`Rev feature_tip)
   in
   let%bind () =
-    Hg.set_bookmark repo_root (Feature feature_path) ~to_:(`Rev feature_tip)
+    Hg.set_bookmark
+      repo_root
+      (Feature feature_path)
+      ~to_:(`Rev feature_tip)
       (`Push_to_and_overwrite remote_repo_path)
   in
   let%bind () =
@@ -51,14 +53,15 @@ let command =
   Command.async'
     ~summary:"unarchive a feature"
     (let open Command.Let_syntax in
-     let%map_open () = return ()
-     and feature_path = archived_feature_path
-     and feature_id =
-       flag "-id" ~doc:"FEATURE_ID feature id"
-         (optional (Arg_type.create Feature_id.of_string))
-     in
-     fun () ->
-       let feature_path = ok_exn feature_path in
-       main { feature_path; feature_id }
-    )
+    let%map_open () = return ()
+    and feature_path = archived_feature_path
+    and feature_id =
+      flag
+        "-id"
+        ~doc:"FEATURE_ID feature id"
+        (optional (Arg_type.create Feature_id.of_string))
+    in
+    fun () ->
+      let feature_path = ok_exn feature_path in
+      main { feature_path; feature_id })
 ;;

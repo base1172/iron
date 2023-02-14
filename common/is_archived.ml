@@ -14,7 +14,7 @@ module Stable = struct
 
     let to_bool = function
       | Yes _ -> true
-      | No    -> false
+      | No -> false
     ;;
   end
 
@@ -23,5 +23,4 @@ end
 
 open! Core
 open! Import
-
 include Stable.Model

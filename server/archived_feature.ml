@@ -2,11 +2,11 @@ open! Core
 open! Import
 
 type t =
-  { feature_id   : Feature_id.t
+  { feature_id : Feature_id.t
   ; feature_path : Feature_path.t
-  ; rev_zero     : Rev.t
-  ; owners       : User_name.t list
-  ; archived_at  : Time.t
+  ; rev_zero : Rev.t
+  ; owners : User_name.t list
+  ; archived_at : Time.t
   ; reason_for_archiving : string
   }
 [@@deriving fields, sexp_of]
@@ -24,30 +24,25 @@ let invariant t =
 ;;
 
 let create feature ~archived_at ~reason_for_archiving =
-  { feature_id   = Feature.feature_id feature
+  { feature_id = Feature.feature_id feature
   ; feature_path = Feature.feature_path feature
-  ; rev_zero     = Feature.rev_zero feature
-  ; owners       = Feature.owners feature
+  ; rev_zero = Feature.rev_zero feature
+  ; owners = Feature.owners feature
   ; archived_at
   ; reason_for_archiving
   }
 ;;
 
-let to_list_protocol { feature_id
-                     ; feature_path
-                     ; owners
-                     ; archived_at
-                     ; reason_for_archiving
-                     ; _
-                     } =
-  { Iron_protocol.List_features.Reaction.
-    feature_path
+let to_list_protocol
+  { feature_id; feature_path; owners; archived_at; reason_for_archiving; _ }
+  =
+  { Iron_protocol.List_features.Reaction.feature_path
   ; feature_id
   ; owners
   ; review_is_enabled = false
-  ; num_lines         = Known (error_string "no num lines for archived features")
-  ; next_steps        = []
-  ; status            = Archived { archived_at; reason_for_archiving }
+  ; num_lines = Known (error_string "no num lines for archived features")
+  ; next_steps = []
+  ; status = Archived { archived_at; reason_for_archiving }
   }
 ;;
 

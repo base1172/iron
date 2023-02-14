@@ -1,0 +1,6 @@
+(library
+  (name        iron_obligations)
+  (public_name iron.obligations)
+  (libraries async core iron_common re2)
+  (preprocess (
+    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))

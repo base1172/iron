@@ -24,7 +24,7 @@ end
 
 module Action : sig
   type t =
-    { types  : Type.t list
+    { types : Type.t list
     ; prefix : string
     }
   [@@deriving fields, sexp_of]
@@ -34,6 +34,4 @@ module Reaction : sig
   type t = string list [@@deriving sexp_of]
 end
 
-include Iron_versioned_rpc.S
-  with type action   = Action.t
-  with type reaction = Reaction.t
+include Iron_versioned_rpc.S with type action = Action.t with type reaction = Reaction.t

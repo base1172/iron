@@ -9,14 +9,13 @@ type t =
 
 val default : t
 val latest : t
-
 val is_at_least_version : t -> version:t -> bool
-
 val cr_comment_format : t -> Cr_comment_format.t
 
 module Stable : sig
   module V1 : sig
-    include Stable_without_comparator with type t = t
-    val hash : t -> int
+    type nonrec t = t [@@deriving hash]
+
+    include Stable_without_comparator with type t := t
   end
 end

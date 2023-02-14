@@ -3,29 +3,20 @@ module Stable = struct
   module Hash_consing = Hash_consing.Stable
 
   module V1 = struct
-
     module Unshared = struct
-      type t = string [@@deriving compare]
-
-      let hash =
-        Core.String.hash
-      ;;
+      type t = Core.Md5.Stable.V1.t [@@deriving compare, hash, sexp]
 
       let module_name = "Iron_common.Digest"
 
-      include Binable.Of_stringable.V1 (struct
-          type nonrec t = t
-          let of_string t = t
-          let to_string t = t
-        end)
+      include Binable.Of_sexpable.V2 (struct
+        type nonrec t = t [@@deriving sexp]
 
-      include Sexpable.Of_stringable.V1 (struct
-          type nonrec t = t
-          let of_string = Digest.from_hex
-          let to_string = Digest.to_hex
-        end)
-
+        let caller_identity =
+          Bin_prot.Shape.Uuid.of_string "842b2322-bc9a-4358-ad8b-3acc705604f8"
+        ;;
+      end)
     end
+
     include Hash_consing.Make_stable_private (Unshared) ()
 
     let%expect_test _ =
@@ -37,14 +28,11 @@ end
 
 open! Core
 open! Import
-
 module T = Stable.V1
 include T
 include Comparable.Make (T)
 include Hashable.Make (T)
 
 let invariant (_ : t) = ()
-
-let create str = Digest.string str |> shared_t
-
+let create str = Md5.digest_string str |> shared_t
 let of_empty_string = create ""

@@ -3,27 +3,23 @@ open! Async
 open! Import
 
 let verbose = Verbose.workspaces
-
 let clone_file_name = File_name.of_string "+clone+"
 
 type t =
-  { root_feature     : Feature_name.t
-  ; repo_root        : Repo_root.t
+  { root_feature : Feature_name.t
+  ; repo_root : Repo_root.t
   ; remote_repo_path : Remote_repo_path.t
-  ; tip_on_server    : Rev.t
+  ; tip_on_server : Rev.t
   }
 [@@deriving fields, sexp_of]
 
 let compare t1 t2 = Feature_name.compare t1.root_feature t2.root_feature
-
 let workspaces_basedir () = Client_config.(get () |> Workspaces.basedir)
 
 let clone_repo_root_abspath ~root_feature =
-  Abspath.append (workspaces_basedir ())
-    (Relpath.of_list
-       [ Feature_name.to_file_name root_feature
-       ; clone_file_name
-       ])
+  Abspath.append
+    (workspaces_basedir ())
+    (Relpath.of_list [ Feature_name.to_file_name root_feature; clone_file_name ])
 ;;
 
 (* The memoization is used to ensure sure that we don't concurrently try to clone the same
@@ -43,56 +39,48 @@ let force_memo =
        | No ->
          raise_s [%sexp "root feature doesn't exist", (root_feature : Feature_name.t)]);
       let%bind { remote_repo_path; tip = tip_on_server; _ } =
-        Get_feature_revs.rpc_to_server_exn
-          { feature_path
-          ; rev_zero     = None
-          }
+        Get_feature_revs.rpc_to_server_exn { feature_path; rev_zero = None }
       in
       let%map repo_root =
-        Workspace_util.create_repo_if_it_does_not_exist (`Clone_of root_feature)
+        Workspace_util.create_repo_if_it_does_not_exist
+          (`Clone_of root_feature)
           ~repo_root_abspath
           ~create_repo:(fun () ->
-            let%bind () =
-              Async_interactive.printf !"setting up clone for %{Feature_name} ...\n%!"
-                root_feature
-            in
-            let%bind repo_root =
-              Hg.clone remote_repo_path
-                ~dst_repo_root_abspath__delete_if_exists:repo_root_abspath
-            in
-            let repo_root = ok_exn repo_root in
-            let%bind () =
-              Hg.update repo_root (`Feature feature_path) ~clean_after_update:No
-            in
-            Workspace_hgrc.save
-              { repo_root
-              ; remote_repo_path
-              ; kind = `Clone
-              })
+          let%bind () =
+            Async_interactive.printf
+              !"setting up clone for %{Feature_name} ...\n%!"
+              root_feature
+          in
+          let%bind repo_root =
+            Hg.clone
+              remote_repo_path
+              ~dst_repo_root_abspath__delete_if_exists:repo_root_abspath
+          in
+          let repo_root = ok_exn repo_root in
+          let%bind () =
+            Hg.update repo_root (`Feature feature_path) ~clean_after_update:No
+          in
+          Workspace_hgrc.save { repo_root; remote_repo_path; kind = `Clone })
       in
-      { root_feature
-      ; repo_root
-      ; remote_repo_path
-      ; tip_on_server
-      }))
+      { root_feature; repo_root; remote_repo_path; tip_on_server }))
 ;;
 
-let force ~root_feature =
-  Deferred.map (force_memo root_feature) ~f:ok_exn
-;;
+let force ~root_feature = Deferred.map (force_memo root_feature) ~f:ok_exn
 
 let find_internal root_features_by_name ~root_feature =
   match Map.find root_features_by_name root_feature with
   | None -> return None
   | Some (feature : List_root_features.Reaction.one) ->
     let repo_root_abspath = clone_repo_root_abspath ~root_feature in
-    match%map Sys.is_directory_exn (Abspath.to_string repo_root_abspath) with
-    | false -> None
-    | true  -> Some { root_feature
-                    ; repo_root        = Repo_root.of_abspath repo_root_abspath
-                    ; remote_repo_path = feature.remote_repo_path
-                    ; tip_on_server    = feature.tip
-                    }
+    (match%map Sys.is_directory_exn (Abspath.to_string repo_root_abspath) with
+     | false -> None
+     | true ->
+       Some
+         { root_feature
+         ; repo_root = Repo_root.of_abspath repo_root_abspath
+         ; remote_repo_path = feature.remote_repo_path
+         ; tip_on_server = feature.tip
+         })
 ;;
 
 let list () =
@@ -108,7 +96,7 @@ let list () =
         | None -> return None
         | Some root_feature -> find_internal root_features_by_name ~root_feature)
     in
-    List.sort workspaces ~cmp:compare
+    List.sort workspaces ~compare
 ;;
 
 let find ~root_feature =
@@ -124,14 +112,11 @@ let pull_all_revs t =
 ;;
 
 module Spare_shares = struct
-
   let spare_share_dir t =
     Repo_root.append t.repo_root (Path_in_repo.of_string ".hg/spare-shares")
   ;;
 
-  let is_spare_dir path =
-    is_some (Option.try_with (fun () -> Uuid.of_string path))
-  ;;
+  let is_spare_dir path = is_some (Option.try_with (fun () -> Uuid.of_string path))
 
   let move_one t ~dst_repo_root_abspath =
     let spare_share_dir = spare_share_dir t in
@@ -143,38 +128,37 @@ module Spare_shares = struct
         | Error e ->
           return (`Finished (Error (Error.tag (Error.of_exn e) ~tag:"Couldn't ls")))
         | Ok l ->
-          let l =
-            l
-            |> List.filter ~f:(fun d -> is_spare_dir d)
-            |> List.permute
-          in
-          match l with
-          | [] -> return (`Finished (Or_error.error_string "no spare shares"))
-          | share :: _ ->
-            let share = Abspath.extend spare_share_dir (File_name.of_string share) in
-            if verbose
-            then Verbose.message "trying to claim share" share [%sexp_of: Abspath.t];
-            match%map
-              Monitor.try_with (fun () ->
-                Sys.rename (Abspath.to_string share)
-                  (Abspath.to_string dst_repo_root_abspath))
-            with
-            | Error _ ->
-              if tries > 3
-              then `Finished (Or_error.error_string "got too many errors")
-              else `Repeat (tries + 1)
-            | Ok () ->
-              if verbose
-              then Verbose.message "succeeded in claiming share" share
-                     [%sexp_of: Abspath.t];
-              `Finished (Ok (Repo_root.of_abspath dst_repo_root_abspath)))
+          let l = l |> List.filter ~f:(fun d -> is_spare_dir d) |> List.permute in
+          (match l with
+           | [] -> return (`Finished (Or_error.error_string "no spare shares"))
+           | share :: _ ->
+             let share = Abspath.extend spare_share_dir (File_name.of_string share) in
+             if verbose
+             then Verbose.message "trying to claim share" share [%sexp_of: Abspath.t];
+             (match%map
+                Monitor.try_with (fun () ->
+                  Sys.rename
+                    (Abspath.to_string share)
+                    (Abspath.to_string dst_repo_root_abspath))
+              with
+              | Error _ ->
+                if tries > 3
+                then `Finished (Or_error.error_string "got too many errors")
+                else `Repeat (tries + 1)
+              | Ok () ->
+                if verbose
+                then
+                  Verbose.message
+                    "succeeded in claiming share"
+                    share
+                    [%sexp_of: Abspath.t];
+                `Finished (Ok (Repo_root.of_abspath dst_repo_root_abspath)))))
     in
     if verbose
     then (
       match result with
       | Ok _ -> ()
-      | Error error ->
-        Verbose.message "failed to claim share" error [%sexp_of: Error.t]);
+      | Error error -> Verbose.message "failed to claim share" error [%sexp_of: Error.t]);
     result
   ;;
 
@@ -190,22 +174,22 @@ module Spare_shares = struct
     in
     let%bind existing_spares =
       let%map ls_dir = Sys.ls_dir (Abspath.to_string spare_share_dir) in
-      List.filter_map ls_dir
-        ~f:(fun dir -> Option.try_with (fun () -> Uuid.of_string dir))
+      List.filter_map ls_dir ~f:(fun dir ->
+        Option.try_with (fun () -> Uuid.of_string dir))
     in
     let num_existing_spares = List.length existing_spares in
     let share_repo_root_abspath ~in_ share =
       let dir =
         match in_ with
         | `Staging -> staging_dir
-        | `Spare   -> spare_share_dir
+        | `Spare -> spare_share_dir
       in
       Abspath.extend dir (Uuid.to_file_name share)
     in
     let move share ~from ~to_ =
       Sys.rename
         (Abspath.to_string (share_repo_root_abspath ~in_:from share))
-        (Abspath.to_string (share_repo_root_abspath ~in_:to_  share))
+        (Abspath.to_string (share_repo_root_abspath ~in_:to_ share))
     in
     (* Update existing shares, one at a time.  The temporary [move] to the staging
        directory is a way to allow concurrency while avoiding locking, so that one process
@@ -233,7 +217,8 @@ module Spare_shares = struct
       else (
         let share = Uuid.create () in
         let%bind repo_root =
-          Hg.share t.repo_root
+          Hg.share
+            t.repo_root
             ~dst_repo_root_abspath__delete_if_exists:
               (share_repo_root_abspath ~in_:`Staging share)
         in

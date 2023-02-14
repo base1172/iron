@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
@@ -18,6 +17,7 @@ module Stable = struct
 
       let to_model t = t
     end
+
     module Model = V1
   end
 
@@ -25,8 +25,8 @@ module Stable = struct
     module V1 = struct
       type one =
         { feature_path : Feature_path.V1.t
-        ; base         : Rev.V1.t
-        ; tip          : Rev.V1.t
+        ; base : Rev.V1.t
+        ; tip : Rev.V1.t
         }
       [@@deriving bin_io, sexp_of]
 
@@ -37,7 +37,7 @@ module Stable = struct
 
       type t =
         { remote_repo_path : Remote_repo_path.V1.t
-        ; features         : one list
+        ; features : one list
         }
       [@@deriving bin_io, sexp_of]
 
@@ -48,15 +48,21 @@ module Stable = struct
 
       let of_model t = t
     end
+
     module Model = V1
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "list-feature-revisions" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "list-feature-revisions"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

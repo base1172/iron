@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Included_features_order = struct
@@ -20,11 +19,10 @@ module Stable = struct
   end
 
   module Action = struct
-
     module V2 = struct
       type t =
-        { feature_path            : Feature_path.V1.t
-        ; for_                    : User_name.V1.t
+        { feature_path : Feature_path.V1.t
+        ; for_ : User_name.V1.t
         ; included_features_order : Iron_protocol.Feature.Stable.Sorted_by.V2.t
         }
       [@@deriving bin_io, sexp]
@@ -39,13 +37,13 @@ module Stable = struct
 
     module V1 = struct
       type t =
-        { feature_path            : Feature_path.V1.t
-        ; for_                    : User_name.V1.t
+        { feature_path : Feature_path.V1.t
+        ; for_ : User_name.V1.t
         ; included_features_order : Iron_protocol.Feature.Stable.Sorted_by.V1.t
         }
       [@@deriving bin_io]
 
-      let to_model { feature_path; for_; included_features_order; } =
+      let to_model { feature_path; for_; included_features_order } =
         V2.to_model
           { feature_path
           ; for_
@@ -69,17 +67,25 @@ module Stable = struct
   end
 end
 
-include Iron_command_rpc.Make
-    (struct let name = "release" end)
-    (struct let version = 2 end)
+include
+  Iron_command_rpc.Make
+    (struct
+      let name = "release"
+    end)
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action                  = Stable.Action.                  Model
-module Included_features_order = Stable.Included_features_order. Model
-module Reaction                = Stable.Reaction.                Model
+module Action = Stable.Action.Model
+module Included_features_order = Stable.Included_features_order.Model
+module Reaction = Stable.Reaction.Model

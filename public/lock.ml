@@ -1,13 +1,12 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V2 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; lock_names   : Lock_name.V3.t list
-        ; reason       : string
+        ; lock_names : Lock_name.V3.t list
+        ; reason : string
         ; is_permanent : bool
         }
       [@@deriving bin_io, fields, sexp]
@@ -23,8 +22,8 @@ module Stable = struct
     module V1 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; lock_names   : Lock_name.V2.t list
-        ; reason       : string
+        ; lock_names : Lock_name.V2.t list
+        ; reason : string
         ; is_permanent : bool
         }
       [@@deriving bin_io]
@@ -34,14 +33,10 @@ module Stable = struct
         [%expect {| d56ad0ba8e38e68e55bf7352c9099812 |}]
       ;;
 
-      let to_model { feature_path
-                   ; lock_names
-                   ; reason
-                   ; is_permanent
-                   } =
+      let to_model { feature_path; lock_names; reason; is_permanent } =
         V2.to_model
           { feature_path
-          ; lock_names   = List.map lock_names ~f:Lock_name.V2.to_v3
+          ; lock_names = List.map lock_names ~f:Lock_name.V2.to_v3
           ; reason
           ; is_permanent
           }
@@ -57,16 +52,24 @@ module Stable = struct
   end
 end
 
-include Iron_command_rpc.Make
-    (struct let name = "lock" end)
-    (struct let version = 2 end)
+include
+  Iron_command_rpc.Make
+    (struct
+      let name = "lock"
+    end)
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

@@ -19,11 +19,7 @@ type t [@@deriving sexp_of]
 
 include Invariant.S with type t := t
 
-val create
-  : children_of:(Feature_path.t -> Feature.t list)
-  -> unit
-  -> t
-
+val create : children_of:(Feature_path.t -> Feature.t list) -> unit -> t
 val dump_subscriptions : t -> Sexp.t
 
 (** Creating new subscriptions *)
@@ -45,7 +41,6 @@ val subscribe_feature_and_descendants
 (** Queueing new updates, and actually broadcasting them. *)
 
 val on_archive : t -> Feature.t -> unit
-val on_rename  : t -> Feature.t -> unit
-val on_update  : t -> Feature.t -> unit
-
+val on_rename : t -> Feature.t -> unit
+val on_update : t -> Feature.t -> unit
 val broadcast_updates : t -> unit

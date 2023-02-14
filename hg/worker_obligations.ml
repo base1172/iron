@@ -1,14 +1,13 @@
 module Stable = struct
   open! Core.Core_stable
   open! Import_stable
-
   module Obligations_are_valid = Rev_facts.Stable.Obligations_are_valid
 
   module V5 = struct
     type t =
       { obligations_are_valid : Obligations_are_valid.V1.t
-      ; obligations           : Obligations.V5.t Or_error.V2.t
-      ; obligations_version   : Obligations_version.V1.t Or_error.V2.t
+      ; obligations : Obligations.V5.t Or_error.V2.t
+      ; obligations_version : Obligations_version.V1.t Or_error.V2.t
       }
     [@@deriving bin_io, compare, fields, sexp]
 
@@ -17,51 +16,42 @@ module Stable = struct
       [%expect {| 2ad71b49ce7257bfa0a800348c7d4456 |}]
     ;;
   end
+
   module Model = V5
 end
 
 open! Core
 open! Import
-
 module Obligations_are_valid = Rev_facts.Obligations_are_valid
 
 type t =
   { obligations_are_valid : Obligations_are_valid.t
-  ; obligations           : Obligations.t Or_error.t
-  ; obligations_version   : Obligations_version.t Or_error.t
+  ; obligations : Obligations.t Or_error.t
+  ; obligations_version : Obligations_version.t Or_error.t
   }
 [@@deriving sexp_of]
 
-let of_stable { Stable.Model.
-                obligations_are_valid
-              ; obligations
-              ; obligations_version
-              } =
+let of_stable { Stable.Model.obligations_are_valid; obligations; obligations_version } =
   { obligations_are_valid
-  ; obligations           = Or_error.map ~f:Obligations.Stable.V5.to_model obligations
+  ; obligations = Or_error.map ~f:Obligations.Stable.V5.to_model obligations
   ; obligations_version
   }
 ;;
 
-let to_stable { obligations_are_valid
-              ; obligations
-              ; obligations_version
-              } =
-  { Stable.Model.
-    obligations_are_valid
-  ; obligations           = Or_error.map ~f:Obligations.Stable.V5.of_model obligations
+let to_stable { obligations_are_valid; obligations; obligations_version } =
+  { Stable.Model.obligations_are_valid
+  ; obligations = Or_error.map ~f:Obligations.Stable.V5.of_model obligations
   ; obligations_version
   }
 ;;
 
 module On_server = struct
-
   module Obligations = struct
     module Obligations_consing = File_tree_consing.Obligations
 
     type t =
       { obligations_repo : Obligations_repo.t
-      ; by_path          : Obligations_consing.t
+      ; by_path : Obligations_consing.t
       }
     [@@deriving fields, sexp_of]
 
@@ -73,29 +63,21 @@ module On_server = struct
           ~by_path:(check Obligations_consing.invariant))
     ;;
 
-    let to_stable { obligations_repo
-                  ; by_path
-                  } =
-      { Obligations.Stable.V5.
-        obligations_repo
+    let to_stable { obligations_repo; by_path } =
+      { Obligations.Stable.V5.obligations_repo
       ; by_path = Obligations_consing.to_alist by_path
       }
     ;;
 
-    let of_stable { Obligations.Stable.V5.
-                    obligations_repo
-                  ; by_path
-                  } =
-      { obligations_repo
-      ; by_path = Obligations_consing.of_alist by_path
-      }
+    let of_stable { Obligations.Stable.V5.obligations_repo; by_path } =
+      { obligations_repo; by_path = Obligations_consing.of_alist by_path }
     ;;
   end
 
   type t =
     { obligations_are_valid : Obligations_are_valid.t
-    ; obligations           : Obligations.t Or_error.t
-    ; obligations_version   : Obligations_version.t Or_error.t
+    ; obligations : Obligations.t Or_error.t
+    ; obligations_version : Obligations_version.t Or_error.t
     }
   [@@deriving fields, sexp_of]
 
@@ -108,24 +90,16 @@ module On_server = struct
         ~obligations_version:ignore_worker_invariant_on_server)
   ;;
 
-  let of_stable { Stable.Model.
-                  obligations_are_valid
-                ; obligations
-                ; obligations_version
-                } =
+  let of_stable { Stable.Model.obligations_are_valid; obligations; obligations_version } =
     { obligations_are_valid
-    ; obligations           = Or_error.map ~f:Obligations.of_stable obligations
+    ; obligations = Or_error.map ~f:Obligations.of_stable obligations
     ; obligations_version
     }
   ;;
 
-  let to_stable { obligations_are_valid
-                ; obligations
-                ; obligations_version
-                } =
-    { Stable.Model.
-      obligations_are_valid
-    ; obligations           = Or_error.map ~f:Obligations.to_stable obligations
+  let to_stable { obligations_are_valid; obligations; obligations_version } =
+    { Stable.Model.obligations_are_valid
+    ; obligations = Or_error.map ~f:Obligations.to_stable obligations
     ; obligations_version
     }
   ;;

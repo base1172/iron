@@ -1,13 +1,9 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V1 = struct
-      type t =
-        { rev : Rev.V1.t
-        }
-      [@@deriving bin_io, fields, sexp]
+      type t = { rev : Rev.V1.t } [@@deriving bin_io, fields, sexp]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -16,6 +12,7 @@ module Stable = struct
 
       let to_model t = t
     end
+
     module Model = V1
   end
 
@@ -25,11 +22,16 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "revision-is-fully-reviewed" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "revision-is-fully-reviewed"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

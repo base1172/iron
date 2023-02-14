@@ -11,22 +11,23 @@ open! Core
 open! Async
 open! Import
 
-val clone_file_name : File_name.t (** ["+clone+"] *)
+(** ["+clone+"] *)
+val clone_file_name : File_name.t
 
 type t [@@deriving sexp_of]
 
 (** Accessors *)
 
-val root_feature     : t -> Feature_name.t
+val root_feature : t -> Feature_name.t
 val remote_repo_path : t -> Remote_repo_path.t
-val repo_root        : t -> Repo_root.t
-val tip_on_server    : t -> Rev.t
+val repo_root : t -> Repo_root.t
+val tip_on_server : t -> Rev.t
 
 (** Create *)
 
 val force : root_feature:Feature_name.t -> t Deferred.t
-val find  : root_feature:Feature_name.t -> t option Deferred.t
-val list  : unit -> t list Deferred.t
+val find : root_feature:Feature_name.t -> t option Deferred.t
+val list : unit -> t list Deferred.t
 
 (** Side effect *)
 
@@ -38,14 +39,11 @@ val pull_all_revs : t -> unit Deferred.t
     and updates every share to [update_to]. *)
 val refresh_spare_shares
   :  t
-  -> desired_num_spares : int
-  -> update_to          : Rev.t
+  -> desired_num_spares:int
+  -> update_to:Rev.t
   -> unit Deferred.t
 
 (** [create_share] uses a spare share if there is one. *)
-val create_share_exn
-  :  t
-  -> dst_repo_root_abspath : Abspath.t
-  -> Repo_root.t Deferred.t
+val create_share_exn : t -> dst_repo_root_abspath:Abspath.t -> Repo_root.t Deferred.t
 
 val workspaces_basedir : unit -> Abspath.t

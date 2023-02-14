@@ -11,16 +11,17 @@ module Compare_by_name_and_version : sig
 end
 
 val create
-  :  name     : string
-  -> version  : int
-  -> query    : Bin_prot.Shape.t
-  -> response : Bin_prot.Shape.t
+  :  name:string
+  -> version:int
+  -> query:Bin_prot.Shape.t
+  -> response:Bin_prot.Shape.t
   -> t
 
 val to_ascii_table : t list -> Iron_ascii_table.t
 
 module Stable : sig
   module V2 : Stable_without_comparator with type t = t
+
   module V1 : sig
     include Stable_without_comparator with type t = Rpc.Description.t
 
