@@ -1,0 +1,10 @@
+(cram (
+  deps
+  ./bin/setup-script
+  ./bin/prepare
+  ./bin/common
+  ./bin/fe-server
+  ./etc/hgrc
+  ../hg/hgrc
+  ../bin/fe.exe
+  ../bin/bashrc))

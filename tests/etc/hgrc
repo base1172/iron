@@ -8,6 +8,4 @@
 # internally still uses its own hgrc.
 
 [extensions]
-
-# adds [hg active-bookmark].
-active_bookmark=/j/office/app/hg/prod/jhg/active_bookmark_v3.py
+share =

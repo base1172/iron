@@ -1,8 +1,10 @@
 #!/bin/bash
 
-source $(dirname $0)/bin/common
-source $(dirname $0)/bin/prepare
+IRON_TEST_SETUP_SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source ${IRON_TEST_SETUP_SCRIPT_DIR}/common
+source ${IRON_TEST_SETUP_SCRIPT_DIR}/prepare
 
-export HG_BINARY=$(FE_EXE=$FE_EXE_BEFORE_COPY fe internal hg-path)
+# TODO: The HG_BINARY env variable doesn't appear to be used anywhere.  Remove it.
+export HG_BINARY=$(FE_EXE=$FE_EXE_BEFORE_COPY ${IRON_TEST_SETUP_SCRIPT_DIR}/../../bin/fe.exe internal hg-path)
 
 cd $IRON_TEST_DIR

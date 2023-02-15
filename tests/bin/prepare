@@ -1,8 +1,9 @@
 #!/bin/bash --
 
 export IRON_TEST_DIR=$(cd $(dirname $BASH_SOURCE)/.. && pwd)
-export IRON_TEST_BIN=$IRON_TEST_DIR/bin
-export PATH=$IRON_TEST_BIN:/bin:/usr/bin
+export IRON_TEST_ROOT=$(cd $IRON_TEST_DIR/.. && pwd)
+export IRON_TEST_BIN=$IRON_TEST_DIR/../bin
+export PATH=$IRON_TEST_BIN:$IRON_TEST_DIR/bin:/bin:/usr/bin
 
 # Unset IRON_CONFIG so that we don't unintentionally connect to the prod server.
 unset IRON_CONFIG
@@ -24,6 +25,8 @@ export HGRCPATH=$IRON_TEST_DIR/etc/hgrc
 # little differently so that functional tests work and are repeatable.
 export IRON_FUNCTIONAL_TESTING=
 
+export HGUSER=unix-login-for-testing
+
 function exit_trap {
     trap - EXIT; internal_end_test
 }
@@ -44,9 +47,8 @@ function setup_test {
             set -e
             ;;
     esac
-    test_name=$(printenv | sed -rn 's_.*/(test-[^/].*).t$_\1_p' | head -1)
     export IRON_OPTIONS='((display_ascii_always true))'
-    export IRON_APPDIR=$IRON_TEST_DIR/appdir/$test_name
+    export IRON_APPDIR=$IRON_TEST_DIR/appdir
     rm -rf $IRON_APPDIR
     mkdir -p $IRON_APPDIR
 
@@ -69,6 +71,7 @@ function start_test {
     mkdir -p $IRON_BASEDIR/{etc,export,var}
     IRON_HGRC=$IRON_BASEDIR/etc/hgrc
     cp $IRON_TEST_DIR/../hg/hgrc $IRON_HGRC
+    chmod u+w $IRON_HGRC
     # Fix the date in commit messages for repeatability.
     cat >>$IRON_HGRC <<EOF
 [defaults]
@@ -86,7 +89,7 @@ EOF
     export IRON_CONFIG="$(cat $IRON_CONFIG_PATH)"
     trap 'exit_trap' EXIT
     fe-server start
-    fe admin users update-valid-users-and-aliases -stdin <<EOF
+    fe.exe admin users update-valid-users-and-aliases -stdin <<EOF
 ((username jdoe1))
 ((username jdoe2))
 ((username jdoe3))
@@ -106,27 +109,20 @@ EOF
 ((username user3))
 ((username this-user-has-only-this-cr-soon))
 EOF
-    fe admin users refresh-existing-users
+    fe.exe admin users refresh-existing-users
     # We use variables for CR and XCR so that we can write CRs in
     # tests that don't look like CRs in the source.
     CR=CR
     XCR=XCR
     set +e
-
+		
     # temporarily enable workspace for all tests to check things out
-    if [ -n ${IRON_FUNCTIONAL_TESTING_FORCE_WORKSPACES:-""} ] ; then
-        export HOME=$(readlink -m /tmp/$IRON_APPDIR/home)
-        rm -rf /tmp/$IRON_APPDIR/home
-        mkdir -p $HOME/workspaces
-        echo "
-         (workspaces (
-           (basedir $HOME/workspaces)
-         ))
-          " > $HOME/.ferc
-    fi
+    export HOME=$IRON_TEST_ROOT/home
+    mkdir -p $HOME/workspaces
+    echo "(workspaces ((basedir $HOME/workspaces)))" > $HOME/.ferc
 
     # Bring in the bashrc that we distribute for use with iron.
-    source $IRON_TEST_DIR/../bin/bashrc
+    source $IRON_TEST_BIN/bashrc
     # Reset the variable in case the USER running the test has it defined in
     # their environment.
     OLD_CDF_FEATURE=""
@@ -135,9 +131,9 @@ EOF
 export -f start_test
 
 function internal_end_test {
-    fe internal dump state >/dev/null
-    fe internal cached-attributes errors get
-    fe internal timed-events errors get
+    fe.exe internal dump state >/dev/null
+    fe.exe internal cached-attributes errors get
+    fe.exe internal timed-events errors get
     fe-server stop
 }
 
@@ -219,7 +215,7 @@ export -f setup_repo_without_root
 
 function setup_repo_and_root {
     setup_repo_without_root "$@"
-    fe create root -d root -permanent -remote-repo-path "$PWD"
+    fe.exe create root -d root -permanent -remote-repo-path "$PWD"
 }
 
 export -f setup_repo_and_root
@@ -230,7 +226,7 @@ function setup_sample_repo_and_root {
     hg init
     hg -q addremove
     hg -q commit -m init
-    fe create root -d root -permanent -remote-repo-path "$PWD"
+    fe.exe create root -d root -permanent -remote-repo-path "$PWD"
 }
 
 export -f setup_sample_repo_and_root
@@ -243,7 +239,7 @@ function feature_to_server {
     local feature_name="$1"
     shift
     hg up -q -r "$feature_name"
-    IRON_USER=as-hydra-test BOOKMARK="$feature_name" fe internal hydra "$@"
+    IRON_USER=as-hydra-test BOOKMARK="$feature_name" fe.exe internal hydra "$@"
     hg up -q -r "$feature_name"
 }
 
