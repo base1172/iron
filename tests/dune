@@ -4,6 +4,7 @@
   ./bin/prepare
   ./bin/common
   ./bin/fe-server
+  ./bin/program_linking_with_iron_lib.exe
   ./etc/hgrc
   ../hg/hgrc
   ../bin/fe.exe
