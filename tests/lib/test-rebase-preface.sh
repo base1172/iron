@@ -25,7 +25,7 @@ start_test
 function rb_diamond {
   (cd "$remote_repo_dir"
    #echo fe-sb remote root "$1:"
-   fe change root -set-base "$1"
+   fe.exe change root -set-base "$1"
    #echo set-book remote root "$2:"
    hg book -q -f -r "$2" root
    #echo f2s root:
@@ -33,13 +33,13 @@ function rb_diamond {
 
   (cd "$local_repo_dir"
    #echo fe-sb local feature "$1:"
-   fe change root/test-feature -set-base "$1"
+   fe.exe change root/test-feature -set-base "$1"
    #echo set-book local feature "$3:"
    hg book -q -f -r "$3" root/test-feature
    #echo f2s feature:
    feature_to_server root/test-feature $5 &>/dev/null
    #echo rebase:
-   rebase_cmd=$(echo "fe rebase root/test-feature -interactive true" ${REBASE_OPT-''})
+   rebase_cmd=$(echo "fe.exe rebase root/test-feature -interactive true" ${REBASE_OPT-''})
    IRON_OPTIONS='((workspaces false))' \
      $rebase_cmd && diamond=$(hg tip --template={node}) )
   }
@@ -92,7 +92,7 @@ EOF
 
 # Make the root feature:
 
-fe create root -description 'root feature' -remote-repo-path $(pwd)
+fe.exe create root -description 'root feature' -remote-repo-path $(pwd)
 
 # Make an alternate revset with a conflict:
 
@@ -142,7 +142,7 @@ cd "$local_repo_dir"
 # Make the root/test-feature feature:
 # Base & tip will be root's tip, that is, rev 0.
 
-fe create root/test-feature -description 'test feature'
+fe.exe create root/test-feature -description 'test feature'
 
 # Do some feature hacking -- insert a line into f1.txt.
 

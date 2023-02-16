@@ -1,5 +1,6 @@
 Slurp in the common setup code for the rebase tests:
-  $ . $IRON_TEST_DIR/lib/test-rebase-preface.sh &> /dev/null
+  $ source ./bin/setup-script
+  $ . ./lib/test-rebase-preface.sh &> /dev/null
 
 -- Test: Commit metadata gets in on successful rebases.
 

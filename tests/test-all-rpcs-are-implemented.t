@@ -1,13 +1,14 @@
+  $ source ./bin/setup-script
   $ start_test
 
   $ diff -u \
-  >    <(fe internal rpc-to-server supported-by-client) \
-  >    <(fe internal rpc-to-server supported-by-server)
+  >    <(fe.exe internal rpc-to-server supported-by-client) \
+  >    <(fe.exe internal rpc-to-server supported-by-server)
 
   $ diff -u \
-  >    <(fe internal command-rpc supported-by-iron-lib) \
-  >    <(fe internal command-rpc supported-by-command)
+  >    <(fe.exe internal command-rpc supported-by-iron-lib) \
+  >    <(fe.exe internal command-rpc supported-by-command)
 
   $ diff -u \
-  >    <(fe internal command-rpc supported-by-iron-lib -names-only) \
-  >    <(fe internal command-rpc referenced-by-fe-file)
+  >    <(fe.exe internal command-rpc supported-by-iron-lib -names-only) \
+  >    <(fe.exe internal command-rpc referenced-by-fe-file)

@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Checking that we keep the status clean when we update
@@ -8,5 +9,5 @@ Checking that we keep the status clean when we update
   $ hg commit -m 'update hgignore'
   $ touch a.ignored
   $ hg status
-  $ fe create root/feature -base 0 -desc 'wah the error is terrible'
+  $ fe.exe create root/feature -base 0 -desc 'wah the error is terrible'
   $ hg status

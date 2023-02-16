@@ -5,16 +5,17 @@ Start test.
   $ is_int "not-an-int"
   [2]
 
+  $ source ./bin/setup-script
   $ start_test
 
-  $ FIRST=$(fe admin server stat -kind gc-stat | sexp select compactions)
+  $ FIRST=$(fe.exe admin server stat -kind gc-stat | sexp select compactions)
   $ is_int ${FIRST}
 
 Gc-compact.
 
-  $ fe admin server gc-compact
+  $ fe.exe admin server gc-compact
 
-  $ SECOND=$(fe admin server stat -kind gc-stat | sexp select compactions)
+  $ SECOND=$(fe.exe admin server stat -kind gc-stat | sexp select compactions)
   $ is_int ${SECOND}
 
   $ test ${SECOND} -gt ${FIRST}

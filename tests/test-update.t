@@ -1,17 +1,18 @@
 Start test. 
 
+  $ source ./bin/setup-script
   $ start_test
 
   $ setup_repo_and_root file
-  $ hg active-bookmark
+  $ hg bookmarks --list . --template '{activebookmark}\n'
   root
-  $ fe create root/child -desc child
-  $ hg active-bookmark
+  $ fe.exe create root/child -desc child
+  $ hg bookmarks --list . --template '{activebookmark}\n'
   root/child
-  $ fe up root
-  $ hg active-bookmark
+  $ fe.exe up root
+  $ hg bookmarks --list . --template '{activebookmark}\n'
   root
-  $ fe up root/child
-  $ hg active-bookmark
+  $ fe.exe up root/child
+  $ hg bookmarks --list . --template '{activebookmark}\n'
   root/child
  

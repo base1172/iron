@@ -6,6 +6,7 @@
   ./bin/fe-server
   ./bin/program_linking_with_iron_lib.exe
   ./etc/hgrc
+  ./lib/test-rebase-preface.sh
   ../hg/hgrc
   ../bin/fe.exe
   ../bin/bashrc))
