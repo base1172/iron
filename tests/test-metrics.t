@@ -1,5 +1,6 @@
 Check expected behaviour around the [fe admin server metrics] command.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Avoid truncating ascii tables in the rest of the test.

@@ -1,6 +1,7 @@
 Checking that we ask the worker for sufficiently many review edges that even if we change
 reviewers or reviews during a bookmark update, we won't have troubles.
 
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root a
 

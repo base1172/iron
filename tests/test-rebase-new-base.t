@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Create a repo.
@@ -46,10 +47,10 @@ The feature revs are:
 
 Test rebasing to new bases.
 
-  $ fe rebase root/a -new-base $rev2
-  New base (*) must be an ancestor of the parent feature's tip (*). (glob)
+  $ fe rebase root/a -new-base $rev2 |& sanitize_output
+  New base ({ELIDED}) must be an ancestor of the parent feature's tip ({ELIDED}).
   [1]
   $ fe rebase root/a -new-base $rev3 > /dev/null
-  $ fe rebase root/a -new-base $rev1
-  New base (*) must descend from the feature's current base (*). (glob)
+  $ fe rebase root/a -new-base $rev1 |& sanitize_output
+  New base ({ELIDED}) must descend from the feature's current base ({ELIDED}).
   [1]

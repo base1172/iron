@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root file
   $ echo z >file2; hg add file2

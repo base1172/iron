@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Setup root feature.
@@ -31,11 +32,11 @@ Now the old tip has spec.txt and the new base doesn't.
 
 Rebasing works, and removes spec.txt.
 
-  $ fe rebase root/child -interactive true
+  $ fe rebase root/child -interactive true |& sanitize_output
   Checking cleanliness of local repo ... done.
   Updating local repo to root/child ... done.
   Removing .projections due to rebase across switch-to-dot-fe.
-  Merging with f47c00bf805d.
+  Merging with {ELIDED}    .
   0 files updated, 0 files merged, 0 files removed, 0 files unresolved
   (branch merge, don't forget to commit)
   $ has_spec root/child

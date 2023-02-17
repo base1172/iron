@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Setup a empty feature containing files with many lines
@@ -44,8 +45,8 @@ from the various edges of the diamond.
   $ fe rebase root/feature > /dev/null
   $ echo changed >> a-renamed; hg commit -m 4
   $ feature_to_server root/feature -fake-valid-obligations
-  $ fe session show
-  Reviewing root/feature to *. (glob)
+  $ fe session show | sanitize_output
+  Reviewing root/feature to {ELIDED}    .
   1 files to review: 1 lines total
      [ ] 1 a-renamed
   $ fe session diff | grep -i renaming

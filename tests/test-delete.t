@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Create hg repo.
@@ -25,8 +26,8 @@ Create hg repo.
 Make user1 a whole-feature reviewer and do his review.
 
   $ fe change -add-whole-feature-reviewer user1
-  $ fe session show -for user1
-  Reviewing root to 57023eb9094d.
+  $ fe session show -for user1 | sanitize_output
+  Reviewing root to {ELIDED}    .
   1 files to review: 3 lines total
      [ ] 3 file
   $ fe session mark-file root file -for user1 -reason reason
@@ -38,15 +39,15 @@ Delete the file and make sure user1 will see the deleted lines in red.
   $ hg rm file
   $ hg commit -m "delete"
   $ feature_to_server root -fake-valid-obligations
-  $ fe session show -for user1
-  Reviewing root to 6381c8f38de3.
+  $ fe session show -for user1 | sanitize_output
+  Reviewing root to {ELIDED}    .
   1 files to review: 4 lines total
      [ ] 4 file
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | sanitize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   base file = file
   tip file  = <absent>
-  base 04da3968e088 | old tip 57023eb9094d | new tip 6381c8f38de3
+  base {ELIDED}     | old tip {ELIDED}     | new tip {ELIDED}    
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ old tip, base 1,5 new tip 1,2 @@@@@@@@

@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 -- Test completion on feature names, which requires making RPCs to the server.

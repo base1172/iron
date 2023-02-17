@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Creating a feature with only whitespace to read

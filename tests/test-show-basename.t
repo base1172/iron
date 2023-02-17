@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Create hg repos.
@@ -23,8 +24,8 @@ Create features.
   $ cd ${basedir}/repo1
   $ fe create root1 -description 'root1' -remote-repo-path $(pwd)
   $ cat > .hg/hgrc <<EOF
-  >   [paths]
-  >   default = ssh://hg//hg/root1/fake-submissions-for-test
+  > [paths]
+  > default = ssh://hg//hg/root1/fake-submissions-for-test
   > EOF
   $ fe create root1/foo1 -description 'foo1'
   $ fe create root1/foo2 -description 'foo2'
@@ -33,8 +34,8 @@ Create features.
   $ cd ${basedir}/repo2
   $ fe create root2 -description 'root2' -remote-repo-path $(pwd)
   $ cat > .hg/hgrc <<EOF
-  >   [paths]
-  >   default = ssh://hg//hg/root2/fake-submissions-for-test
+  > [paths]
+  > default = ssh://hg//hg/root2/fake-submissions-for-test
   > EOF
   $ fe create root2/bar -description 'root2/bar'
 

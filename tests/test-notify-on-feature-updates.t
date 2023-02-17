@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Create a parent feature and a child feature. Run a bunch of commands on the child to make

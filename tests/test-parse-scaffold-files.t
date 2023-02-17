@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Verify that Iron can understand the scaffold files that are used in prod.

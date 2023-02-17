@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Here we create a parent feature and a child feature, mark the child

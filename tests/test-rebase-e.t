@@ -1,6 +1,7 @@
 Slurp in the common setup code for the rebase tests:
 
-  $ . $IRON_TEST_DIR/lib/test-rebase-preface.sh &>/dev/null
+  $ source ./bin/setup-script
+  $ source ./lib/test-rebase-preface.sh &>/dev/null
 
 The next test makes sure we catch developers doing brain-dead things by accident.
 
@@ -15,7 +16,7 @@ pull for you. So we pull all the remote-repo stuff over before this test.
 
   $ (rb_diamond "$root_tip" "$r0" "$feature_tip" \
   >             -fake-valid-obligations -fake-valid-obligations || true) \
-  > |& fgrep -q "feature's base is unexpectedly not the greatest-common ancestor of the feature and the new base"
+  > |& grep -q "feature's base is unexpectedly not the greatest-common ancestor of the feature and the new base"
 
 Make the feature reasonable for rebasing.
 

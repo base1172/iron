@@ -1,5 +1,6 @@
 Slurp in the common setup code for the rebase tests:
-  $ . $IRON_TEST_DIR/lib/test-rebase-preface.sh &> /dev/null
+  $ source ./bin/setup-script
+  $ source ./lib/test-rebase-preface.sh &> /dev/null
 
 Commented out material for script debugging:
 $ echo "r0=$r0"

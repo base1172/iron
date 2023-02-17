@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Usees a repo with revs like this:
@@ -33,8 +34,8 @@ Create a local repository, and release the child -- the release fails.
 
   $ [ $(hg log -r root --template={node}) = $r2 ]
   $ hg -q clone . ../local
-  $ ( cd ../local && hg book -d root && fe release child )
+  $ ( cd ../local && hg book -d root && fe release child |& sanitize_output )
   ("Failed to release feature" root/child
-   ((feature_base dc568be383d7) (parent_tip 28da2ad87d67)))
+   ((feature_base {ELIDED}    ) (parent_tip {ELIDED}    )))
   [1]
   $ [ $(hg log -r root --template={node}) = $r2 ]

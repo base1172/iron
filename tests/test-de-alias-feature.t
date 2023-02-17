@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
   $ setup_repo_and_root a
@@ -33,10 +34,10 @@ Update aliases and make a change.
 Now, because of the attribute change, we need to forget the old diff and review the
 diff from scratch.
 
-  $ fe session diff -do-not-lock-session | fe internal remove-color
+  $ fe session diff -do-not-lock-session | fe internal remove-color | sanitize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ a @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  old base d3873e73d99e | old tip 8de79e2f3ed3
+  old base {ELIDED}     | old tip {ELIDED}    
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ Forget this diff -- this file no longer has a diff you should know @@@@@@@@
@@ -44,7 +45,7 @@ diff from scratch.
   | -|a
   | +|b
   |_
-  base d3873e73d99e | tip b67cafba4fe2
+  base {ELIDED}     | tip {ELIDED}    
   _
   | @@@@@@@@ Hunk 2/2 @@@@@@@@
   | @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
@@ -56,10 +57,10 @@ But if we de-alias, we only have to review the new diff.
 
   $ fe internal de-alias root
   ((de_aliased (unix-login-for-testing)) (nothing_to_do (user1 user2)))
-  $ fe session diff -do-not-lock-session | fe internal remove-color
+  $ fe session diff -do-not-lock-session | fe internal remove-color | sanitize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ a @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base d3873e73d99e | old tip 8de79e2f3ed3 | new tip b67cafba4fe2
+  base {ELIDED}     | old tip {ELIDED}     | new tip {ELIDED}    
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|b
   +|c

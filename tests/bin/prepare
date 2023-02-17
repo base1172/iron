@@ -151,10 +151,12 @@ function sanitize_output {
 				| sed --regexp-extended -e "s/${timestamp_regex1}/{ELIDED}                           /g" \
 				| sed --regexp-extended -e "s/${timestamp_regex2}/{ELIDED}                            /g" \
 				| sed --regexp-extended -e 's/revision ([0-9a-f]{40}|[0-9a-f]{12})/revision {ELIDED}/g' \
+				| sed --regexp-extended -e 's/\(([0-9a-f]{40}|[0-9a-f]{12})\)/({ELIDED})/g' \
 				| sed --regexp-extended -e 's/^[0-9a-f]{12} tip /{ELIDED}     tip /g' \
-				| sed --regexp-extended -e 's/^[0-9a-f]{40}\n/{ELIDED}/g' \
-				| perl -0777 -pe 's/([0-9]+:| )[0-9a-f]{12}(\n|\.| )/\1\{ELIDED\}    \2/g' \
-				| perl -0777 -pe 's/([0-9]+:| )[0-9a-f]{40}(\n|\.| )/\1\{ELIDED\}                            \2/g' \
+				| sed --regexp-extended -e 's/^[0-9a-f]{40}$/{ELIDED}/g' \
+        | sed --regexp-extended -e 's/ [0-9.]+[a-z]+ ago/ \{ELIDED\} ago/g' \
+				| perl -0777 -pe 's/(base |old tip |new tip |[0-9]+:| )[0-9a-f]{12}(\n|\)|\.| )/\1\{ELIDED\}    \2/g' \
+				| perl -0777 -pe 's/(base |old tip |new tip |[0-9]+:| )[0-9a-f]{40}(\n|\)|\.| )/\1\{ELIDED\}                            \2/g' \
 				| perl -0777 -pe 's/(\| +)[0-9a-f]{12}( +\|)/\1\{ELIDED\}    \2/g' \
 				| perl -0777 -pe 's/(\| +)[0-9a-f]{40}( +\|)/\1\{ELIDED\}                                \2/g' \
         | perl -0777 -pe 's/\| pending for [0-9.]+[a-z]+ +\|/\| pending for \{ELIDED\} |/g'
@@ -268,6 +270,16 @@ function feature_to_server {
 }
 
 export -f feature_to_server
+
+function add_file {
+    content="$1"
+    filename=$content.txt
+    echo "$content" > "$filename"
+    hg add "$filename"
+    hg commit -q -m "$content"
+}
+
+export -f add_file
 
 function with_visible_colors {
     IRON_OPTIONS="()" "$@" |

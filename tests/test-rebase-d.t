@@ -1,5 +1,6 @@
 Slurp in the common setup code for the rebase tests:
-  $ . $IRON_TEST_DIR/lib/test-rebase-preface.sh &> /dev/null
+  $ source ./bin/setup-script
+  $ source ./lib/test-rebase-preface.sh &> /dev/null
 
 Make a rebase that succeeds, but produces a file with conflicts.
 We'll move root's f1.txt to one that conflicts with feature's f1.txt.
@@ -19,7 +20,7 @@ We'll move root's f1.txt to one that conflicts with feature's f1.txt.
   $ cd "$local_repo_dir"
   $ (rb_diamond "$r0" "$root_noncompat" "$feature_tip" \
   >             -fake-valid-obligations -fake-valid-obligations || true ) \
-  > |& fgrep -q "conflicts during merge"
+  > |& grep -q "conflicts while merging"
 
   $ cat f1.txt
   a

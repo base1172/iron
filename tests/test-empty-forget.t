@@ -2,6 +2,7 @@ Regression test for the appearance of empty forget.
 
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
   $ hg init repo

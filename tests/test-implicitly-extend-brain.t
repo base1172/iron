@@ -4,6 +4,7 @@ reviewed diff4s too eagerly, which causes an unnecessary number of revisions in
 
   $ export NUM=5
 
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root $(for i in $(seq 1 ${NUM}) ; do echo "f${i}" ; done)
 

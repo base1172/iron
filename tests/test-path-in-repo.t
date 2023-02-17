@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root a b/c
   $ echo change >a; echo change >b/c; hg com -m change

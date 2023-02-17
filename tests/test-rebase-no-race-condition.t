@@ -1,5 +1,6 @@
 Slurp in the common setup code for the rebase tests:
-  $ . $IRON_TEST_DIR/lib/test-rebase-preface.sh &> /dev/null
+  $ source ./bin/setup-script
+  $ source ./lib/test-rebase-preface.sh &> /dev/null
 
   $ cd "$remote_repo_dir"
 
@@ -23,8 +24,8 @@ Slurp in the common setup code for the rebase tests:
   $ fe show root/test-feature -next-base-update
   No_update_expected
 
-  $ cat $temp_dir/show.txt | grep '^| base' | single_space
-  | base | none (last known as * * ago) | (glob)
+  $ cat $temp_dir/show.txt | grep '^| base' | single_space | sanitize_output
+  | base | none (last known as {ELIDED}     {ELIDED} ago) |
 
-  $ cat $temp_dir/next-base-update.txt | sexp print -machine
-  (Update_expected((rev *)(by unix-login-for-testing)(expected_since(*)))) (glob)
+  $ cat $temp_dir/next-base-update.txt | sexp print -machine | sanitize_output
+  (Update_expected((rev {ELIDED}    )(by unix-login-for-testing)(expected_since({ELIDED}                           ))))

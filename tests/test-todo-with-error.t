@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Creating a feature with some review, and a current session for the seconder:
@@ -9,13 +10,13 @@ Creating a feature with some review, and a current session for the seconder:
   $ feature_to_server root -fake-valid
   $ fe session  mark-file root b -for seconder -reason reason
   $ fe catch-up mark-file root b -for seconder
-  $ fe session show
-  Reviewing root to e6cbcddb31ff.
+  $ fe session show | sanitize_output
+  Reviewing root to {ELIDED}    .
   2 files to review: 3 lines total
      [ ] 2 a
      [ ] 1 b
-  $ fe session show -for seconder
-  Reviewing root to e6cbcddb31ff.
+  $ fe session show -for seconder | sanitize_output
+  Reviewing root to {ELIDED}    .
   1 files to review (1 already reviewed): 3 lines total
      [ ] 2 a
      [X] 1 b
@@ -43,8 +44,8 @@ And now, the owner sees the error. He also sees his existing session:
 
 The seconder also sees his old session, but not the error:
 
-  $ IRON_USER=seconder fe session show
-  Reviewing root to e6cbcddb31ff.
+  $ IRON_USER=seconder fe session show | sanitize_output
+  Reviewing root to {ELIDED}    .
   1 files to review (1 already reviewed): 3 lines total
      [ ] 2 a
      [X] 1 b

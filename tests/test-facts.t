@@ -1,4 +1,5 @@
 Start test
+  $ source ./bin/setup-script
   $ start_test
 
 Can't assert a fact with no existing spec

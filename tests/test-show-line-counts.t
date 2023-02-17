@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Create hg repo.
@@ -21,7 +22,7 @@ Create feature.
 
 Show it.
 
-  $ fe show root
+  $ fe show root | sanitize_output
   root
   ====
   root
@@ -37,8 +38,8 @@ Show it.
   | CRs are enabled        | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | false                  |
-  | tip                    | 46fab6465033           |
-  | base                   | 04da3968e088           |
+  | tip                    | {ELIDED}               |
+  | base                   | {ELIDED}               |
   |-------------------------------------------------|
   
   |---------------------------------|

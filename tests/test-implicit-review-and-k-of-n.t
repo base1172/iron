@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Creating a feature where user1 and user2 have 1-of-2 review obligations in file1 and

@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Create a conflict where the child changes a file while the base deletes it:
@@ -18,23 +19,23 @@ Create a conflict where the child changes a file while the base deletes it:
 
 The rebase keeps the old-tip as-is, with no conflict markers.
 
-  $ fe show root/child -base
-  dc568be383d74aa2aadbbcea8df3869d792d7ff4
+  $ fe show root/child -base | sanitize_output
+  {ELIDED}
 
   $ fe rebase root/child | matches "local changed file which remote deleted"
 
-  $ fe show root/child -base
-  a4069a5ed8f9c61ba0da2b3be40de31223f7ac2e
+  $ fe show root/child -base | sanitize_output
+  {ELIDED}
   $ feature_to_server root/child -fake-valid
 
 And Iron shows the conflict resolution during review:
 
-  $ fe session diff root/child | fe internal remove-color
+  $ fe session diff root/child | fe internal remove-color | sanitize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   old base file      = file
   new base file      = <absent>
   old & new tip file = file
-  old base dc568be383d7 | old tip * | new base a4069a5ed8f9 | new tip * (glob)
+  old base {ELIDED}     | old tip {ELIDED}     | new base {ELIDED}     | new tip {ELIDED}    
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ A change present only in the new-base was dropped @@@@@@@@

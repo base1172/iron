@@ -2,6 +2,7 @@ This test ensures an important behavior for feature explorer, namely
 that [!r] is able to mark a file in an empty session, even if the
 feature tip has moved since the session was created.
 
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root file
   $ echo change >file
@@ -15,7 +16,7 @@ Advance the feature.
   $ echo change2 >file
   $ hg com -m change2
   $ feature_to_server root -fake-valid
-  $ fe show root
+  $ fe show root | sanitize_output
   root
   ====
   root
@@ -30,8 +31,8 @@ Advance the feature.
   | review is enabled      | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | true                   |
-  | tip                    | 38cde75947b4           |
-  | base                   | dc568be383d7           |
+  | tip                    | {ELIDED}               |
+  | base                   | {ELIDED}               |
   |-------------------------------------------------|
   
   |---------------------------------|
@@ -47,7 +48,7 @@ still mark a file in it.
 
 But then we still have to review the subsequent diff.
 
-  $ fe session show
-  Reviewing root to 38cde75947b4.
+  $ fe session show | sanitize_output
+  Reviewing root to {ELIDED}    .
   1 files to review: 2 lines total
      [ ] 2 file

@@ -1,6 +1,7 @@
 
 Start test. 
 
+  $ source ./bin/setup-script
   $ start_test
 
 Setup a repository with a few cr-soons:

@@ -1,5 +1,6 @@
 Slurp in the common setup code for the rebase tests:
-  $ . $IRON_TEST_DIR/lib/test-rebase-preface.sh &>/dev/null
+  $ source ./bin/setup-script
+  $ source ./lib/test-rebase-preface.sh &>/dev/null
 
 Regression test for a bug where fe reb returns the wrong error message
 when the GCA is not unique.
@@ -29,4 +30,4 @@ that seems too special-purpose to push into the preface.
   $ hg push -q -f "$remote_repo_dir"
   $ (rb_diamond "$grandparent1" "$parent1" "$parent2" \
   >   -fake-valid-obligations -fake-valid-obligations || true) |&
-  > fgrep -q "multiple greatest common ancestors"
+  > grep -q "multiple greatest common ancestors"

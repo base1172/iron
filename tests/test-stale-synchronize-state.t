@@ -1,6 +1,7 @@
 Just after receiving a bookmark update, the next step of the feature is not wait-for-hydra
 anymore:
 
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root a
   $ feature_to_server root -fake-valid-obligations

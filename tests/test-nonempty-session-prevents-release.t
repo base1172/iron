@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Setup feature with review in two files
