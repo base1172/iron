@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Check that one can add an admin from the server box, and then add other admins as an admin.

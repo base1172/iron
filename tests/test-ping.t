@@ -5,4 +5,4 @@ Start test.
 
 Ping.
 
-  $ fe.exe tools ping
+  $ fe tools ping

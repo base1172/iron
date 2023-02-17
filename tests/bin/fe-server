@@ -4,7 +4,7 @@ source $(dirname $0)/common
 
 command=$1; shift
 
-fe.exe admin server $command \
+fe admin server $command \
     -appdir $IRON_APPDIR \
     -mode $IRON_MODE "$@" \
     ;
@@ -12,7 +12,7 @@ fe.exe admin server $command \
 if [ $command = start ]; then
     can_ping=false
     for i in {1..10}; do
-        if fe.exe tools ping &> /dev/null; then
+        if fe tools ping &> /dev/null; then
             can_ping=true
             break
         fi
@@ -26,7 +26,7 @@ fi
 if [ $command = stop ]; then
     can_ping=true
     for i in {1..20}; do
-        if ! fe.exe tools ping &> /dev/null; then
+        if ! fe tools ping &> /dev/null; then
             can_ping=false
             break
         fi

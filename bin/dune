@@ -10,8 +10,7 @@
    iron_obligations
    iron_protocol
    iron_server)
-  (preprocess (
-    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))
+  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
 
 (install (section bin) (files (fe.exe as fe)))
 

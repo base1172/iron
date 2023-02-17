@@ -7,5 +7,9 @@
 # This hgrc is just for the calls to hg that appear in *.t scripts; Iron
 # internally still uses its own hgrc.
 
+[alias]
+active-bookmark = bookmarks --list . --template '{activebookmark}\n'
+active = bookmarks --list . --template '{activebookmark}\n'
+
 [extensions]
 share =

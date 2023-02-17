@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
   $ setup_sample_repo_and_root two-users
   $ cat >.fe/obligations-repo.sexp <<EOF
@@ -24,7 +25,7 @@
   $ fe enable-review
   $ fe change -add-whole-feature-reviewers jdoe3
   $ fe change -set-reviewing-all
-  $ fe show
+  $ fe show | sanitize_output
   root/a
   ======
   root/a
@@ -39,8 +40,8 @@
   | review is enabled       | true                          |
   | reviewing               | all                           |
   | is permanent            | false                         |
-  | tip                     | * | (glob)
-  | base                    | * | (glob)
+  | tip                     | {ELIDED}                      |
+  | base                    | {ELIDED}                      |
   |---------------------------------------------------------|
   
   |---------------------------------|

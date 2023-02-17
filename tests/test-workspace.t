@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Create the repo.
@@ -10,23 +11,7 @@ Create the repo.
   $ hg ci -m '.'
   $ remote=$PWD
 
-Set up some extra things needed only for workspaces.  We have to set up HOME
-outside of the IRON_APPDIR because we do not want HOME to be inside a hg repo.
-
-  $ export HOME=$(readlink -m /tmp/$IRON_APPDIR/home)
-  $ rm -rf $HOME
-  $ mkdir -p $HOME/workspaces
-
-Enable workspaces by adding a clause to .ferc
-
-  $ cat >$HOME/.ferc <<EOF
-  >   (workspaces (
-  >     (basedir $HOME/workspaces)
-  >   ))
-  > EOF
-
 Create some features.
-
   $ fe create root -description 'root' -remote $remote | sed "s;$HOME;\$HOME;"
   $ fe create root/child1 -desc child1 | sed "s;$HOME;\$HOME;"
   $ fe create root/child2 -desc child2 -owner owner | sed "s;$HOME;\$HOME;"
@@ -46,7 +31,7 @@ Create some features.
           `-- +share+
               `-- f1.ml
   
-  7 directories, 4 files
+  8 directories, 4 files
 
   $ fe workspace dir root | sed "s;$HOME;\$HOME;"
   $HOME/workspaces/root/+share+
@@ -187,7 +172,7 @@ Distclean workspaces.  Test [-rec], [-exclude], [-dry-run] and exclusion via [.f
   > EOF
   $ fe workspace distclean root -rec
   $ test -f $CHILD2/foo
-  $ rm -f $CHILD2/foo
+  $ rm $CHILD2/foo
 
 Delete a workspace.
 
@@ -214,7 +199,7 @@ Delete a workspace.
   $ fe workspace unclean check -all
   (errors (((feature_path root) (reason ("uncommitted changes")))))
   [1]
-  $ rm -f $(fe workspace dir root)/FILE
+  $ rm $(fe workspace dir root)/FILE
   $ fe workspace unclean list
 
   $ fe workspace delete root
@@ -230,7 +215,7 @@ Delete a workspace.
           `-- +share+
               `-- f1.ml
   
-  6 directories, 3 files
+  7 directories, 3 files
 
   $ fe workspace dir root
   ("you don't have a workspace for" root)
@@ -255,7 +240,7 @@ Rename a feature.
               `-- +share+
                   `-- f1.ml
   
-  8 directories, 4 files
+  9 directories, 4 files
 
 Compress a feature.
 
@@ -272,7 +257,7 @@ Compress a feature.
           `-- +share+
               `-- f1.ml
   
-  6 directories, 3 files
+  7 directories, 3 files
 
 Check workspace invariants is deprecated.
 
@@ -293,7 +278,7 @@ Archive a feature.
           `-- +share+
               `-- f1.ml
   
-  4 directories, 2 files
+  5 directories, 2 files
 
 Attempt to access a non-existent feature and get a normal Iron error
 rather than a share error.
@@ -361,33 +346,33 @@ Test options related to users' todo.
 Create spare shares
 
   $ fe workspace create -features-in-my-todo -num-spares 5
-  $ ls $HOME/workspaces/root/+clone+/.hg/spare-shares
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
+  $ ls $HOME/workspaces/root/+clone+/.hg/spare-shares | sanitize_output
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
   staging
 
 Use a spare share
 
   $ IRON_OPTIONS='((verbose (Workspaces)))' fe create root/child4 -desc child4 |& matches 'succeeded in claiming share'
-  $ ls $HOME/workspaces/root/+clone+/.hg/spare-shares
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
+  $ ls $HOME/workspaces/root/+clone+/.hg/spare-shares | sanitize_output
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
   staging
 
 Now force the spare share count back up to 5
 
   $ fe workspace create -features-in-my-todo -num-spares 5
-  $ ls $HOME/workspaces/root/+clone+/.hg/spare-shares
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
-  [a-f0-9-]{36} (re)
+  $ ls $HOME/workspaces/root/+clone+/.hg/spare-shares | sanitize_output
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
+  {ELIDED}                            
   staging
 
 Testing creation and other operations for scaffold repos.
@@ -451,7 +436,7 @@ Verify the layout of enclosing scaffolded workspace.
           |   `-- scaffold.sexp
           `-- this-is-jane-root
   
-  6 directories, 8 files
+  7 directories, 8 files
 
 Update the hgrc to please the heuristic used by Iron to let a command happen in
 the local repo as opposed to select a workspace.
@@ -493,8 +478,8 @@ This updates to the right revision and the right bookmark is active.
   $ A=$(fe show -tip scaffoo/child)
   $ B=$(hg log -r . --template="{node}" --cwd $HOME/workspaces/scaffoo/+clone+)
   $ test $A = $B
-  $ hg id --cwd $HOME/workspaces/scaffoo/+clone+
-  * tip scaffoo/child (glob)
+  $ hg id --cwd $HOME/workspaces/scaffoo/+clone+ | sanitize_output
+  {ELIDED}     tip scaffoo/child
 
 Check the update satellite logic.
 
@@ -503,8 +488,8 @@ Check the update satellite logic.
   $ hg -q pull $PWD/jane --cwd $HOME/workspaces/scaffoo/+share+
   $ hg -q update -r 1    --cwd $HOME/workspaces/scaffoo/+share+
   $ hg log -r . --template="{node}\n" --cwd $HOME/workspaces/scaffoo/+share+ \
-  >   | matches "$JANE"
-  * (glob)
+  >   | matches "$JANE" | sanitize_output
+  {ELIDED}
 
 2) Run fe update in the workspace.
 
@@ -553,7 +538,7 @@ Check workspaces operations on release.
           |-- foo
           `-- this-is-jane-root
   
-  3 directories, 5 files
+  4 directories, 5 files
 
   $ RELEASED_TIP=$(fe show jane/a/child -tip)
   $ fe release jane/a/child
@@ -566,7 +551,7 @@ Check workspaces operations on release.
       |-- OMakeroot
       `-- this-is-jane-root
   
-  1 directory, 2 files
+  2 directories, 2 files
 
 2) The workspace of the parent is up to date.
 
@@ -574,7 +559,3 @@ Check workspaces operations on release.
   $ (cd $(fe workspace dir jane/a) && hg log -r . --template="{node}\n") \
   >   | sed "s;$RELEASED_TIP;\$RELEASED_TIP;" | grep -q '$RELEASED_TIP'
   [1]
-
-Clean up the "home" directory.
-
-  $ rm -rf $HOME

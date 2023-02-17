@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Make a review manager where the brain matches the goal

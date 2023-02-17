@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root file
 
@@ -35,7 +36,7 @@ Initially, the feature has a bookmark.
 
 An admin can clear the bookmarks without a feature.
 
-  $ fe internal clear-bookmarks-without-feature $TESTTMP/repo
+  $ fe internal clear-bookmarks-without-feature $(pwd)/repo
 
   $ fe todo -bookmarks-without-feature
 

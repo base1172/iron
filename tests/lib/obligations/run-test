@@ -37,7 +37,7 @@ test -d scratch || mkdir scratch
 scratch=scratch/`basename $testdir`
 
 # Instantiate the repo.
-cp -r "$testdir/repo" "$scratch"
+cp -r --dereference "$testdir/repo" "$scratch"
 (
     cd "$scratch"
     prepare_sample_repo

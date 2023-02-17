@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Create hg repo.
@@ -17,16 +18,16 @@ The log is in reverse-chronological order.
 
 The log is human readable.
 
-  $ fe log root
-  changeset:   2:5751b9463335
+  $ fe log root | sanitize_output
+  changeset:   2:{ELIDED}    
   bookmark:    root
   tag:         tip
-  user:        test
-  date:        * (glob)
+  user:        unix-login-for-testing
+  date:        {ELIDED}                            
   summary:     file3
   
-  changeset:   1:d2f2e888d0d3
-  user:        test
-  date:        * (glob)
+  changeset:   1:{ELIDED}    
+  user:        unix-login-for-testing
+  date:        {ELIDED}                            
   summary:     file2
   

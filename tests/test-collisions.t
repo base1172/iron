@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Create a couple of unrelated repos

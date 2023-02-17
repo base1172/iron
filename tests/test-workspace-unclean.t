@@ -1,4 +1,4 @@
-  $ export IRON_FUNCTIONAL_TESTING_FORCE_WORKSPACES=true
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root f1.ml
 
@@ -35,7 +35,7 @@
           `-- +share+
               `-- f1.ml
   
-  7 directories, 4 files
+  8 directories, 4 files
 
 Unclean workspaces and interaction with [fe todo] and [fe show].
 
@@ -221,7 +221,8 @@ Detect unpushed changesets.
 
 Detect invalid current bookmark.
   $ hg up -r .^ -q ; hg active
-  [1]
+  abort: no active bookmark
+  [255]
   $ list_unclean_workspaces
   Unclean workspaces on $HOSTNAME:
   |-------------------------------------|

@@ -16,5 +16,4 @@
    sexp_macro
    textutils.ascii_table
    textutils.console)
-  (preprocess (
-    pps ppx_jane -dont-apply=sexp_message ppx_js_style -check-doc-comments)))
+  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))

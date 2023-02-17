@@ -7,5 +7,6 @@ that these two hg's match:
 See the --with-hg flag passed by run-test to run-test.py for the details on how #2
 is set.
 
+  $ source ./bin/setup-script
   $ setup_test
   $ diff -u --label "hg in path" <(which hg) --label "hg used by fe" <(fe internal hg-path)

@@ -3,10 +3,14 @@
   ./bin/setup-script
   ./bin/prepare
   ./bin/common
+  ./bin/fe
   ./bin/fe-server
   ./bin/program_linking_with_iron_lib.exe
   ./etc/hgrc
-  ./lib/test-rebase-preface.sh
+  (source_tree ./bin/broken_hg)
+  (source_tree ./lib)
+  (source_tree ./sample-repos)
   ../hg/hgrc
+  (source_tree ../hg/extensions)
   ../bin/fe.exe
   ../bin/bashrc))

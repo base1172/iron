@@ -1,5 +1,6 @@
-Start test.
+Start test. 
 
+  $ source ./bin/setup-script
   $ start_test
 
 Make a repo with a root feature.

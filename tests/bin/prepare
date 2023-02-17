@@ -3,7 +3,10 @@
 export IRON_TEST_DIR=$(cd $(dirname $BASH_SOURCE)/.. && pwd)
 export IRON_TEST_ROOT=$(cd $IRON_TEST_DIR/.. && pwd)
 export IRON_TEST_BIN=$IRON_TEST_DIR/../bin
-export PATH=$IRON_TEST_BIN:$IRON_TEST_DIR/bin:/bin:/usr/bin
+alias sexp="$(which sexp)"
+export PATH=$IRON_TEST_DIR/bin:/usr/bin:/bin
+export TERM=xterm
+export COLUMNS=90
 
 # Unset IRON_CONFIG so that we don't unintentionally connect to the prod server.
 unset IRON_CONFIG
@@ -60,7 +63,7 @@ function setup_test {
     # We shouldn't put fe.exe in bin/, because of the dependency on (files_recursively_in bin)
     # in the jbuild (I think tests would be run twice all the time).
     # Hopefully, this should fix issues where the tests leak fe servers.
-    ln -T $FE_EXE_BEFORE_COPY $FE_EXE
+    cp --dereference $FE_EXE_BEFORE_COPY $FE_EXE
 }
 
 export -f setup_test
@@ -86,10 +89,10 @@ EOF
  (hydra_user as-hydra)
 )
 EOF
-    export IRON_CONFIG="$(cat $IRON_CONFIG_PATH)"
+    export IRON_CONFIG="$(cat $IRON_CONFIG_PATH)"		
     trap 'exit_trap' EXIT
     fe-server start
-    fe.exe admin users update-valid-users-and-aliases -stdin <<EOF
+    fe admin users update-valid-users-and-aliases -stdin <<EOF
 ((username jdoe1))
 ((username jdoe2))
 ((username jdoe3))
@@ -109,7 +112,7 @@ EOF
 ((username user3))
 ((username this-user-has-only-this-cr-soon))
 EOF
-    fe.exe admin users refresh-existing-users
+    fe admin users refresh-existing-users
     # We use variables for CR and XCR so that we can write CRs in
     # tests that don't look like CRs in the source.
     CR=CR
@@ -117,7 +120,7 @@ EOF
     set +e
 		
     # temporarily enable workspace for all tests to check things out
-    export HOME=$IRON_TEST_ROOT/home
+    export HOME=$TMPDIR/home
     mkdir -p $HOME/workspaces
     echo "(workspaces ((basedir $HOME/workspaces)))" > $HOME/.ferc
 
@@ -131,13 +134,33 @@ EOF
 export -f start_test
 
 function internal_end_test {
-    fe.exe internal dump state >/dev/null
-    fe.exe internal cached-attributes errors get
-    fe.exe internal timed-events errors get
+    fe internal dump state >/dev/null
+    fe internal cached-attributes errors get
+    fe internal timed-events errors get
     fe-server stop
 }
 
 export -f internal_end_test
+
+function sanitize_output {
+		local uuid_regex='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+		local timestamp_regex1='[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}\+[0-9]{2}:[0-9]{2}'
+		local timestamp_regex2='[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4} \+[0-9]{4}'
+    cat /dev/stdin \
+				| sed --regexp-extended -e "s/${uuid_regex}/{ELIDED}                            /g" \
+				| sed --regexp-extended -e "s/${timestamp_regex1}/{ELIDED}                           /g" \
+				| sed --regexp-extended -e "s/${timestamp_regex2}/{ELIDED}                            /g" \
+				| sed --regexp-extended -e 's/revision ([0-9a-f]{40}|[0-9a-f]{12})/revision {ELIDED}/g' \
+				| sed --regexp-extended -e 's/^[0-9a-f]{12} tip /{ELIDED}     tip /g' \
+				| sed --regexp-extended -e 's/^[0-9a-f]{40}\n/{ELIDED}/g' \
+				| perl -0777 -pe 's/([0-9]+:| )[0-9a-f]{12}(\n|\.| )/\1\{ELIDED\}    \2/g' \
+				| perl -0777 -pe 's/([0-9]+:| )[0-9a-f]{40}(\n|\.| )/\1\{ELIDED\}                            \2/g' \
+				| perl -0777 -pe 's/(\| +)[0-9a-f]{12}( +\|)/\1\{ELIDED\}    \2/g' \
+				| perl -0777 -pe 's/(\| +)[0-9a-f]{40}( +\|)/\1\{ELIDED\}                                \2/g' \
+        | perl -0777 -pe 's/\| pending for [0-9.]+[a-z]+ +\|/\| pending for \{ELIDED\} |/g'
+}
+
+export -f sanitize_output
 
 function single_space {
     while read line ; do
@@ -186,7 +209,8 @@ function prepare_sample_repo {
 export -f prepare_sample_repo
 
 function copy_sample_repo {
-    cp -r $IRON_TEST_DIR/sample-repos/$1 $2
+    cp --dereference -r $IRON_TEST_DIR/sample-repos/$1 $2
+    chmod u+w --recursive $2
     (cd $2; prepare_sample_repo)
 }
 
@@ -215,7 +239,7 @@ export -f setup_repo_without_root
 
 function setup_repo_and_root {
     setup_repo_without_root "$@"
-    fe.exe create root -d root -permanent -remote-repo-path "$PWD"
+    fe create root -d root -permanent -remote-repo-path "$PWD"
 }
 
 export -f setup_repo_and_root
@@ -226,7 +250,7 @@ function setup_sample_repo_and_root {
     hg init
     hg -q addremove
     hg -q commit -m init
-    fe.exe create root -d root -permanent -remote-repo-path "$PWD"
+    fe create root -d root -permanent -remote-repo-path "$PWD"
 }
 
 export -f setup_sample_repo_and_root
@@ -239,7 +263,7 @@ function feature_to_server {
     local feature_name="$1"
     shift
     hg up -q -r "$feature_name"
-    IRON_USER=as-hydra-test BOOKMARK="$feature_name" fe.exe internal hydra "$@"
+    IRON_USER=as-hydra-test BOOKMARK="$feature_name" fe internal hydra "$@"
     hg up -q -r "$feature_name"
 }
 

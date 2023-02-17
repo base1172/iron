@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Setup a repository with a CR-soon for a user that otherwise does not exist.

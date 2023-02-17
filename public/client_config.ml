@@ -221,8 +221,7 @@ module Workspace_config = struct
     { are_enabled = `default
     ; auto_update_clean_workspaces_is_enabled = false
     ; basedir =
-        concat
-          [ "/usr/local/home/"; User_name.to_string User_name.unix_login; "/workspaces" ]
+        concat [ "/home/"; User_name.to_string User_name.unix_login; "/workspaces" ]
         |> Abspath.of_string
     ; do_not_distclean = Feature_path.Hash_set.create ()
     ; do_not_auto_update = Feature_path.Hash_set.create ()

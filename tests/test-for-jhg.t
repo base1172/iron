@@ -2,6 +2,7 @@ Test of various ways that jhg calls fe.  If any of the results in this
 file change, please email app-hg-dev@ with information on the upcoming
 changes.
 
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root file
 

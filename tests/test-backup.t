@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Set up a repo.
@@ -25,8 +26,8 @@ Enable and review.
   $ fe enable-review test
   $ fe internal session show-num-lines test
   8
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | sanitize_output
+  Reviewing test to {ELIDED}    .
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -50,8 +51,8 @@ Pause serializer, freeze persistent state.
 Do some write operations.
 
   $ fe session mark-file test a
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | sanitize_output
+  Reviewing test to {ELIDED}    .
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -81,8 +82,8 @@ Persistence after resume.
   $ fe-server stop
   $ fe-server start
 
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | sanitize_output
+  Reviewing test to {ELIDED}    .
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -109,8 +110,8 @@ One should be able to recover from a backup.
 
   $ fe-server start
 
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | sanitize_output
+  Reviewing test to {ELIDED}    .
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b

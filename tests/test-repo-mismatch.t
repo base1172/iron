@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root file
   $ feature_to_server root -fake-valid

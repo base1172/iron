@@ -1,3 +1,6 @@
+Start test. 
+
+  $ source ./bin/setup-script
   $ start_test
 
 Setup repo with three revs: r0 --> r1 --> r2

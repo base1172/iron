@@ -1,11 +1,17 @@
 # -*- mode: conf; -*-
 
+[alias]
+active-bookmark = bookmarks --list . --template '{activebookmark}\n'
+active = bookmarks --list . --template '{activebookmark}\n'
+
 [extensions]
 purge =
 blackbox =
-global_tags=/j/office/app/hg/prod/jhg/global_tags_v3.py
-specifiable_commit_metadata=/j/office/app/hg/prod/jhg/specifiable_commit_metadata.py
 share =
+commitextras =
+# global_tags=/j/office/app/hg/prod/jhg/global_tags_v3.py
+# specifiable_commit_metadata=/j/office/app/hg/prod/jhg/specifiable_commit_metadata.py
+
 # This extension tweaks the bookmark update done on 'hg pull' in the following
 # two ways:
 #
@@ -32,29 +38,29 @@ share =
 # If R1 is in the remote repo: When the user types 'fe review', R2
 # will be pulled, given the bookmark B, fe will update to the new B
 # (even though it's not a child of R1) and do the review.
-iron_bookmark_manipulation=/j/office/app/hg/prod/jhg/iron_bookmark_manipulation_v3.py
+# iron_bookmark_manipulation=/j/office/app/hg/prod/jhg/iron_bookmark_manipulation_v3.py
 
 # adds [hg active-bookmark].
-active_bookmark=/j/office/app/hg/prod/jhg/active_bookmark_v3.py
+# active_bookmark=/j/office/app/hg/prod/jhg/active_bookmark_v3.py
 
 # Updates the files .hg/dirstate.for-{omake,jenga}.txt on hg operations which
 # change the dirstate.  This file is used by jenga.
-dirstate_for_omake=/j/office/app/hg/prod/jhg/dirstate_for_omake_v6.py
+# dirstate_for_omake=/j/office/app/hg/prod/jhg/dirstate_for_omake_v6.py
 
 # Causes bookmark information only to be shared for bookmarks
 # explicitly passed with [-r] or [-B] to [hg push].
-only_push_explicitly_mentioned_bookmarks=/j/office/app/hg/prod/jhg/only_push_explicitly_mentioned_bookmarks_v1.py
+# only_push_explicitly_mentioned_bookmarks=/j/office/app/hg/prod/jhg/only_push_explicitly_mentioned_bookmarks_v1.py
 
-tracefile=/j/office/app/hg/prod/jhg/fix_tracefile.py
+# tracefile=/j/office/app/hg/prod/jhg/fix_tracefile.py
 
 # Add [hg distclean]
-distclean=/j/office/app/hg/prod/jhg/distclean_v1.py
+# distclean=/j/office/app/hg/prod/jhg/distclean_v1.py
 
 # In hg >= 3.5, bookmark names with length greater than 255 cause
 # problems with pushes due to the use of the new bundle2 protocol.
 # This extension gets around this by not using bundle2 to exchange
 # bookmark names.
-allow_long_bookmark_names=/j/office/app/hg/prod/jhg/allow_long_bookmarks_v1.py
+# allow_long_bookmark_names=/j/office/app/hg/prod/jhg/allow_long_bookmarks_v1.py
 
 # In hg < 4.1, [hg status] will create a file matching
 # [hg-checkexec-*] in the repo to test to see if the filesystem has
@@ -62,4 +68,7 @@ allow_long_bookmark_names=/j/office/app/hg/prod/jhg/allow_long_bookmarks_v1.py
 # [hg status] calls to show as unclean.  This extension fixes this by
 # creating the test files in [.hg/cache] instead (this is also where
 # hg >= 4.1 creates them).
-fix_checkexec=/j/office/app/hg/prod/jhg/fix_checkexec_v1.py
+# fix_checkexec=/j/office/app/hg/prod/jhg/fix_checkexec_v1.py
+
+[revsetalias]
+gcas($1,$2) = heads( ancestors($1) & ancestors($2) )

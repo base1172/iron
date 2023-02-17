@@ -1,4 +1,5 @@
-  $ IRON_FUNCTIONAL_TESTING_FORCE_WORKSPACES=true start_test
+  $ source ./bin/setup-script
+  $ start_test
 
 Create the repo.
 

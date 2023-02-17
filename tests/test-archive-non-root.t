@@ -1,5 +1,6 @@
 Start test.
 
+  $ source ./bin/setup-script
   $ start_test
 
 Make a repo with root and child features.
@@ -15,10 +16,10 @@ Make a repo with root and child features.
 Archive child.
 
   $ fe archive root/child
-  $ fe list -archived -depth max
-  |------------------------------------------------------------------------------|
-  | feature | feature id                           | archived at                 |
-  |---------+--------------------------------------+-----------------------------|
-  | root    |                                      |                             |
-  |   child | * | * | (glob)
-  |------------------------------------------------------------------------------|
+  $ fe list -archived -depth max | sanitize_output
+  |--------------------------------------------------------------------------------------|
+  | feature | feature id                           | archived at                         |
+  |---------+--------------------------------------+-------------------------------------|
+  | root    |                                      |                                     |
+  |   child | {ELIDED}                             | {ELIDED}                            |
+  |--------------------------------------------------------------------------------------|

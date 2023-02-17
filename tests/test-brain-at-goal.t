@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
   $ setup_repo_and_root file
   $ echo change >file; hg com -m change

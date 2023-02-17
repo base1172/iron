@@ -1,5 +1,6 @@
 Start test. 
 
+  $ source ./bin/setup-script
   $ start_test
 
 Setup.
@@ -37,7 +38,7 @@ The feature is there.
   |---------+-------+-----------|
   | root    |     1 | CRs       |
   |-----------------------------|
-  $ fe show root
+  $ fe show root | sanitize_output
   root
   ====
   root
@@ -53,9 +54,9 @@ The feature is there.
   | CRs are enabled        | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | false                  |
-  | tip                    | 570d1cbcb724           |
+  | tip                    | {ELIDED}               |
   |   tip is cr clean      | false                  |
-  | base                   | 9bc08b7747e4           |
+  | base                   | {ELIDED}               |
   |-------------------------------------------------|
   
   |--------------------------------------|
@@ -90,7 +91,7 @@ Can't archive when not in the repo.
   $ IRON_OPTIONS='((workspaces false))' fe archive root |& matches "inside an hg repo"
   [1]
   $ cd -
-  $TESTTMP/repo
+  $TESTCASE_ROOT/repo
 
 Can't archive a permanent feature.
 
@@ -110,7 +111,7 @@ Can't archive a feature with children.
 Archive the child, give a reason.  Check that the email sent contains that reason.
 
   $ REASON="Reason for archiving that feature."
-  $ fe internal render-archive-email root/child -reason "${REASON}"
+  $ fe internal render-archive-email root/child -reason "${REASON}" | sanitize_output
   Reason for archiving: Reason for archiving that feature.
   
   root/child
@@ -120,7 +121,7 @@ Archive the child, give a reason.  Check that the email sent contains that reaso
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | {ELIDED}                             |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewer  | unix-login-for-testing               |
   | seconder                | not seconded                         |
@@ -128,12 +129,12 @@ Archive the child, give a reason.  Check that the email sent contains that reaso
   | CRs are enabled         | true                                 |
   | reviewing               | unix-login-for-testing               |
   | is permanent            | false                                |
-  | bookmark update         | * | (glob)
-  | tip                     | * | (glob)
-  | tip facts               | * | (glob)
-  | base                    | * | (glob)
-  | base facts              | * | (glob)
-  | base is ancestor of tip | * | (glob)
+  | bookmark update         | pending for {ELIDED} |
+  | tip                     | {ELIDED}                             |
+  | tip facts               | pending for {ELIDED} |
+  | base                    | {ELIDED}                             |
+  | base facts              | pending for {ELIDED} |
+  | base is ancestor of tip | pending for {ELIDED} |
   |----------------------------------------------------------------|
 
   $ fe archive root/child -reason "${REASON}"
@@ -142,10 +143,13 @@ Archive it.
 
   $ fe archive root
   $ fe list
-  $ COLUMNS=500 fe list -archived -depth max | grep -v -- ------ | single_space
-  | feature | feature id | archived at | reason for archiving |
-  | root | * | * | | (glob)
-  | child | * | * | Reason for archiving that feature. | (glob)
+  $ COLUMNS=500 fe list -archived -depth max | sanitize_output
+  |---------------------------------------------------------------------------------------------------------------------------|
+  | feature | feature id                           | archived at                         | reason for archiving               |
+  |---------+--------------------------------------+-------------------------------------+------------------------------------|
+  | root    | {ELIDED}                             | {ELIDED}                            |                                    |
+  |   child | {ELIDED}                             | {ELIDED}                            | Reason for archiving that feature. |
+  |---------------------------------------------------------------------------------------------------------------------------|
 
 The bookmark is gone.
 
@@ -163,8 +167,8 @@ Unarchive.
   $ hg book
   no bookmarks set
   $ fe unarchive root -id $feature_id
-  $ hg book
-   * root                      1:570d1cbcb724
+  $ hg book | sanitize_output
+   * root                      1:{ELIDED}    
   $ hg active-bookmark
   root
   $ fe list
@@ -173,12 +177,15 @@ Unarchive.
   |---------+-------+-----------|
   | root    |     1 | CRs       |
   |-----------------------------|
-  $ COLUMNS=500 fe list -archived -depth max | grep -v -- ------ | single_space
-  | feature | feature id | archived at | reason for archiving |
-  | root | | | | (glob)
-  | child | * | * | * | (glob)
+  $ COLUMNS=500 fe list -archived -depth max | sanitize_output
+  |---------------------------------------------------------------------------------------------------------------------------|
+  | feature | feature id                           | archived at                         | reason for archiving               |
+  |---------+--------------------------------------+-------------------------------------+------------------------------------|
+  | root    |                                      |                                     |                                    |
+  |   child | {ELIDED}                             | {ELIDED}                            | Reason for archiving that feature. |
+  |---------------------------------------------------------------------------------------------------------------------------|
 
-  $ fe show root
+  $ fe show root | sanitize_output
   root
   ====
   root
@@ -194,9 +201,9 @@ Unarchive.
   | CRs are enabled        | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | false                  |
-  | tip                    | 570d1cbcb724           |
+  | tip                    | {ELIDED}               |
   |   tip is cr clean      | false                  |
-  | base                   | 9bc08b7747e4           |
+  | base                   | {ELIDED}               |
   |-------------------------------------------------|
   
   |--------------------------------------|
@@ -228,8 +235,8 @@ Unarchive.
 Change a review manager and then persist.
 
   $ fe enable
-  $ fe session show
-  Reviewing root to 570d1cbcb724.
+  $ fe session show | sanitize_output
+  Reviewing root to {ELIDED}    .
   1 files to review: 1 lines total
      [ ] 1 f1.txt
   $ fe session mark-file root f1.txt
@@ -320,14 +327,14 @@ case of an ambiguity so that the user can resolve it.
   $ fe create root/blah -d ''
   $ fe archive root/blah
 
-  $ fe unarchive root/blah
+  $ fe unarchive root/blah 2>&1 | sanitize_output
   (error
    (get-feature-maybe-archived
     ("multiple archived features matching"
-     ((((feature_id *)) (glob)
+     ((((feature_id {ELIDED}                            ))
        ((feature_path root/blah) (owners (unix-login-for-testing))
-        (archived_at (*)))) (glob)
-      (((feature_id *)) (glob)
+        (archived_at ({ELIDED}                           ))))
+      (((feature_id {ELIDED}                            ))
        ((feature_path root/blah) (owners (unix-login-for-testing))
-        (archived_at (*)))))))) (glob)
+        (archived_at ({ELIDED}                           ))))))))
   [1]

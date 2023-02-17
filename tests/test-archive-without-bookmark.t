@@ -1,3 +1,4 @@
+  $ source ./bin/setup-script
   $ start_test
 
 Test -- archive a feature whose bookmark is not in the local clone
