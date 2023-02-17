@@ -120,7 +120,7 @@ EOF
     set +e
 		
     # temporarily enable workspace for all tests to check things out
-    export HOME=$TMPDIR/home
+    export HOME=$TMPDIR/$IRON_TEST_ROOT/home
     mkdir -p $HOME/workspaces
     echo "(workspaces ((basedir $HOME/workspaces)))" > $HOME/.ferc
 
