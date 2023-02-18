@@ -29,7 +29,7 @@ file2.
   $ feature_to_server root
   $ fe enable
   $ fe second -even-though-owner -even-though-empty
-  $ fe change -set-whole-feature-reviewers ''
+  $ fe change -remove-whole-feature-reviewers unix-login-for-testing
 
 Then make user1 review all of the feature, so it becomes releasable:
 

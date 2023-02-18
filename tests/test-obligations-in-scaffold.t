@@ -20,18 +20,9 @@ Create a repo with valid obligations.
   $ hg status
   $ fe ob check
 
-  $ function scaffold-repo {
-  >   copy_sample_repo two-users $1
-  >   cd $1
-  >   hg init
-  >   rm .fe/obligations-global.sexp
-  >   hg add a b .fe/obligations-repo.sexp .fe/.fe.sexp .fe.sexp
-  >   hg commit -m 0
-  > }
-
 Iron in a nested repo looks in the outer tree.
 
-  $ scaffold-repo nested-scaffold
+  $ make_scaffold_repo nested-scaffold
   $ fe ob check
 
 The filesystem takes precedence over the scaffold.sexp.
@@ -45,7 +36,7 @@ jane, so Iron finds the .fe/obligations-global.sexp of jane itself.
 
   $ temp_dir="$(mktemp -d --tmpdir=/tmp fe_obXXXXXX)"
   $ trap 'exit_trap; rm -rf "$temp_dir"' EXIT
-  $ scaffold-repo "$temp_dir"/scaffold-repo
+  $ make_scaffold_repo "$temp_dir"/scaffold-repo
 
   $ cat > scaffold.sexp <<EOF
   > ((repo $start/repo)

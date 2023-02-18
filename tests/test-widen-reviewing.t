@@ -6,13 +6,15 @@ Start test.
 Setup a repo with two files:
 
   $ setup_sample_repo_and_root two-users
+  $ export rev0=$(hg tip --template='{node|short}')
   $ feature_to_server root
   $ seq 1 3 > a
   $ seq 1 3 > b
   $ hg addremove . -q
   $ hg commit -m "add some lines"
+  $ export rev1=$(hg tip --template='{node|short}')
   $ feature_to_server root
-  $ fe show
+  $ fe show | sub ${rev0} '{BASE_REV}  ' | sub ${rev1} '{TIP_REV}   '
   root
   ====
   root
@@ -28,8 +30,8 @@ Setup a repo with two files:
   | CRs are enabled        | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | true                   |
-  | tip                    | 225d4bac9981           |
-  | base                   | 0f5b3abd13b6           |
+  | tip                    | {TIP_REV}              |
+  | base                   | {BASE_REV}             |
   |-------------------------------------------------|
   
   |---------------------------------|

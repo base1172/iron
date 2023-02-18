@@ -81,13 +81,8 @@ let main
       (* The heuristic used to allow the local repo to be used is to extract
          successfully the repo family from the [.hg/hgrc] file.  In test, we clone
          repository locally with no hg repo root, causing this heuristic to fail.
-         This code here is just to help the heuristic to apply.  The variable
-         [IRON_FUNCTIONAL_TESTING_FORCE_WORKSPACES] is honored during functional
-         testing only, and in addition to IRON_OPTIONS -- because some of the tests
-         set [IRON_OPTIONS], using a independent variable allow the same tests to be
-         run with or without the workspaces forced. *)
+         This code here is just to help the heuristic to apply. *)
       if Feature_path.is_root feature_path
-         && Option.is_some (Sys.getenv "IRON_FUNCTIONAL_TESTING_FORCE_WORKSPACES")
       then (
         let fake_remote_repo_path =
           Remote_repo_path.of_string

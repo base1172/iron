@@ -1,6 +1,7 @@
 (cram (
   deps
   ./bin/common
+  ./bin/completion-test
   ./bin/fe
   ./bin/fe-server
   ./bin/prepare

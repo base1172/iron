@@ -40,7 +40,7 @@ function rb_diamond {
    feature_to_server root/test-feature $5 &>/dev/null
    #echo rebase:
    rebase_cmd=$(echo "fe rebase root/test-feature -interactive true" ${REBASE_OPT-''})
-   IRON_OPTIONS='((workspaces false))' \
+   IRON_OPTIONS=$(echo $IRON_OPTIONS | sexp query '(wrap (cat (pipe each (not (pipe (index 0)(equals workspaces)))) (quote (workspaces false))))') \
      $rebase_cmd && diamond=$(hg tip --template={node}) )
   }
 

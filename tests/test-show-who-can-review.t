@@ -12,7 +12,7 @@ Setup a repo with two files:
   $ hg addremove . -q
   $ hg commit -m "add some lines"
   $ feature_to_server root
-  $ fe show
+  $ fe show | sanitize_output
   root
   ====
   root
@@ -28,8 +28,8 @@ Setup a repo with two files:
   | CRs are enabled        | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | true                   |
-  | tip                    | 225d4bac9981           |
-  | base                   | 0f5b3abd13b6           |
+  | tip                    | {ELIDED}               |
+  | base                   | {ELIDED}               |
   |-------------------------------------------------|
   
   |---------------------------------|

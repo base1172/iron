@@ -12,8 +12,10 @@ Create hg repo.
 Tag the root tip.
 
   $ hg up -q -r 0  # so that tagging doesn't change [root]
+  $ export base_hash=$(hg log -r . --template '{node|short}')
   $ hg tag -f -r root 'root-111.11+24'
   $ hg tag -r root 'root-111.12'
+  $ export root_hash=$(hg log -r root --template '{node|short}')
   $ hg log -r root '--template={tags}\n'
   root-111.11+24 root-111.12
 
@@ -21,7 +23,7 @@ Create a child, and it has a nice name for its base.
 
   $ fe create root/child -desc child
   $ feature_to_server root/child -fake-valid
-  $ fe show
+  $ fe show | sed -e "s/\[${root_hash}\]/[  {ELIDED}  ]/g"
   root/child
   ==========
   child
@@ -37,20 +39,21 @@ Create a child, and it has a nice name for its base.
   | CRs are enabled        | true                       |
   | reviewing              | unix-login-for-testing     |
   | is permanent           | false                      |
-  | tip                    | root-111.12 [289e0fc393fa] |
-  | base                   | root-111.12 [289e0fc393fa] |
+  | tip                    | root-111.12 [  {ELIDED}  ] |
+  | base                   | root-111.12 [  {ELIDED}  ] |
   |-----------------------------------------------------|
 
 The base gets a nice name even if the rev is not present when [fe create] starts.
+FIXME: This test fails because we don't have jane street's iron_bookmark_manipulation.py extension
 
   $ cd ..
-  $ hg clone -q -r 1ef1f9600b48 repo repo2
+  $ hg clone -q -r ${base_hash} repo repo2
   $ cd repo2
-  $ hg log -r 289e0fc393fa |& matches "unknown revision"
+  $ hg log -r ${root_hash} |& matches "unknown revision"
   [255]
   $ IRON_OPTIONS='((workspaces false))' fe create root/child2 -desc child2
   $ feature_to_server root/child2 -fake-valid
-  $ fe show
+  $ fe show | sed -e "s/\[${root_hash}\]/[  {ELIDED}  ]/g"
   root/child2
   ===========
   child2
@@ -66,6 +69,6 @@ The base gets a nice name even if the rev is not present when [fe create] starts
   | CRs are enabled        | true                       |
   | reviewing              | unix-login-for-testing     |
   | is permanent           | false                      |
-  | tip                    | root-111.12 [289e0fc393fa] |
-  | base                   | root-111.12 [289e0fc393fa] |
+  | tip                    | root-111.12 [  {ELIDED}  ] |
+  | base                   | root-111.12 [  {ELIDED}  ] |
   |-----------------------------------------------------|

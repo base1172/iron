@@ -22,7 +22,7 @@ The rebase keeps the old-tip as-is, with no conflict markers.
   $ fe show root/child -base | sanitize_output
   {ELIDED}
 
-  $ fe rebase root/child | matches "local changed file which remote deleted"
+  $ fe rebase root/child |& matches "file 'file' was deleted in other \[merge rev\] but was modified in local \[working copy\]"
 
   $ fe show root/child -base | sanitize_output
   {ELIDED}
