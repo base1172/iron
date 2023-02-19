@@ -19,7 +19,7 @@ as reviewed, and create a new version of the parent.
   $ feature_to_server root/feature -fake-valid
   $ fe session mark-file root/feature for_the_feature
   $ IRON_USER=file-owner fe session mark-file root/feature for_the_feature
-  $ fe show
+  $ fe show | stabilize_output
   root/feature
   ============
   root/feature
@@ -34,8 +34,8 @@ as reviewed, and create a new version of the parent.
   | review is enabled      | true                               |
   | reviewing              | file-owner, unix-login-for-testing |
   | is permanent           | false                              |
-  | tip                    | d803b2604c82                       |
-  | base                   | 6494d11dd5d8                       |
+  | tip                    | {REVISION 1}                       |
+  | base                   | {REVISION 0}                       |
   |-------------------------------------------------------------|
   
   |------------------------------------|

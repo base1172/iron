@@ -148,6 +148,30 @@ function sub {
 
 export -f sub
 
+function stabilize_timestamps {
+		local uuid_regex='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+		local timestamp_regex1='[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}\+[0-9]{2}:[0-9]{2}'
+		local timestamp_regex2='[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4} \+[0-9]{4}'
+
+    cat /dev/stdin \
+        | sed --regexp-extended -e "s/${uuid_regex}/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/g" \
+				| sed --regexp-extended -e "s/${timestamp_regex1}/yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm/g" \
+				| sed --regexp-extended -e "s/${timestamp_regex2}/Day Mon dd yy hh:mm:ss yyyy +hhmm/g" \
+        | perl -0777 -pe 's/\| pending for [0-9.]+[a-z]+ +\|/\| pending for \{ELIDED\} |/g'
+}
+
+export -f stabilize_timestamps
+
+function stabilize_output {    
+    local input="$(cat /dev/stdin)"
+    while read s; do
+        input=$(echo "$input" | sed -e "$s")
+    done <<<$(hg log --template 's/{node|short}/\{REVISION {rev}}/g\n')
+    echo "$input" | stabilize_timestamps
+}
+
+export -f stabilize_output
+
 function sanitize_output {
 		local uuid_regex='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 		local timestamp_regex1='[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}\+[0-9]{2}:[0-9]{2}'
@@ -224,6 +248,31 @@ function copy_sample_repo {
 }
 
 export -f copy_sample_repo
+
+function cat_then_truncate {
+    cat ${dump_file}
+    truncate --size 0 ${dump_file}
+}
+
+export -f cat_then_truncate
+
+function path_and_next_step {
+    sexp query "(pipe (variant Updated) (index 1) (cat (field feature_path) (field next_steps)))"
+}
+
+export -f path_and_next_step
+
+function tip_rev {
+    hg tip --template='{node|short}'
+}
+
+export -f tip_rev
+
+function tip_full_rev {
+    hg tip --template '{node}'
+}
+
+export -f tip_full_rev
 
 function setup_repo_without_root {
     hg init repo
@@ -313,6 +362,12 @@ function parent_is {
 }
 
 export -f parent_is
+
+function is_ancestor {
+    ! test -z "$(hg log -l 1 -r $1::$2)"
+}
+
+export -f is_ancestor
 
 function do_fe_review {
     IRON_OPTIONS='((workspaces false))' fe review root 2>&1 >/dev/null | grep -v -F 'Received EOF' || true

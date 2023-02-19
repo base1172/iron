@@ -10,6 +10,7 @@ Create hg repo.
   $ hg init
   $ hg add -q .
   $ hg com -m init
+  $ BASE_HASH=$(tip_rev)
   $ remote=$(pwd)
   $ fe create root -owner owner -description root -remote-repo-path $remote
   $ cat >b <<EOF
@@ -29,8 +30,8 @@ Create hg repo.
 Make user1 a whole-feature reviewer and do his review.
 
   $ fe change -add-whole-feature-reviewer user1
-  $ fe session show -for user1
-  Reviewing root to *. (glob)
+  $ fe session show -for user1 | sub $(tip_rev) {TIP_HASH}
+  Reviewing root to {TIP_HASH}.
   2 files to review: 4 lines total
      [ ] 1 a
      [ ] 3 b
@@ -53,18 +54,18 @@ Make user1 not a whole-feature reviewer and he has to forget his knowledge.
   | user2 |        |         3 |
   |----------------------------|
 
-  $ fe session show -for user1
-  Reviewing root to *. (glob)
+  $ fe session show -for user1 | sub $(tip_rev) {TIP_HASH}
+  Reviewing root to {TIP_HASH}
   1 files to review: 4 lines total
   
   Follow review.
   Your pending review on these changes does not prevent releasability.
   These files are shown to you just so you can follow along.
      [ ] 4 b
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | sub ${BASE_HASH} {OLD_BASE} | sub $(tip_rev) {OLD_TIP}
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ b @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  old base * | old tip * (glob)
+  old base {OLD_BASE} | old tip {OLD_TIP}
   @@@@@@@@ Forget this diff -- this file no longer has a diff you should know @@@@@@@@
   @@@@@@@@ old base 1,1 old tip 1,4 @@@@@@@@
   +|line1

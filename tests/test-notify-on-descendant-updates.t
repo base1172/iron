@@ -17,17 +17,10 @@ Start the pipe in the background, redirecting its output.
   $ dump_process_pid=$!
   $ trap 'kill ${dump_process_pid} &> /dev/null || true; exit_trap' EXIT
 
-A small function to test the update counts.
-
-  $ function cat-then-truncate {
-  >   cat ${dump_file}
-  >   truncate --size 0 ${dump_file}
-  > }
-
 Create a child of the feature we are listening to.
 
   $ fe create root/parent/child
-  $ cat-then-truncate
+  $ cat_then_truncate
   Updates_in_subtree
 
 Show the current event subscriptions.
@@ -44,38 +37,38 @@ Show the current event subscriptions.
     (max_subscriptions_per_user 50)
     (current_count_by_user ((unix-login-for-testing 1)))
     (subscriptions
-     (((rpc_name notify-on-descendant-updates) (rpc_version *) (glob)
+     (((rpc_name notify-on-descendant-updates) (rpc_version 2)
        (opened_at <time>) (ticks 1) (query <query>))))))
 
 Rename the feature so that it leaves the subtree we are listening to.
 
   $ fe rename root/parent/child root/other-parent/child
-  $ cat-then-truncate
+  $ cat_then_truncate
   Updates_in_subtree
 
 Rename the feature so that it re-enters the subtree.
 
   $ fe rename root/other-parent/child root/parent/child
-  $ cat-then-truncate
+  $ cat_then_truncate
   Updates_in_subtree
 
 Archive the feature so that is leaves the subtree.
 
   $ ARCHIVED_ID=$(fe show root/parent/child -id)
   $ fe archive root/parent/child
-  $ cat-then-truncate
+  $ cat_then_truncate
   Updates_in_subtree
 
 Create a new subfeature in the subtree
 
   $ fe create root/parent/other-child -description 'other-child'
-  $ cat-then-truncate
+  $ cat_then_truncate
   Updates_in_subtree
 
 Unarchive a feature so that it re-enters the subtree.
 
   $ fe unarchive root/parent/child -id ${ARCHIVED_ID}
-  $ cat-then-truncate
+  $ cat_then_truncate
   Updates_in_subtree
 
 Rename the parent feature and verify that the pipe closes.  We wait on
@@ -84,7 +77,7 @@ returns, the initial subscriber may not have seen the last renamed event.
 
   $ fe rename root/parent root/renamed-parent
   $ wait ${dump_process_pid}
-  $ cat-then-truncate
+  $ cat_then_truncate
   Renamed
   Process Exited
 

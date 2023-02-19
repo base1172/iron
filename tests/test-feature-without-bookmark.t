@@ -40,7 +40,7 @@ Restore bookmark is shown in next steps and the owner is alerted in his todo.
   ((bookmarks_to_rerun ()))
   $ fe show -has-bookmark
   false
-  $ fe show
+  $ fe show | stabilize_output 
   root
   ====
   root
@@ -57,8 +57,8 @@ Restore bookmark is shown in next steps and the owner is alerted in his todo.
   | reviewing              | unix-login-for-testing |
   | is permanent           | true                   |
   | has bookmark           | false                  |
-  | tip                    | dc568be383d7           |
-  | base                   | dc568be383d7           |
+  | tip                    | {REVISION 0}           |
+  | base                   | {REVISION 0}           |
   |-------------------------------------------------|
   $ fe todo
   |----------------------------|
@@ -112,7 +112,8 @@ Synchronize state adds the bookmark if it does mention it.
 Restore-bookmark did not update to the bookmark.
 
   $ hg active-bookmark
-  [1]
+  abort: no active bookmark
+  [255]
 
 And did not modify the known state in the server.
 

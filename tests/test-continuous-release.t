@@ -29,7 +29,7 @@ Setup child.
 
 Show the root attributes.
 
-  $ fe show root
+  $ fe show root | stabilize_output
   root
   ====
   root
@@ -44,8 +44,8 @@ Show the root attributes.
   | review is enabled      | true                                       |
   | reviewing              | all                                        |
   | is permanent           | false                                      |
-  | tip                    | 0499c217bb29                               |
-  | base                   | 0499c217bb29                               |
+  | tip                    | {REVISION 0}                               |
+  | base                   | {REVISION 0}                               |
   | release into me        |                                            |
   |   release process      | continuous                                 |
   |   who can release      | my owners                                  |
@@ -60,10 +60,10 @@ Release child.
 
   $ fe change root -set-who-can-release-into-me my-owners-and-child-owners
   $ fe release -for user1
-  $ ( cd ../remote && hg book )
-     [release]root/child       1:25b2443be372
-     root                      0:0499c217bb29
-     root/child                1:25b2443be372
+  $ ( cd ../remote && hg book | stabilize_output )
+     [release]root/child       1:{REVISION 1}
+     root                      0:{REVISION 0}
+     root/child                1:{REVISION 1}
 
 Releasing again is OK, as [user1] or [unix-login-for-testing].
 
@@ -80,5 +80,5 @@ Have hydra release the child directly.
   |---------+-------+-----------|
   | root    |     0 | add code  |
   |-----------------------------|
-  $ ( cd ../remote && hg book )
-     root                      1:25b2443be372
+  $ ( cd ../remote && hg book | stabilize_output )
+     root                      1:{REVISION 1}

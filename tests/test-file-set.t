@@ -42,7 +42,7 @@ Syntax error.
   $ file_set ')'
   ("syntax error"
    ("syntax error when parsing sexp"
-    (.fe.sexp:5:10 "unexpected character: ')'")))
+    (.fe.sexp:5:11 "unexpected character: ')'")))
   [1]
 
 Invalid sexp.
@@ -52,7 +52,7 @@ Invalid sexp.
    ("invalid sexp"
     (.fe.sexp:5:0
      (Failure
-      "dot_fe.ml.Declaration.syntax_of_sexp: sum tag \"Apply_to\" has incorrect number of arguments")
+      "obligations/dot_fe.ml.Declaration.syntax_of_sexp: sum tag \"Apply_to\" has incorrect number of arguments")
      in (Apply_to))))
   [1]
 

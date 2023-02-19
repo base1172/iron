@@ -16,18 +16,18 @@ Add spec
 
 Assert fact
   $ fe fact add -spec-id "test" -scope "((rev 1))" -comment "test comment"
-  $ fe fact show -spec-id "test" -scope "((rev 1))" 
+  $ fe fact show -spec-id "test" -scope "((rev 1))" | stabilize_timestamps
   asserter: unix-login-for-testing
-  assertion_time: * (glob)
+  assertion_time: yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm
   comment: test comment
 
 Remove spec
   $ fe fact spec remove -spec-id "test"
 
 Can still check evidence of fact whose spec has been removed
-  $ fe fact show -spec-id "test" -scope "((rev 1))" 
+  $ fe fact show -spec-id "test" -scope "((rev 1))" | stabilize_timestamps
   asserter: unix-login-for-testing
-  assertion_time: * (glob)
+  assertion_time: yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm
   comment: test comment
 
 But can't assert new fact whose spec has been removed
@@ -67,32 +67,33 @@ Should be able to assert fact again
   $ fe fact add -spec-id "test" -scope "((rev 1))" -comment "test comment"
 
 Check evidence for fact
-  $ fe fact show -spec-id "test" -scope "((rev 1))" 
+  $ fe fact show -spec-id "test" -scope "((rev 1))" | stabilize_timestamps
   asserter: unix-login-for-testing
-  assertion_time: * (glob)
+  assertion_time: yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm
   comment: test comment
 
 Assert another fact
   $ fe fact add -spec-id "test" -scope "((rev 2))" -comment "another test comment"
 
 Check evidence for fact
-  $ fe fact show -spec-id "test" -scope "((rev 2))" 
+  $ fe fact show -spec-id "test" -scope "((rev 2))" | stabilize_timestamps
   asserter: unix-login-for-testing
-  assertion_time: * (glob)
+  assertion_time: yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm
   comment: another test comment
 
 Check evidence for fact, in machine format
-  $ fe fact show -spec-id "test" -scope "((rev 2))" -machine
-  ((asserter unix-login-for-testing)(assertion_time(*))(comment"another test comment")) (glob)
+  $ fe fact show -spec-id "test" -scope "((rev 2))" -machine | stabilize_timestamps
+  ((asserter unix-login-for-testing)(assertion_time(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(comment"another test comment"))
 
 List all evidence for spec
-  $ fe fact list -spec-id "test" 
+  $ fe fact list -spec-id "test" | stabilize_timestamps
   (((rev 1))
    ((asserter unix-login-for-testing)
-    (assertion_time (*)) (comment "test comment"))) (glob)
+    (assertion_time (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
+    (comment "test comment")))
   (((rev 2))
    ((asserter unix-login-for-testing)
-    (assertion_time (*)) (glob)
+    (assertion_time (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
     (comment "another test comment")))
 
 Show specs
@@ -115,5 +116,5 @@ Test persistence.
   |---------+-------------+------------+------------------------|
   | test    | test        | rev        | unix-login-for-testing |
   |-------------------------------------------------------------|
-  $ fe fact show -spec-id "test" -scope "((rev 2))" -machine
-  ((asserter unix-login-for-testing)(assertion_time(*))(comment"another test comment")) (glob)
+  $ fe fact show -spec-id "test" -scope "((rev 2))" -machine | stabilize_timestamps
+  ((asserter unix-login-for-testing)(assertion_time(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(comment"another test comment"))

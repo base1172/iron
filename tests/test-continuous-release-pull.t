@@ -40,7 +40,7 @@ Mark the feature as reviewed (from the remote).
 
 Show the root attributes.
 
-  $ fe show root
+  $ fe show root | stabilize_output
   root
   ====
   root
@@ -55,8 +55,8 @@ Show the root attributes.
   | review is enabled      | true                                       |
   | reviewing              | all                                        |
   | is permanent           | false                                      |
-  | tip                    | 0499c217bb29                               |
-  | base                   | 0499c217bb29                               |
+  | tip                    | {REVISION 0}                               |
+  | base                   | {REVISION 0}                               |
   | release into me        |                                            |
   |   release process      | continuous                                 |
   |   who can release      | my owners                                  |
@@ -66,10 +66,10 @@ Release child from the local repo (which is behind by one commit).
 
   $ cd $repo
   $ hg log -r f8afa1835c87
-  abort: unknown revision 'f8afa1835c87'!
+  abort: unknown revision 'f8afa1835c87'
   [255]
   $ fe release
-  $ ( cd $remote && hg book )
-     [release]root/child       2:f8afa1835c87
-     root                      0:0499c217bb29
-   * root/child                2:f8afa1835c87
+  $ ( cd $remote && hg book | stabilize_output )
+     [release]root/child       2:{REVISION 2}
+     root                      0:{REVISION 0}
+   * root/child                2:{REVISION 2}

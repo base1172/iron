@@ -8,10 +8,11 @@ Make a repo with root and two children features.
   $ hg init repo
   $ cd repo
   $ remote=$PWD
-  $ touch file; hg add file; hg com -m 0
-  $ rev0=$(hg log -r . --template {node})
+  $ touch file; hg add file; hg commit -m 0
+  $ rev0=$(tip_rev)
   $ fe create root -remote $remote -d root -permanent
   $ echo a > file; hg commit -m 1
+  $ rev1=$(tip_rev)
   $ feature_to_server root -fake-valid
   $ fe enable-review root
   $ fe tools mark-fully-reviewed root
@@ -21,8 +22,8 @@ Make a releasable child1 feature.
 
   $ fe create root/child1 -d child1
   $ feature_to_server root/child1 -fake-valid
-  $ echo child1 >>file ; hg com -m 2 &>/dev/null
-  $ rev1=$(hg log -r . --template {node})
+  $ echo child1 >>file ; hg commit -m 2 &>/dev/null
+  $ rev2=$(tip_rev)
   $ feature_to_server root/child1 -fake-valid
   $ fe enable-review
   $ fe second -even-though-owner
@@ -33,8 +34,8 @@ Make a releasable child2 feature.
 
   $ fe create root/child2 -d child2
   $ feature_to_server root/child2 -fake-valid
-  $ echo child2 >>file ; hg com -m 2 &>/dev/null
-  $ rev2=$(hg log -r . --template {node})
+  $ echo child2 >>file ; hg commit -m 2 &>/dev/null
+  $ rev3=$(tip_rev)
   $ feature_to_server root/child2 -fake-valid
   $ fe enable-review
   $ fe second -even-though-owner
@@ -71,15 +72,11 @@ Look for releasable features in the todo.
 Attempt to release both features in sequence.  The second release shall fail.
 
   $ fe release root/child1
-  $ fe release root/child2
+  $ fe release root/child2 |& sub ${rev1} {feature_base} | sub ${rev2} {parent_tip}
   ("Failed to release feature" root/child2
-   ((feature_base 88de6830d27e) (parent_tip 4b28b03726c3)))
+   ((feature_base {feature_base}) (parent_tip {parent_tip})))
   [1]
 
-  $ function is-ancestor {
-  >   ! test -z "$(hg log -l 1 -r $1::$2)"
-  > }
-
-  $ is-ancestor ${rev1} root
-  $ is-ancestor ${rev2} root
+  $ is_ancestor ${rev2} root
+  $ is_ancestor ${rev3} root
   [1]

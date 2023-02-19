@@ -6,8 +6,7 @@ Setup feature with review in two files
   $ setup_repo_and_root file1 file2
   $ echo start >file2; hg com -m change
   $ attribute="((owner user1)(file_reviewers (user1)))"
-  $ function current-rev { hg log -r . --template {node}; }
-  $ attributes="($(fe show -base) $attribute) ($(current-rev) $attribute)"
+  $ attributes="($(fe show -base) $attribute) ($(tip_full_rev) $attribute)"
   $ feature_to_server root -fake-valid -fake-attribute-by-rev "$attributes"
   $ fe enable
   $ fe second -even-though-owner
@@ -15,10 +14,10 @@ Setup feature with review in two files
   $ IRON_USER=user1 fe tools mark-fully-reviewed root
   $ CHECK_POINT=$(fe show -tip root)
   $ echo change >file1; echo change >file2; hg com -m change
-  $ attributes="$attributes ($(current-rev) $attribute)"
+  $ attributes="$attributes ($(tip_full_rev) $attribute)"
   $ feature_to_server root -fake-valid -fake-attribute-by-rev "$attributes"
 
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -33,8 +32,8 @@ Setup feature with review in two files
   | review is enabled      | true                                       |
   | reviewing              | all                                        |
   | is permanent           | true                                       |
-  | tip                    | * | (glob)
-  | base                   | * | (glob)
+  | tip                    | {REVISION 2}                               |
+  | base                   | {REVISION 0}                               |
   |---------------------------------------------------------------------|
   
   |---------------------------------------------|
@@ -52,7 +51,7 @@ Review one file, but not the other.
 Revert the feature to the check point, and it's not releasable.
 
   $ hg revert . -q -r ${CHECK_POINT} ; hg com -m 'revert to check point'
-  $ attributes="$attributes ($(current-rev) $attribute)"
+  $ attributes="$attributes ($(tip_full_rev) $attribute)"
   $ feature_to_server root -fake-valid -fake-attribute-by-rev "$attributes"
 
   $ fe show -omit-attribute-table -omit-description
