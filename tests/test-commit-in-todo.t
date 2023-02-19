@@ -94,8 +94,8 @@ Create child with changes.
   |   child | commit session |
   |--------------------------|
 
-  $ IRON_USER=user1 fe session show
-  Reviewing root/child to 5cad0a51f8cb.
+  $ IRON_USER=user1 fe session show | stabilize_output
+  Reviewing root/child to {REVISION 2}.
   1 files to review (2 already reviewed): 6 lines total
   
   Required review.
@@ -115,8 +115,8 @@ Create child with changes.
   |   child | commit session |
   |--------------------------|
 
-  $ IRON_USER=user2 fe session show
-  Reviewing root/child to 5cad0a51f8cb.
+  $ IRON_USER=user2 fe session show | stabilize_output
+  Reviewing root/child to {REVISION 2}.
   1 files to review (2 already reviewed): 6 lines total
   
   Required review.
@@ -136,8 +136,8 @@ Create child with changes.
   |   child | commit session |
   |--------------------------|
 
-  $ IRON_USER=user3 fe session show
-  Reviewing root/child to 5cad0a51f8cb.
+  $ IRON_USER=user3 fe session show | stabilize_output
+  Reviewing root/child to {REVISION 2}.
   1 files to review (2 already reviewed): 6 lines total
   
   Required review.

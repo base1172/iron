@@ -46,9 +46,9 @@ Enable review for [user1], and they have one line to review -- the attribute cha
   |---------+--------|
   | root    |      1 |
   |------------------|
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  base * | tip * (glob)
+  base {REVISION 0} | tip {REVISION 1}
   @@@@@@@@ base 1,5 tip 1,5 @@@@@@@@
     file        = file
     scrutiny    = level10
@@ -66,9 +66,9 @@ have to review the change.
   |---------+--------|
   | root    |      3 |
   |------------------|
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  base * | tip * (glob)
+  base {REVISION 0} | tip {REVISION 1}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ base 1,5 tip 1,5 @@@@@@@@
@@ -94,18 +94,18 @@ have to review the change.
   $ hg book -f -r ${rev_f2} root
   $ feature_to_server root -fake-valid -fake-attribute "$attribute"
 
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  old base * | old tip * (glob)
+  old base {REVISION 0} | old tip {REVISION 1}
   @@@@@@@@ Forget this diff -- this file no longer has a diff you should know @@@@@@@@
   @@@@@@@@ old base 1,2 old tip 1,2 @@@@@@@@
   -|base
   +|tip
 
-  $ fe session diff | fe internal remove-color
+  $ fe session diff | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  old base * | old tip * | new base * | new tip * (glob)
+  old base {REVISION 0} | old tip {REVISION 1} | new base {REVISION 2} | new tip {REVISION 3}
   @@@@@@@@ View : feature-ddiff @@@@@@@@
   @@@@@@@@ A base change was dropped in favor of a feature change @@@@@@@@
   @@@@@@@@ -- old base 1,6 new tip, old tip 1,6 @@@@@@@@
@@ -134,9 +134,9 @@ rebase.
   $ hg book -f -r ${rev_b2} root
   $ feature_to_server root -fake-valid -fake-attribute "$attribute"
   $ fe brain forget -all
-  $ fe session diff | fe internal remove-color
+  $ fe session diff | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  base ce8d6e8cf6e0 | tip 1d8e9b268ccd
+  base {REVISION 0} | tip {REVISION 2}
   @@@@@@@@ base 1,5 tip 1,5 @@@@@@@@
     file        = file
     scrutiny    = level10

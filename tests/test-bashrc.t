@@ -17,15 +17,9 @@ Create some features.
   $ fe create root/child1 -desc child1
   $ fe create root/child2 -desc child2 -owner owner
 
-Define helpers.
-
-  $ function rewrite_pwd { sed "s;$HOME;\$HOME;"; }
-
-  $ function pwd () { builtin pwd | rewrite_pwd; }
-
 Cdw without argument.
 
-  $ cdw && pwd
+  $ cdw && pwd | stabilize_home
   $HOME/workspaces
 
 Cdf without argument.
@@ -48,17 +42,17 @@ Cdf - when there was no previous feature.
 
 Cdf when feature and workspace exist.
 
-  $ cdf root/child1 && pwd
+  $ cdf root/child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
   $ cdw
 
 Cdf - when previous workspace exists.
 
-  $ cdf root/child1 && pwd
+  $ cdf root/child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
-  $ cdf root/child2 && pwd
+  $ cdf root/child2 && pwd | stabilize_home
   $HOME/workspaces/root/child2/+share+
-  $ cdf - | rewrite_pwd
+  $ cdf - | stabilize_home
   $HOME/workspaces/root/child1/+share+
   $ cdw
 
@@ -71,22 +65,22 @@ Cdf when workspace doesn't exist but feature does.
 
 
   $ cdw
-  $ cdf root/child1 <(echo 'y') && pwd
+  $ cdf root/child1 <(echo 'y') && pwd | stabilize_home
   
   $HOME/workspaces/root/child1/+share+
 
   $ cdw
   $ fe workspace delete root/child1
-  $ cdf root/child1 <(echo 'y') && pwd
+  $ cdf root/child1 <(echo 'y') && pwd | stabilize_home
   
   $HOME/workspaces/root/child1/+share+
 
 Cdf - when previous workspace doesn't exist but feature does.
 
   $ fe create root/child3 -desc child3
-  $ cdf root/child3 && pwd
+  $ cdf root/child3 && pwd | stabilize_home
   $HOME/workspaces/root/child3/+share+
-  $ cdf root/child1 && pwd
+  $ cdf root/child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
   $ fe workspace delete root/child3
   $ cdf -
@@ -104,9 +98,9 @@ Cdf when neither workspace nor feature exist.
 Cdf - when neither workspace nor feature exist.
 
   $ fe create root/child4 -desc child4
-  $ cdf root/child4 && pwd
+  $ cdf root/child4 && pwd | stabilize_home
   $HOME/workspaces/root/child4/+share+
-  $ cdf root/child1 && pwd
+  $ cdf root/child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
   $ fe workspace delete root/child4
   $ fe archive root/child4
@@ -117,19 +111,19 @@ Cdf - when neither workspace nor feature exist.
 
 Cdw when feature and workspace exist.
 
-  $ cdw root/child1 && pwd
+  $ cdw root/child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
 
 Cdw when workspace doesn't exist but feature does.
 
-  $ cdw && pwd
+  $ cdw && pwd | stabilize_home
   $HOME/workspaces
   $ fe workspace delete root/child1
   $ fe workspace dir root/child1
   ("you don't have a workspace for" root/child1)
   [1]
 
-  $ cdw root/child1 <(echo 'Y') && pwd
+  $ cdw root/child1 <(echo 'Y') && pwd | stabilize_home
   
   $HOME/workspaces/root/child1/+share+
 
@@ -141,7 +135,7 @@ Cdw when neither workspace nor feature exist.
 
 Cdc when feature exists.
 
-  $ cdc root && pwd
+  $ cdc root && pwd | stabilize_home
   $HOME/workspaces/root/+clone+
 
 Cdc when feature exists but is not a root feature.
@@ -159,7 +153,7 @@ Cdw for incomplete path.
   $ cdw t/ch
   ("no such feature" t/ch)
   [1]
-  $ cdw child1 && pwd
+  $ cdw child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
   $ cdw root/ch
   ("cannot disambiguate among features" (root/child1 root/child2))
@@ -170,7 +164,7 @@ Cdf for incomplete path.
   $ cdf t/ch
   ("no such feature" t/ch)
   [1]
-  $ cdf child1 && pwd
+  $ cdf child1 && pwd | stabilize_home
   $HOME/workspaces/root/child1/+share+
   $ cdf root/ch
   ("cannot disambiguate among features" (root/child1 root/child2))

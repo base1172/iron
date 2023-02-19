@@ -11,11 +11,6 @@ Setup a repo with two files:
   $ hg commit -m "commit"
   $ feature_to_server root -fake-valid-obligations
 
-  $ function show-catch-up {
-  >     fe show -omit-review-sessions-in-progress-table \
-  >       | sed -rn '/\| user .*\|/,$ p'
-  > }
-
 Enable.
 
   $ fe enable-review root -add-whole-feature-reviewers user1,user2
@@ -37,7 +32,7 @@ Review & Catch up.
   1
   $ fe internal catch-up show-num-lines root -for user2
   1
-  $ show-catch-up
+  $ show_catch_up
   | user                   | review | catch-up | completed |
   |------------------------+--------+----------+-----------|
   | unix-login-for-testing |      2 |          |           |
@@ -87,7 +82,7 @@ Allow to anyone via -for to review invalid users catch-up sessions
   $ fe catch-up mark-file root a -for user2
   $ fe internal catch-up show-num-lines root -for user2
   0
-  $ show-catch-up
+  $ show_catch_up
   | user                   | review | catch-up | completed |
   |------------------------+--------+----------+-----------|
   | unix-login-for-testing |      2 |          |           |
@@ -106,7 +101,7 @@ Do not generate catch-up when reviewing for an invalid user
   0
   $ fe internal catch-up show-num-lines root -for user2
   0
-  $ show-catch-up
+  $ show_catch_up
   | user                   | review | catch-up | completed |
   |------------------------+--------+----------+-----------|
   | unix-login-for-testing |      2 |          |           |
@@ -121,7 +116,7 @@ Allow a user to review existing catch-up session for their aliases
   $ fe catch-up mark-file root a -for user1
   $ fe internal catch-up show-num-lines root -for user1
   0
-  $ show-catch-up
+  $ show_catch_up
   | user                   | review | completed |
   |------------------------+--------+-----------|
   | unix-login-for-testing |      2 |           |
@@ -140,7 +135,7 @@ Do not generate catch-up when reviewing for an alias
   0
   $ fe internal catch-up show-num-lines root -for user1
   0
-  $ show-catch-up
+  $ show_catch_up
   | user                   | review | completed |
   |------------------------+--------+-----------|
   | unix-login-for-testing |      2 |           |

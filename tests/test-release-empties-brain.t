@@ -40,7 +40,7 @@ No review remains, even before Iron server hears from hydra.
   | root    |         |       |                |
   |   child | pending | error | wait for hydra |
   |--------------------------------------------|
-  $ fe show root/child
+  $ fe show root/child |& stabilize_output
   root/child
   ==========
   child
@@ -55,15 +55,15 @@ No review remains, even before Iron server hears from hydra.
   | review is enabled       | true                             |
   | reviewing               | all                              |
   | is permanent            | true                             |
-  | bookmark update         | pending for *                | (glob)
-  | tip                     | cee6d61471f1                     |
-  | base                    | cee6d61471f1                     |
-  | base facts              | pending for *                | (glob)
-  | base is ancestor of tip | pending for *                | (glob)
+  | bookmark update         | pending for {ELIDED}                |
+  | tip                     | {REVISION 1}                     |
+  | base                    | {REVISION 1}                     |
+  | base facts              | pending for {ELIDED}                |
+  | base is ancestor of tip | pending for {ELIDED}                |
   |------------------------------------------------------------|
   
   ("not showing line counts"
-   ("line count is not knowable" ("pending for" *))) (glob)
+   ("line count is not knowable" ("pending for" {ELIDED})))
 
 Hydra informs Iron server.
 
@@ -72,7 +72,7 @@ Hydra informs Iron server.
 
 No review remains.
 
-  $ fe show root/child
+  $ fe show root/child | stabilize_output
   root/child
   ==========
   child
@@ -87,7 +87,7 @@ No review remains.
   | review is enabled       | true                             |
   | reviewing               | all                              |
   | is permanent            | true                             |
-  | tip                     | cee6d61471f1                     |
-  | base                    | cee6d61471f1                     |
+  | tip                     | {REVISION 1}                     |
+  | base                    | {REVISION 1}                     |
   |------------------------------------------------------------|
 

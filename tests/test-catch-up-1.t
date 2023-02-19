@@ -52,7 +52,7 @@ Review & Catch up.
   false
   $ fe catch-up is-needed -for user1
   true
-  $ fe catch-up show -for user1
+  $ fe catch-up show -for user1 | stabilize_output
   test
   ====
   root for test
@@ -65,20 +65,20 @@ Review & Catch up.
   | whole-feature reviewers | unix-login-for-testing, user1, user2 |
   | seconder                | not seconded                         |
   | is permanent            | false                                |
-  | tip                     | f610d97eacad                         |
-  | base                    | 9ecad0f82c66                         |
+  | tip                     | {REVISION 1}                         |
+  | base                    | {REVISION 0}                         |
   |----------------------------------------------------------------|
   
-  Reviewing test to f610d97eacad.
+  Reviewing test to {REVISION 1}.
   1 files to review: 3 lines total
   
   Catch-up.  unix-login-for-testing reviewed this for you, giving the reason as:
   reason
      [ ] 3 a
-  $ fe catch-up diff -for user1 | fe internal remove-color
+  $ fe catch-up diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ a @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base 9ecad0f82c66 | tip f610d97eacad
+  base {REVISION 0} | tip {REVISION 1}
   @@@@@@@@ base 1,1 tip 1,4 @@@@@@@@
   +|1
   +|2
@@ -87,7 +87,7 @@ Review & Catch up.
   $ fe catch-up diff -for user1 -session-id $(echo $session_id | sed 's/[a-f0-9]/0/g') \
   >     |& matches "incorrect review-session id"
   [1]
-  $ echo q | fe review -only-catch-up-review test -for user1
+  $ echo q | fe review -only-catch-up-review test -for user1 | stabilize_output
   test
   ====
   root for test
@@ -100,11 +100,11 @@ Review & Catch up.
   | whole-feature reviewers | unix-login-for-testing, user1, user2 |
   | seconder                | not seconded                         |
   | is permanent            | false                                |
-  | tip                     | f610d97eacad                         |
-  | base                    | 9ecad0f82c66                         |
+  | tip                     | {REVISION 1}                         |
+  | base                    | {REVISION 0}                         |
   |----------------------------------------------------------------|
   
-  Reviewing test to f610d97eacad.
+  Reviewing test to {REVISION 1}.
   1 files to review: 3 lines total
   
   Catch-up.  unix-login-for-testing reviewed this for you, giving the reason as:

@@ -26,9 +26,13 @@ Show/add/remove inheritable properties.
 
   $ fe change root -set-property ticket=FE-290
   $ fe change root -set-inheritable-property ticket=FE-291
-  $ fe show root -inheritable-attributes |& matches "ticket"
+  $ fe show root -inheritable-attributes
+  ((properties ((ticket FE-291))) (whole_feature_followers (user1)))
+
   $ fe change root -set-inheritable-property not-a-property=yet
-  $ fe show root -inheritable-attributes |& matches "not-a-property"
+  $ fe show root -inheritable-attributes
+  ((properties ((not-a-property yet) (ticket FE-291)))
+   (whole_feature_followers (user1)))
 
 Check basic inheritability works. Add follower to the parent.
 
@@ -54,10 +58,9 @@ whole_feature_reviewer in the command line and also as an inheritable
 attribute. Also check that the owners passed into fe create are set as owners
 first before inherited owners.
 
-
   $ fe change root -set-inheritable-owners user3,unix-login-for-testing,user1,user2 \
   >   -set-inheritable-whole-feature-reviewers user1 \
-  >   -set-inheritable-whole-feature-followers ""
+  >   -remove-inheritable-whole-feature-followers user1
   $ fe create root/child3 -d child3 -owners user2 \
   >   -add-whole-feature-reviewers user1,user3
   $ fe show child3 -owners
@@ -67,9 +70,8 @@ first before inherited owners.
 
 Check that inheritable attributes recurse down more than one level.
 
-  $ fe change root -set-inheritable-owners user3 \
-  > -set-inheritable-whole-feature-followers "" \
-  > -set-inheritable-whole-feature-reviewers "" \
+  $ fe change root -remove-inheritable-owners unix-login-for-testing,user1,user2 \
+  > -remove-inheritable-whole-feature-reviewers user1 \
   > -set-inheritable-property ticket=FE-290
   $ fe show root -inheritable-attributes
   ((owners (user3)) (properties ((not-a-property yet) (ticket FE-290))))

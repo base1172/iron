@@ -23,45 +23,45 @@ Show locks.
 Take a few locks.
 
   $ fe lock -rebase -release -release-into -reason 'test'
-  $ fe show -what-is-locked
+  $ fe show -what-is-locked | stabilize_timestamps
   ((Rebase
     (((by unix-login-for-testing) (reason test)
-      (at (*)) (is_permanent false)))) (glob)
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
    (Release
     (((by unix-login-for-testing) (reason test)
-      (at (*)) (is_permanent false)))) (glob)
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
    (Release_into
     (((by unix-login-for-testing) (reason test)
-      (at (*)) (is_permanent false))))) (glob)
-  $ fe is-unlocked -all-locks
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false)))))
+  $ fe is-unlocked -all-locks |& stabilize_timestamps
   (locked
    ((Rebase
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
     (Release
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
     (Release_into
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))))
   [1]
-  $ fe is-unlocked -rebase
+  $ fe is-unlocked -rebase |& stabilize_timestamps
   (locked
    ((Rebase
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))))
   [1]
-  $ fe is-unlocked -rebase -release -release-into
+  $ fe is-unlocked -rebase -release -release-into |& stabilize_timestamps
   (locked
    ((Rebase
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
     (Release
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
     (Release_into
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent false)))))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))))
   [1]
 
 Check that a different user can concurrently lock.
@@ -71,19 +71,19 @@ Check that a different user can concurrently lock.
 And the user owning the lock can amend a lock.
 
   $ fe lock -release -reason 'blah'
-  $ fe show -what-is-locked
+  $ fe show -what-is-locked | stabilize_timestamps
   ((Rebase
-    (((by user1) (reason test) (at (*)) (glob)
+    (((by user1) (reason test) (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
       (is_permanent false))
      ((by unix-login-for-testing) (reason test)
-      (at (*)) (is_permanent false)))) (glob)
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
    (Release
     (((by unix-login-for-testing) (reason blah)
-      (at (*)) (is_permanent false)))) (glob)
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
    (Release_into
     (((by unix-login-for-testing) (reason test)
-      (at (*)) (is_permanent false))))) (glob)
-  $ fe show
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false)))))
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -99,8 +99,8 @@ And the user owning the lock can amend a lock.
   | CRs are enabled          | true                   |
   | reviewing                | unix-login-for-testing |
   | is permanent             | true                   |
-  | tip                      | dc568be383d7           |
-  | base                     | dc568be383d7           |
+  | tip                      | {REVISION 0}           |
+  | base                     | {REVISION 0}           |
   | locks                    |                        |
   |   rebase locked by       | unix-login-for-testing |
   |   rebase locked by       | user1                  |
@@ -108,7 +108,7 @@ And the user owning the lock can amend a lock.
   |   release-into locked by | unix-login-for-testing |
   |---------------------------------------------------|
 
-  $ fe show -show-lock-reasons
+  $ fe show -show-lock-reasons | stabilize_output
   root
   ====
   root
@@ -124,8 +124,8 @@ And the user owning the lock can amend a lock.
   | CRs are enabled          | true                         |
   | reviewing                | unix-login-for-testing       |
   | is permanent             | true                         |
-  | tip                      | dc568be383d7                 |
-  | base                     | dc568be383d7                 |
+  | tip                      | {REVISION 0}                 |
+  | base                     | {REVISION 0}                 |
   | locks                    |                              |
   |   rebase locked by       | unix-login-for-testing: test |
   |   rebase locked by       | user1: test                  |
@@ -136,16 +136,16 @@ And the user owning the lock can amend a lock.
 One user unlocking doesn't unlock another's.
 
   $ fe unlock -rebase
-  $ fe show -what-is-locked
+  $ fe show -what-is-locked | stabilize_timestamps
   ((Rebase
-    (((by user1) (reason test) (at (*)) (glob)
+    (((by user1) (reason test) (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
       (is_permanent false))))
    (Release
     (((by unix-login-for-testing) (reason blah)
-      (at (*)) (is_permanent false)))) (glob)
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false))))
    (Release_into
     (((by unix-login-for-testing) (reason test)
-      (at (*)) (is_permanent false))))) (glob)
+      (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent false)))))
 
 Must unlock at least one lock.
 
@@ -160,11 +160,11 @@ Check that it is an error to unlock if it is not locked.
 A user can lock a feature in a permanent fashion.
 
   $ fe lock -release-into -reason test -permanent
-  $ fe is-unlocked -release-into
+  $ fe is-unlocked -release-into |& stabilize_timestamps
   (locked
    ((Release_into
      (((by unix-login-for-testing) (reason test)
-       (at (*)) (is_permanent true)))))) (glob)
+       (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm)) (is_permanent true))))))
   [1]
 
 When that happens, a special switch is required to unlock.

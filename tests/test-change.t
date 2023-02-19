@@ -170,7 +170,7 @@ reviewing
 
   $ fe show root -reviewing
   (unix-login-for-testing)
-  $ fe change root -set-reviewing ''
+  $ fe change root -remove-reviewing unix-login-for-testing
   $ fe show root -reviewing
   ()
   $ fe change root -add-reviewing a

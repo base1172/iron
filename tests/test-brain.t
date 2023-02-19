@@ -29,11 +29,11 @@ Mark, and the brain knows stuff.
   | file  | mod |     2 |
   | file2 | add |     1 |
   |---------------------|
-  $ fe brain diff | fe internal remove-color
+  $ fe brain diff | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base dc568be383d7 | tip a08ed6f3a513
+  base {REVISION 0} | tip {REVISION 1}
   _
   | @@@@@@@@ Hunk 1/3 @@@@@@@@
   | @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
@@ -58,10 +58,10 @@ Mark, and the brain knows stuff.
   | @@@@@@@@ base 1,1 tip 1,2 @@@@@@@@
   | +|z
   |_
-  $ fe brain diff -file file | fe internal remove-color
+  $ fe brain diff -file file | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base dc568be383d7 | tip a08ed6f3a513
+  base {REVISION 0} | tip {REVISION 1}
   @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
   -|file
   +|change
@@ -88,7 +88,7 @@ Forget, answer "y" to the prompt, and the brain is empty.
   | file2 | add |     1 |
   |---------------------|
   
-  Really forget above diffs for [root]? [y/N]:  (no-eol)
+  Really forget above diffs for [root]? [y/N]: 
   $ fe brain show
 
 Mark and then clear each file separately.
@@ -204,8 +204,8 @@ Can't forget a file you don't know.
 Create a session with no review, and one can still clear the brain, even if the
 session is locked as long as it has no reviewed files.
 
-  $ fe session show
-  Reviewing root to a08ed6f3a513.
+  $ fe session show | stabilize_output
+  Reviewing root to {REVISION 1}.
   2 files to review: 4 lines total
      [ ] 2 file
      [ ] 2 file2
@@ -215,8 +215,8 @@ session is locked as long as it has no reviewed files.
 But if review has been done in the session, one cannot clear the brain.
 
   $ fe session mark-file root file
-  $ fe session show
-  Reviewing root to a08ed6f3a513.
+  $ fe session show | stabilize_output
+  Reviewing root to {REVISION 1}.
   1 files to review (1 already reviewed): 4 lines total
      [X] 2 file
      [ ] 2 file2

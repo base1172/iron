@@ -108,11 +108,11 @@ Failure if [-file] file doesn't exist.
 The actual diff, not a summary.
 
   $ THE_DIFF=$(fe diff -even-ignored | fe internal remove-color)
-  $ echo "${THE_DIFF}"
+  $ echo "${THE_DIFF}" | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file-ignored @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny ignored
-  base 3e74663d5559 | tip 357576f64f7a
+  base {REVISION 1} | tip {REVISION 2}
   _
   | @@@@@@@@ Hunk 1/3 @@@@@@@@
   | @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@

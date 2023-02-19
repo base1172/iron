@@ -19,7 +19,7 @@ Create hg repo.
   $ hg com -m 'added CR'
   $ feature_to_server root -fake-valid-obligations
   $ fe enable-review
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -34,9 +34,9 @@ Create hg repo.
   | review is enabled      | true         |
   | reviewing              | owner        |
   | is permanent           | false        |
-  | tip                    | 493a6eeffeb0 |
+  | tip                    | {REVISION 1} |
   |   tip is cr clean      | false        |
-  | base                   | 04da3968e088 |
+  | base                   | {REVISION 0} |
   |---------------------------------------|
   
   |---------------------|

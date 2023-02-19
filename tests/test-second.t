@@ -114,7 +114,7 @@ Unsecond the feature.
 
 Now reviewing is restricted to whole feature reviewers.
 
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -129,8 +129,8 @@ Now reviewing is restricted to whole feature reviewers.
   | review is enabled       | true                                    |
   | reviewing               | whole-feature reviewers                 |
   | is permanent            | false                                   |
-  | tip                     | 46fab6465033                            |
-  | base                    | 04da3968e088                            |
+  | tip                     | {REVISION 1}                            |
+  | base                    | {REVISION 0}                            |
   |-------------------------------------------------------------------|
   
   |-----------------------------------------------|
@@ -161,7 +161,7 @@ Cannot second when Second has been locked.
 Second as an owner.
 
   $ fe second -even-though-owner
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -176,8 +176,8 @@ Second as an owner.
   | review is enabled       | true                                       |
   | reviewing               | all                                        |
   | is permanent            | false                                      |
-  | tip                     | 46fab6465033                               |
-  | base                    | 04da3968e088                               |
+  | tip                     | {REVISION 1}                               |
+  | base                    | {REVISION 0}                               |
   |----------------------------------------------------------------------|
   
   |-----------------------------------------------|

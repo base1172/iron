@@ -86,13 +86,13 @@ Test completion by unanchored partial path.
 -- Test: Completion on [fe unarchive] only shows archived features:
 
   $ fe archive root/foo1
-  $ fe list -archived -depth 2
-  |------------------------------------------------------------------------------|
-  | feature | feature id                           | archived at                 |
-  |---------+--------------------------------------+-----------------------------|
-  | root    |                                      |                             |
-  |   foo1  | * | * | (glob)
-  |------------------------------------------------------------------------------|
+  $ fe list -archived -depth 2 | stabilize_output
+  |--------------------------------------------------------------------------------------|
+  | feature | feature id                           | archived at                         |
+  |---------+--------------------------------------+-------------------------------------|
+  | root    |                                      |                                     |
+  |   foo1  | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm |
+  |--------------------------------------------------------------------------------------|
 
   $ completion-test fe unarchive root/f
   root/foo1

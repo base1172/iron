@@ -154,11 +154,14 @@ find the id to give to [fe unarchive].
   $ fe archive root/a -reason "Reason for archiving that feature."
   $ fe archive root/c
 
-  $ COLUMNS=500 fe list -archived root | grep -v -- ------ | single_space
-  | feature | feature id | archived at | reason for archiving |
-  | root | | | |
-  | a | * | * | Reason for archiving that feature. | (glob)
-  | c | * | * | | (glob)
+  $ COLUMNS=500 fe list -archived root | stabilize_output
+  |---------------------------------------------------------------------------------------------------------------------------|
+  | feature | feature id                           | archived at                         | reason for archiving               |
+  |---------+--------------------------------------+-------------------------------------+------------------------------------|
+  | root    |                                      |                                     |                                    |
+  |   a     | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | Reason for archiving that feature. |
+  |   c     | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm |                                    |
+  |---------------------------------------------------------------------------------------------------------------------------|
 
   $ fe list -archived root -name-only -sort-most-recently-archived-first
   root/c

@@ -46,7 +46,7 @@ Copy a feature.
   $ feature_to_server root/a -fake-valid
   $ fe copy root/a root/b
   $ feature_to_server root/b -fake-valid
-  $ fe show root/a
+  $ fe show root/a | stabilize_output
   root/a
   ======
   a
@@ -61,10 +61,10 @@ Copy a feature.
   | review is enabled       | true                          |
   | reviewing               | unix-login-for-testing        |
   | is permanent            | false                         |
-  | tip                     | 9bc08b7747e4                  |
-  | base                    | 9bc08b7747e4                  |
+  | tip                     | {REVISION 0}                  |
+  | base                    | {REVISION 0}                  |
   |---------------------------------------------------------|
-  $ fe show root/b
+  $ fe show root/b | stabilize_output
   root/b
   ======
   a
@@ -79,8 +79,8 @@ Copy a feature.
   | review is enabled       | true                          |
   | reviewing               | unix-login-for-testing        |
   | is permanent            | false                         |
-  | tip                     | 9bc08b7747e4                  |
-  | base                    | 9bc08b7747e4                  |
+  | tip                     | {REVISION 0}                  |
+  | base                    | {REVISION 0}                  |
   |---------------------------------------------------------|
   $ fe list root
   |------------------------------------|

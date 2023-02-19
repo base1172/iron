@@ -73,7 +73,7 @@ Create .fe files.
 It is an error to define a tag more that once.
 
   $ fe projects list-tags
-  ($TESTTMP/repo/.fe/obligations-repo.sexp:5:0
+  ($TESTCASE_ROOT/repo/.fe/obligations-repo.sexp:5:0
    ("multiply defined tag" post-trade))
   [1]
 
@@ -86,7 +86,7 @@ It is an error to define a tag more that once.
   > EOF
 
   $ fe projects list-tags
-  ($TESTTMP/repo/.fe/obligations-repo.sexp:0:0
+  ($TESTCASE_ROOT/repo/.fe/obligations-repo.sexp:0:0
    ("remove tags from .fe/obligations-repo.sexp that are also in .fe/obligations-global.sexp (which comes from the scaffolded repo)"
     (database)))
   [1]
@@ -206,11 +206,11 @@ However, there is no associated attribute review for the tag changes.  This
 would require a change in the stable type [Attribute_file.t] and it is not clear
 at this point that we really want/need this.
 
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@ .fe/obligations-repo.sexp @@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 2} | tip {REVISION 3}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ base 1,4 tip 1,5 @@@@@@@@

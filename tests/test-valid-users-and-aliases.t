@@ -117,7 +117,7 @@ Dump _accumulated_ aliases.
 
 ---------- Checking that [fe show] also doesn't show aliases ---------
 
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -133,9 +133,9 @@ Dump _accumulated_ aliases.
   | CRs are enabled        | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | false                  |
-  | tip                    | 0ff569637015           |
+  | tip                    | {REVISION 1}           |
   |   tip is cr clean      | false                  |
-  | base                   | 0f5b3abd13b6           |
+  | base                   | {REVISION 0}           |
   |-------------------------------------------------|
   
   |---------------------|
