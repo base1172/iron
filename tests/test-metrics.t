@@ -103,7 +103,7 @@ Add stats.
   
   $ fe admin server metrics show root -metrics ^metric$ -stat 50%,count
   $ fe admin server metrics add root/child1 -metric regex1 -value 4.2
-  $ fe admin server metrics show root -metrics r.* -stat 50%
+  $ fe admin server metrics show root -metrics 'r.*' -stat 50%
   regex1
   |----------------|
   | feature |  50% |
@@ -111,7 +111,7 @@ Add stats.
   | root    | 4.20 |
   |----------------|
   
-  $ fe admin server metrics show root -metrics m.* -stat 50%,count \
+  $ fe admin server metrics show root -metrics 'm.*' -stats 50%,count \
   > -depth 0
   metric1
   |------------------------|
@@ -128,7 +128,7 @@ Add stats.
   |------------------------|
   
 
-  $ fe admin server metrics show -metrics m.* -depth 0
+  $ fe admin server metrics show -metrics 'm.*' -depth 0
   metric1
   |--------------------------------------------------------------------------------|
   | feature |   0% |   5% |  15% |  25% |  50% |  75% |  90% |  95% |  99% | count |
@@ -182,46 +182,46 @@ Add stats.
   $ fe admin server metrics clear -metric metric1 root -rec
   $ fe admin server metrics show -metrics metric1
 
-  $ fe admin server metrics get root
+  $ fe admin server metrics get root | stabilize_timestamps
   root: metric.with.dots
-  |-------------------------------------|
-  | at                          | value |
-  |-----------------------------+-------|
-  | * | 2.00  | (glob)
-  |-------------------------------------|
+  |---------------------------------------------|
+  | at                                  | value |
+  |-------------------------------------+-------|
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 2.00  |
+  |---------------------------------------------|
   
   root: metric2
-  |-------------------------------------|
-  | at                          | value |
-  |-----------------------------+-------|
-  | * | 3.10  | (glob)
-  | * | 3.20  | (glob)
-  | * | 3.30  | (glob)
-  |-------------------------------------|
+  |---------------------------------------------|
+  | at                                  | value |
+  |-------------------------------------+-------|
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 3.10  |
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 3.20  |
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 3.30  |
+  |---------------------------------------------|
   
-  $ fe admin server metrics get root -depth max
+  $ fe admin server metrics get root -depth max | stabilize_timestamps
   root: metric.with.dots
-  |-------------------------------------|
-  | at                          | value |
-  |-----------------------------+-------|
-  | * | 2.00  | (glob)
-  |-------------------------------------|
+  |---------------------------------------------|
+  | at                                  | value |
+  |-------------------------------------+-------|
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 2.00  |
+  |---------------------------------------------|
   
   root: metric2
-  |-------------------------------------|
-  | at                          | value |
-  |-----------------------------+-------|
-  | * | 3.10  | (glob)
-  | * | 3.20  | (glob)
-  | * | 3.30  | (glob)
-  |-------------------------------------|
+  |---------------------------------------------|
+  | at                                  | value |
+  |-------------------------------------+-------|
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 3.10  |
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 3.20  |
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 3.30  |
+  |---------------------------------------------|
   
   root/child1: regex1
-  |-------------------------------------|
-  | at                          | value |
-  |-----------------------------+-------|
-  | * | 4.20  | (glob)
-  |-------------------------------------|
+  |---------------------------------------------|
+  | at                                  | value |
+  |-------------------------------------+-------|
+  | yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm | 4.20  |
+  |---------------------------------------------|
   
 Test the subscription API.
 
@@ -249,15 +249,15 @@ Test subscription by feature, metric, and feature & metric.
 
 Check notifications:
 
-  $ cat ${dump_file}
-  ((feature_path root)(metric_name M1)(value 101)(added_at(*))) (glob)
-  ((feature_path root)(metric_name M2)(value 201)(added_at(*))) (glob)
+  $ cat ${dump_file} | stabilize_timestamps
+  ((feature_path root)(metric_name M1)(value 101)(added_at((human_readable(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(int_ns_since_epoch {ELIDED}))))
+  ((feature_path root)(metric_name M2)(value 201)(added_at((human_readable(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(int_ns_since_epoch {ELIDED}))))
   Process Exited
-  ((feature_path root)(metric_name M1)(value 101)(added_at(*))) (glob)
-  ((feature_path jane)(metric_name M1)(value 102)(added_at(*))) (glob)
+  ((feature_path root)(metric_name M1)(value 101)(added_at((human_readable(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(int_ns_since_epoch {ELIDED}))))
+  ((feature_path jane)(metric_name M1)(value 102)(added_at((human_readable(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(int_ns_since_epoch {ELIDED}))))
   Process Exited
-  ((feature_path jane)(metric_name M2)(value 202)(added_at(*))) (glob)
-  ((feature_path jane)(metric_name M2)(value 203)(added_at(*))) (glob)
+  ((feature_path jane)(metric_name M2)(value 202)(added_at((human_readable(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(int_ns_since_epoch {ELIDED}))))
+  ((feature_path jane)(metric_name M2)(value 203)(added_at((human_readable(yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))(int_ns_since_epoch {ELIDED}))))
   Process Exited
 
 Create a feature.
@@ -361,23 +361,23 @@ latency.
   ((by_rev_size 10) (feature_id_count 1) (total_rev_count 3)
    (users (1 ((unix-login-for-testing 3)))))
   $ fe internal push-events show -values \
-  >   | sed -e "s/$rev/\$rev/g" | sed -e "s/$rev2/\$rev2/g" | sed -e "s/$rev3/\$rev3/g"
-  ((* (glob)
+  >   | sed -e "s/$rev/\$rev/g" | sed -e "s/$rev2/\$rev2/g" | sed -e "s/$rev3/\$rev3/g" | stabilize_timestamps | stabilize_uuids
+  ((xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     ((max_size 10) (length 3)
      (items
       (($rev
         ((feature_path root) (by unix-login-for-testing)
-         (at (*)) (glob)
+         (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
          (used_by_metrics
           (hydra.synchronize-state-latency hydra.update-bookmark-latency))))
        ($rev2
         ((feature_path root) (by unix-login-for-testing)
-         (at (*)) (glob)
+         (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
          (used_by_metrics
           (hydra.synchronize-state-latency hydra.update-bookmark-latency))))
        ($rev3
         ((feature_path root) (by unix-login-for-testing)
-         (at (*)) (glob)
+         (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
          (used_by_metrics (hydra.update-bookmark-latency)))))))))
 
   $ fe internal push-events show -user as-hydra-worker
@@ -389,13 +389,13 @@ Change some settings on the push-events.
   $ fe internal push-events show
   ((by_rev_size 1) (feature_id_count 1) (total_rev_count 1)
    (users (1 ((unix-login-for-testing 1)))))
-  $ fe internal push-events show -values | sed -e "s/$rev2/\$rev2/g" | sed -e "s/$rev3/\$rev3/g"
-  ((* (glob)
+  $ fe internal push-events show -values | sed -e "s/$rev2/\$rev2/g" | sed -e "s/$rev3/\$rev3/g" | stabilize_timestamps | stabilize_uuids
+  ((xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     ((max_size 1) (length 1)
      (items
       (($rev3
         ((feature_path root) (by unix-login-for-testing)
-         (at (*)) (glob)
+         (at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
          (used_by_metrics (hydra.update-bookmark-latency)))))))))
 
 Clear the events.

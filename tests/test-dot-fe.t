@@ -129,7 +129,7 @@ Duplicate user in obligations-repo.sexp.
   > (Users user1)
   > EOF
   $ fe ob check
-  ($TESTTMP/repo/.fe/obligations-repo.sexp:0:0
+  ($TESTCASE_ROOT/repo/.fe/obligations-repo.sexp:0:0
    ("remove users from .fe/obligations-repo.sexp that are also in .fe/obligations-global.sexp (which comes from the scaffolded repo)"
     (user1)))
   [1]

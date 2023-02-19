@@ -170,16 +170,24 @@ function stabilize_timestamps {
     cat /dev/stdin \
 				| sed --regexp-extended -e "s/${timestamp_regex1}/yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm/g" \
 				| sed --regexp-extended -e "s/${timestamp_regex2}/Day Mon dd yy hh:mm:ss yyyy +hhmm/g" \
-        | perl -0777 -pe 's/(\| |\(")pending for("?) [0-9.]+[a-z]+(\)| +\|)/\1pending for\2 \{ELIDED\}\3/g'
+				| sed --regexp-extended -e "s/\(int_ns_since_epoch [0-9_]+\)/(int_ns_since_epoch {ELIDED})/g" \
+        | perl -0777 -pe 's/\| pending for [0-9.]+[a-z]+ +\|/| pending for \{ELIDED\} |/g' \
+        | perl -0777 -pe 's/\("pending for"( *)[0-9.]+[a-z]+\)/("pending for"\1\{ELIDED\})/g'
 }
 
 export -f stabilize_timestamps
 
 function stabilize_output {    
     local input="$(cat /dev/stdin)"
+    if [ $# -ne 0 ]; then
+        local repo_path=$(fe show -remote-repo-path "$1")
+    else
+        local repo_path=.
+    fi
+    local substitutions=$(hg log --repository "$repo_path" --template 's/{node|short}/\{REVISION {rev}}/g\n')
     while read s; do
         input=$(echo "$input" | sed -e "$s")
-    done <<<$(hg log --template 's/{node|short}/\{REVISION {rev}}/g\n')
+    done <<<$(echo "$substitutions")
     echo "$input" \
         | stabilize_home \
         | stabilize_timestamps \
@@ -206,7 +214,9 @@ function sanitize_output {
 				| perl -0777 -pe 's/(base |old tip |new tip |[0-9]+:| )[0-9a-f]{40}(\n|\)|\.| )/\1\{ELIDED\}                            \2/g' \
 				| perl -0777 -pe 's/(\| +)[0-9a-f]{12}( +\|)/\1\{ELIDED\}    \2/g' \
 				| perl -0777 -pe 's/(\| +)[0-9a-f]{40}( +\|)/\1\{ELIDED\}                                \2/g' \
-        | perl -0777 -pe 's/(\| |\(")pending for("?) [0-9.]+[a-z]+(\)| +\|)/\1pending for\2 \{ELIDED\}\3/g'
+        | perl -0777 -pe 's/\| pending for [0-9.]+[a-z]+ +\|/| pending for \{ELIDED\} |/g' \
+        | perl -0777 -pe 's/\("pending for"( *)[0-9.]+[a-z]+\)/("pending for"\1\{ELIDED\})/g'
+
 }
 
 export -f sanitize_output
@@ -403,6 +413,13 @@ function show_catch_up {
 }
 
 export -f show_catch_up
+
+function make_releasable {
+       fe tools mark-fully-reviewed $1 -for unix-login-for-testing
+       fe tools mark-fully-reviewed $1 -for user1 -reason reason
+}
+
+export -f make_releasable
 
 function with_visible_colors {
     IRON_OPTIONS="()" "$@" |

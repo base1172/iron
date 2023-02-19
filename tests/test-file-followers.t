@@ -73,10 +73,10 @@ about who follow their files, or there would be too much friction in adding foll
   file-follower
   unix-login-for-testing
 
-  $ fe session diff -do-not-lock-session | fe internal remove-color
+  $ fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ .fe.sexp @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 1} | tip {REVISION 2}
   @@@@@@@@ base 1,11 tip 1,14 @@@@@@@@
     (Local
       (Owner unix-login-for-testing)
@@ -96,9 +96,9 @@ about who follow their files, or there would be too much friction in adding foll
   $ fe show -next-steps root/add-follower
   (Release)
 
-  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  base * | tip * (glob)
+  base {REVISION 1} | tip {REVISION 2}
   @@@@@@@@ base 1,6 tip 1,6 @@@@@@@@
     file                      = file
     scrutiny                  = normal
@@ -145,8 +145,8 @@ Check what happens when the file is deleted.
   | file-follower          |        |      2 |
   |------------------------------------------|
 
-  $ IRON_USER=file-follower fe session show
-  Reviewing root/add-follower to *. (glob)
+  $ IRON_USER=file-follower fe session show | stabilize_output
+  Reviewing root/add-follower to {REVISION 3}.
   1 files to review: 2 lines total
   
   Follow review.
@@ -156,11 +156,11 @@ Check what happens when the file is deleted.
 
 Verify that the red lines are shown for the deleted file.
 
-  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   base file = file
   tip file  = <absent>
-  base * | tip * (glob)
+  base {REVISION 2} | tip {REVISION 3}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ base 1,6 tip 1,2 @@@@@@@@
@@ -239,10 +239,10 @@ with some follow review already done.
   $ echo "Dropped from file followers with a brain" >file
   $ hg commit -q -m 'change'
   $ feature_to_server root/add-follower
-  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 2} | old tip {REVISION 5} | new tip {REVISION 6}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|A change happens in the file
   +|Dropped from file followers with a brain
@@ -260,12 +260,12 @@ with some follow review already done.
   |------------------------+--------+--------+-----------|
   | unix-login-for-testing |      5 |        |         1 |
   | user1                  |      2 |        |         1 |
-  | file-follower          |        |      1 |         1 |
+  | file-follower          |        |      1 |         2 |
   |------------------------------------------------------|
 
-  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  base * | old tip * | new tip * (glob)
+  base {REVISION 2} | old tip {REVISION 6} | new tip {REVISION 7}
   @@@@@@@@ old tip, base 1,6 new tip 1,6 @@@@@@@@
     file                      = file
     scrutiny                  = normal
@@ -317,10 +317,10 @@ This time, add a change but release before the file-follower reviews it.
   |   add-follower |        2 |
   |---------------------------|
 
-  $ IRON_USER=file-follower fe catch-up diff root/add-follower | fe internal remove-color
+  $ IRON_USER=file-follower fe catch-up diff root/add-follower | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 2} | old tip {REVISION 8} | new tip {REVISION 9}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|A change happens in the file
   +|Another change happens in the file
@@ -356,9 +356,9 @@ change to the file [.fe.sexp], expect for the follower themselves.
   | file-follower          |        |      1 |
   |------------------------------------------|
 
-  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=file-follower fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  base * | tip * (glob)
+  base {REVISION 9} | tip {REVISION 10}
   @@@@@@@@ base 1,6 tip 1,6 @@@@@@@@
     file                      = file
     scrutiny                  = normal
@@ -369,10 +369,10 @@ change to the file [.fe.sexp], expect for the follower themselves.
 
   $ IRON_USER=file-follower fe tools mark-fully-reviewed root/remove-follower
 
-  $ fe session diff -do-not-lock-session | fe internal remove-color
+  $ fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ .fe.sexp @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 9} | tip {REVISION 10}
   @@@@@@@@ base 1,14 tip 1,11 @@@@@@@@
     (Local
       (Owner unix-login-for-testing)

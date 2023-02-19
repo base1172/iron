@@ -51,8 +51,8 @@ Requesting an invalid session id fails.
   [1]
 
   $ ID=$(fe session show -id)
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -77,8 +77,8 @@ The lock of a session are persisted.
 
   $ fe session mark-file test a
   $ fe session show -id | matches ${ID}
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -95,11 +95,11 @@ special switch is supplied.
 Can get the session even when review is disabled.
 
   $ fe disable-review
-  $ fe session diff | fe internal remove-color
+  $ fe session diff | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ a @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base 0f5b3abd13b6 | tip 9bdd8ea4bdfa
+  base {REVISION 0} | tip {REVISION 1}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ base 1,1 tip 1,4 @@@@@@@@
@@ -119,8 +119,8 @@ Can get the session even when review is disabled.
   | +|4
   | +|5
   |_
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -128,28 +128,28 @@ Can get the session even when review is disabled.
 
 Can specify what diff to show.
 
-  $ fe session diff -file a | fe internal remove-color
+  $ fe session diff -file a | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ a @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base 0f5b3abd13b6 | tip 9bdd8ea4bdfa
+  base {REVISION 0} | tip {REVISION 1}
   @@@@@@@@ base 1,1 tip 1,4 @@@@@@@@
   +|1
   +|2
   +|3
-  $ fe session diff -unreviewed | fe internal remove-color
+  $ fe session diff -unreviewed | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ b @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base 0f5b3abd13b6 | tip 9bdd8ea4bdfa
+  base {REVISION 0} | tip {REVISION 1}
   @@@@@@@@ base 1,1 tip 1,6 @@@@@@@@
   +|1
   +|2
   +|3
   +|4
   +|5
-  $ fe session diff -reviewed | fe internal remove-color
+  $ fe session diff -reviewed | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ a @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base 0f5b3abd13b6 | tip 9bdd8ea4bdfa
+  base {REVISION 0} | tip {REVISION 1}
   @@@@@@@@ base 1,1 tip 1,4 @@@@@@@@
   +|1
   +|2
@@ -166,8 +166,8 @@ Persistence
   $ fe-server stop
   $ fe-server start
 
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -177,8 +177,8 @@ Forget (should work outside of a clone):
 
   $ cd /
   $ fe session forget test -all -session-id ${ID}
-  $ fe session show test
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show test | stabilize_output test
+  Reviewing test to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -188,8 +188,8 @@ Persistence
 
   $ fe-server stop
   $ fe-server start
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -197,8 +197,8 @@ Persistence
 Forget specific files
 
   $ fe session mark-file test a
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -207,8 +207,8 @@ Forget specific files
   [1]
 
   $ fe session forget -file a -session-id ${ID}
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -224,8 +224,8 @@ Delete
   8
 
   $ ID=$(fe session show -id)
-  $ fe session show
-  Reviewing test to 9bdd8ea4bdfa.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -302,7 +302,7 @@ but not required when they are adding themselves.
 
 Check warning about stale session.
 
-  $ fe session show
+  $ fe session show | stabilize_output
   Warning: the feature has changed since this session was created.  It may be more suitable
   to review the feature to its most recent tip.  Consider committing your session:
   
@@ -312,13 +312,13 @@ Check warning about stale session.
   |                    5 |                  5 |                  10 |
   |-----------------------------------------------------------------|
   
-  Reviewing test to 9bdd8ea4bdfa.
+  Reviewing test to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
 
   $ fe session commit -session-id ${ID}
-  $ fe session show
-  Reviewing test to 4ca86eeaa256.
+  $ fe session show | stabilize_output
+  Reviewing test to {REVISION 2}.
   1 files to review: 10 lines total
      [ ] 10 b

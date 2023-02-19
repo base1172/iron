@@ -163,8 +163,8 @@ When all are enabled, this obviously includes the w-f-followers as well.
   user1
   user2
 
-  $ IRON_USER=user2 fe session show
-  Reviewing root/add-follower to a38efa6fe814.
+  $ IRON_USER=user2 fe session show | stabilize_output
+  Reviewing root/add-follower to {REVISION 2}.
   3 files to review: 11 lines total
   
   Follow review.
@@ -176,11 +176,11 @@ When all are enabled, this obviously includes the w-f-followers as well.
 
 Verify that the red lines are shown for the deleted file.
 
-  $ IRON_USER=user2 fe session diff -file file -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=user2 fe session diff -file file -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   base file = file
   tip file  = <absent>
-  base * | tip * (glob)
+  base {REVISION 1} | tip {REVISION 2}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ base 1,5 tip 1,2 @@@@@@@@
@@ -299,10 +299,10 @@ with some follow review already done.
   $ echo "Dropped from followers with a brain" >file
   $ hg commit -q -m 'change'
   $ feature_to_server root/add-follower
-  $ IRON_USER=user2 fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=user2 fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 1} | old tip {REVISION 4} | new tip {REVISION 5}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|A change happens
   +|Dropped from followers with a brain
@@ -321,11 +321,11 @@ with some follow review already done.
   | user2                  |        |      6 |           |
   |------------------------------------------------------|
 
-  $ IRON_USER=user2 fe session diff -do-not-lock-session | fe internal remove-color
+  $ IRON_USER=user2 fe session diff -do-not-lock-session | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  old base * | old tip * (glob)
+  old base {REVISION 1} | old tip {REVISION 5}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ Forget this diff -- this file no longer has a diff you should know @@@@@@@@
@@ -405,10 +405,10 @@ This time, add a change but release before the user2 reviews it.
   |   add-follower |        2 |
   |---------------------------|
 
-  $ IRON_USER=user2 fe catch-up diff root/add-follower | fe internal remove-color
+  $ IRON_USER=user2 fe catch-up diff root/add-follower | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 1} | old tip {REVISION 7} | new tip {REVISION 8}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|A change happens
   +|Another change happens in the file

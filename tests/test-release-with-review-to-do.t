@@ -179,8 +179,8 @@ session, the files he reviewed already do not flicker in user2's todo.
   | user1                       |
   |-----------------------------|
 
-  $ IRON_USER=user2 fe session show root/child
-  Reviewing root/child to *. (glob)
+  $ IRON_USER=user2 fe session show root/child | stabilize_output root/child
+  Reviewing root/child to {REVISION 2}.
   2 files to review: 4 lines total
   
   Optional review.
@@ -209,8 +209,8 @@ Iron does not show the lines for user2 both in [fe show] and in user2's [fe todo
 
 However user2 would be free to review anyway.
 
-  $ fe session show -for user2
-  Reviewing root/child to *. (glob)
+  $ fe session show -for user2 | stabilize_output
+  Reviewing root/child to {REVISION 2}.
   2 files to review: 4 lines total
   
   Optional review.
@@ -226,7 +226,7 @@ Release the feature.
 
 Now the child is included in the root.
 
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -241,8 +241,8 @@ Now the child is included in the root.
   | review is enabled      | true                                       |
   | reviewing              | all                                        |
   | is permanent           | true                                       |
-  | tip                    | * | (glob)
-  | base                   | * | (glob)
+  | tip                    | {REVISION 2}                               |
+  | base                   | {REVISION 1}                               |
   |---------------------------------------------------------------------|
   
   |------------------------------------|
@@ -351,10 +351,10 @@ Add a whole feature follower.
 
 Review for user1 & user3 up to this point, but push another change.
 
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 2} | tip {REVISION 4}
   @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
   -|change
   +|child2
@@ -424,8 +424,8 @@ read this diff.
 
 However user1 would be free to review all the files anyway.
 
-  $ fe session show -for user1
-  Reviewing root/child2 to *. (glob)
+  $ fe session show -for user1 | stabilize_output
+  Reviewing root/child2 to {REVISION 5}.
   2 files to review: 4 lines total
   
   Follow review.
@@ -438,11 +438,11 @@ However user1 would be free to review all the files anyway.
   However, you may review them anyway if you desire.
      [ ] 2 other-file
 
-  $ fe session diff -for user1 | fe internal remove-color
+  $ fe session diff -for user1 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 2} | old tip {REVISION 4} | new tip {REVISION 5}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
@@ -496,16 +496,16 @@ started.
   |   child2 |        2 |
   |---------------------|
 
-  $ IRON_USER=user1 fe catch-up diff root/child2 | fe internal remove-color
+  $ IRON_USER=user1 fe catch-up diff root/child2 | fe internal remove-color | stabilize_output root
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 2} | old tip {REVISION 4} | new tip {REVISION 5}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|child2
   +|new-contents
 
-  $ IRON_USER=user1 fe catch-up show root/child2 -omit-header -omit-attribute-table
-  Reviewing root/child2 to *. (glob)
+  $ IRON_USER=user1 fe catch-up show root/child2 -omit-header -omit-attribute-table | stabilize_output root
+  Reviewing root/child2 to {REVISION 5}.
   1 files to review: 2 lines total
   
   Catch-up.  The feature was released and you had partial review done on these files.
@@ -521,11 +521,11 @@ Unlike user1, user3 needs to catch-up on all the files since they were w-f-follo
   |   child2 |        4 |
   |---------------------|
 
-  $ IRON_USER=user3 fe catch-up diff root/child2 | fe internal remove-color
+  $ IRON_USER=user3 fe catch-up diff root/child2 | fe internal remove-color | stabilize_output root
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 2} | old tip {REVISION 4} | new tip {REVISION 5}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
@@ -542,8 +542,8 @@ Unlike user1, user3 needs to catch-up on all the files since they were w-f-follo
   | +|new-contents
   |_
 
-  $ IRON_USER=user3 fe catch-up show root/child2 -omit-header -omit-attribute-table
-  Reviewing root/child2 to cd071a335742.
+  $ IRON_USER=user3 fe catch-up show root/child2 -omit-header -omit-attribute-table | stabilize_output root
+  Reviewing root/child2 to {REVISION 5}.
   2 files to review: 4 lines total
   
   Catch-up.  The feature was released and you were a follower.
@@ -552,16 +552,16 @@ Unlike user1, user3 needs to catch-up on all the files since they were w-f-follo
 
 The file follower only has catch-up review on the file they follow.
 
-  $ IRON_USER=file-follower fe catch-up diff root/child2 | fe internal remove-color
+  $ IRON_USER=file-follower fe catch-up diff root/child2 | fe internal remove-color | stabilize_output root
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 2} | tip {REVISION 5}
   @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
   -|change
   +|new-contents
 
-  $ IRON_USER=file-follower fe catch-up show root/child2 -omit-header -omit-attribute-table
-  Reviewing root/child2 to cd071a335742.
+  $ IRON_USER=file-follower fe catch-up show root/child2 -omit-header -omit-attribute-table | stabilize_output
+  Reviewing root/child2 to {REVISION 5}.
   1 files to review: 2 lines total
   
   Catch-up.  The feature was released and you were a follower.

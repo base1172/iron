@@ -117,10 +117,10 @@ Look for releasable features in the todo.
 Save the diff as of prior to release.
 
   $ THE_DIFF=$(fe diff -even-ignored root/child | fe internal remove-color)
-  $ echo "${THE_DIFF}"
+  $ echo "${THE_DIFF}" | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base * | tip * (glob)
+  base {REVISION 1} | tip {REVISION 2}
   @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
   -|a
   +|change
@@ -150,8 +150,8 @@ After release
 
 The child bookmark is gone, and the parent bookmark is active.
 
-  $ hg book
-   * root                      2:ef5fcbdf8858
+  $ hg book | stabilize_output
+   * root                      2:{REVISION 2}
 
 The child feature is gone.
 
@@ -169,7 +169,7 @@ The root tip has been updated.
 
 There is no review to do in the root.
 
-  $ fe show -show-included-feature-details
+  $ fe show -show-included-feature-details | stabilize_output
   root
   ====
   root
@@ -184,8 +184,8 @@ There is no review to do in the root.
   | review is enabled       | true                             |
   | reviewing               | all                              |
   | is permanent            | true                             |
-  | tip                     | root-000.00 [ef5fcbdf8858]       |
-  | base                    | 6af58578f44e                     |
+  | tip                     | root-000.00 [{REVISION 2}]       |
+  | base                    | {REVISION 0}                     |
   |------------------------------------------------------------|
   
   |------------------------------------|
@@ -205,12 +205,12 @@ There is no review to do in the root.
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | seconder, unix-login-for-testing     |
   | seconder                | seconder                             |
-  | tip                     | root-000.00 [ef5fcbdf8858]           |
-  | base                    | 88de6830d27e                         |
+  | tip                     | root-000.00 [{REVISION 2}]           |
+  | base                    | {REVISION 1}                         |
   | key                     | value                                |
   |----------------------------------------------------------------|
 
@@ -255,7 +255,7 @@ Release root.
 
   $ fe release
   $ feature_to_server root -fake-valid
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -270,8 +270,8 @@ Release root.
   | review is enabled       | true                             |
   | reviewing               | all                              |
   | is permanent            | true                             |
-  | tip                     | root-123.45 [ef5fcbdf8858]       |
-  | base                    | root-123.45 [ef5fcbdf8858]       |
+  | tip                     | root-123.45 [{REVISION 2}]       |
+  | base                    | root-123.45 [{REVISION 2}]       |
   |------------------------------------------------------------|
 
 Releasing by a user that owns the parent but not the child.

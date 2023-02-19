@@ -42,7 +42,7 @@ Create feature.
 
 Show it.
 
-  $ fe show root
+  $ fe show root | stabilize_output root
   root
   ====
   root
@@ -59,22 +59,22 @@ Show it.
   | CRs are enabled        | true                                       |
   | reviewing              | unix-login-for-testing                     |
   | is permanent           | false                                      |
-  | tip                    | 04da3968e088                               |
-  | base                   | 04da3968e088                               |
+  | tip                    | {REVISION 0}                               |
+  | base                   | {REVISION 0}                               |
   |---------------------------------------------------------------------|
 
-  $ fe show -compilation-status
+  $ fe show -compilation-status | stabilize_output root
   ((root
     ((finished
       ((Working
         ((first_12_of_rev 1d4af7f6474e)
          (rev_author_or_error (Ok unix-login-for-testing))))))
      (pending
-      (((first_12_of_rev 04da3968e088)
+      (((first_12_of_rev {REVISION 0})
         (rev_author_or_error (Ok unix-login-for-testing))
         (pending_since
-         ((human_readable (*)) (glob)
-          (int_ns_since_epoch *))))))))) (glob)
+         ((human_readable (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))
+          (int_ns_since_epoch {ELIDED})))))))))
 
 Check that if there are no changes affecting the feature during synchronize-state, there
 is no spurious cache invalidation happening.
@@ -135,9 +135,9 @@ However, compilation-status changes correctly trigger a cache invalidation in th
 
   $ fe create root/child -desc child1
   $ fe show root -remote-repo-path
-  $TESTTMP/repo
+  $TESTCASE_ROOT/repo
   $ fe show root/child -remote-repo-path
-  $TESTTMP/repo
+  $TESTCASE_ROOT/repo
 
   $ fe internal rpc-to-server call synchronize-state <<EOF
   > ((remote_repo_path $PWD)
@@ -174,7 +174,7 @@ However, compilation-status changes correctly trigger a cache invalidation in th
   > EOF
   ((bookmarks_to_rerun (root/child)))
 
-  $ fe show -show-full-compilation-status | grep -v '| pending for'
+  $ fe show -show-full-compilation-status | stabilize_output
   root/child
   ==========
   child1
@@ -193,14 +193,18 @@ However, compilation-status changes correctly trigger a cache invalidation in th
   | CRs are enabled         | true                                       |
   | reviewing               | unix-login-for-testing                     |
   | is permanent            | false                                      |
-  | tip                     | 04da3968e088                               |
-  | base                    | 04da3968e088                               |
+  | bookmark update         | pending for {ELIDED} |
+  | tip                     | {REVISION 0}                               |
+  | tip facts               | pending for {ELIDED} |
+  | base                    | {REVISION 0}                               |
+  | base facts              | pending for {ELIDED} |
+  | base is ancestor of tip | pending for {ELIDED} |
   |----------------------------------------------------------------------|
 
 Show it, with the feature id included.
 
-  $ fe show root -show-feature-id | grep '^| id ' | single_space
-  | id | * | (glob)
+  $ fe show root -show-feature-id | grep '^| id ' | single_space | stabilize_output root
+  | id | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
 
 Check that show works both when providing an id or a feature path.
 
@@ -214,25 +218,25 @@ Check that show works both when providing an id or a feature path.
 
 An error message is provided in case of namespace mismatch.
 
-  $ fe show -archived root/child
+  $ fe show -archived root/child |& stabilize_output root
   (error
    (get-feature-maybe-archived
     ("namespace mismatch, feature is active"
      ((requested_feature
        ((feature_spec (Feature_path root/child)) (namespace Archived)))
       (actual_namespace Existing) (feature_path root/child)
-      (feature_id *))))) (glob)
+      (feature_id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)))))
   [1]
 
-  $ fe show -archived ${id}
+  $ fe show -archived ${id} |& stabilize_output root
   (error
    (get-feature-maybe-archived
     ("namespace mismatch, feature is active"
      ((requested_feature
-       ((feature_spec (Feature_id *)) (glob)
+       ((feature_spec (Feature_id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx))
         (namespace Archived)))
       (actual_namespace Existing) (feature_path root/child)
-      (feature_id *))))) (glob)
+      (feature_id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)))))
   [1]
 
   $ fe show -existing-or-most-recently-archived root/child -feature-path
@@ -268,7 +272,7 @@ success.
 But to avoid a surprising behavior change for users, when the lookup is done by
 feature path, the flag [-archived] is mandatory.
 
-  $ fe show root/child
+  $ fe show root/child |& stabilize_output root
   (error
    (get-feature-maybe-archived
     ("namespace mismatch, no such active feature"
@@ -276,9 +280,9 @@ feature path, the flag [-archived] is mandatory.
       ((feature_spec (Feature_path root/child)) (namespace Existing)))
      (actual_namespace Archived)
      ("archived feature matching"
-      (((feature_id *)) (glob)
+      (((feature_id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx))
        ((feature_path root/child) (owners (unix-login-for-testing))
-        (archived_at (*)))))))) (glob)
+        (archived_at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))))))))
   [1]
 
 However, for feature that are neither archived or active, the error message is
@@ -294,7 +298,7 @@ Check that show gets the correct attributes for archived features.  In
 particular, no pending attributes, and the view makes it clear that there is no
 next steps, and that CRs and line count are not available.
 
-  $ fe show -archived root/child
+  $ fe show -archived root/child | stabilize_output root
   root/child
   ==========
   child1
@@ -302,7 +306,7 @@ next steps, and that CRs and line count are not available.
   |---------------------------------------------------------------|
   | attribute              | value                                |
   |------------------------+--------------------------------------|
-  | id                     | * | (glob)
+  | id                     | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | is archived            | true                                 |
   | owner                  | unix-login-for-testing               |
   | whole-feature reviewer | unix-login-for-testing               |
@@ -311,8 +315,8 @@ next steps, and that CRs and line count are not available.
   | CRs are enabled        | true                                 |
   | reviewing              | unix-login-for-testing               |
   | is permanent           | false                                |
-  | tip                    | 04da3968e088                         |
-  | base                   | 04da3968e088                         |
+  | tip                    | {REVISION 0}                         |
+  | base                   | {REVISION 0}                         |
   |---------------------------------------------------------------|
   
   ("not showing crs" "CRs unavailable for archived features")
@@ -386,16 +390,16 @@ with the ids of those features.
   $ most_recently_archived_id=$(fe show -id root/child)
   $ fe archive root/child
 
-  $ fe show -archived root/child -omit-attribute-table
+  $ fe show -archived root/child -omit-attribute-table |& stabilize_output root
   (error
    (get-feature-maybe-archived
     ("multiple archived features matching"
-     ((((feature_id *)) (glob)
+     ((((feature_id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx))
        ((feature_path root/child) (owners (unix-login-for-testing))
-        (archived_at (*)))) (glob)
-      (((feature_id *)) (glob)
+        (archived_at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))))
+      (((feature_id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx))
        ((feature_path root/child) (owners (unix-login-for-testing))
-        (archived_at (*)))))))) (glob)
+        (archived_at (yyyy-mm-dd hh:mm:ss.xxxxxxxxx+hh:mm))))))))
   [1]
 
   $ fe show -existing-or-most-recently-archived root/child -id \
@@ -454,25 +458,25 @@ Check that the cache operations work properly.
   $ fe show -archived ${id} -feature-path
   root/child
 
-  $ fe internal archived-features-cache show
-  ((max_size 500) (length 1) (keys (*))) (glob)
+  $ fe internal archived-features-cache show | stabilize_uuids
+  ((max_size 500) (length 1) (keys (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)))
 
   $ fe show -archived ${id2} -feature-path
   root/child
 
-  $ fe internal archived-features-cache show
+  $ fe internal archived-features-cache show | stabilize_uuids
   ((max_size 500) (length 2)
    (keys
-    (*))) (glob)
+    (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)))
 
-  $ fe internal archived-features-cache show -feature-paths
-  ((* root/child) (glob)
-   (* root/child)) (glob)
+  $ fe internal archived-features-cache show -feature-paths | stabilize_uuids
+  ((xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx root/child)
+   (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx root/child))
 
   $ fe internal archived-features-cache set-max-size 1
 
-  $ fe internal archived-features-cache show
-  ((max_size 1) (length 1) (keys (*))) (glob)
+  $ fe internal archived-features-cache show | stabilize_uuids
+  ((max_size 1) (length 1) (keys (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)))
 
   $ fe internal archived-features-cache clear -all
 
@@ -483,8 +487,8 @@ Check persist properties of the cache.
 
   $ fe internal archived-features-cache set-max-size 42
   $ fe show -archived ${id2} -omit-attribute-table > /dev/null
-  $ fe internal archived-features-cache show
-  ((max_size 42) (length 1) (keys (*))) (glob)
+  $ fe internal archived-features-cache show | stabilize_uuids
+  ((max_size 42) (length 1) (keys (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)))
 
   $ fe-server stop
   $ fe-server start

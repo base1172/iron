@@ -55,11 +55,11 @@ No review remains, even before Iron server hears from hydra.
   | review is enabled       | true                             |
   | reviewing               | all                              |
   | is permanent            | true                             |
-  | bookmark update         | pending for {ELIDED}                |
+  | bookmark update         | pending for {ELIDED} |
   | tip                     | {REVISION 1}                     |
   | base                    | {REVISION 1}                     |
-  | base facts              | pending for {ELIDED}                |
-  | base is ancestor of tip | pending for {ELIDED}                |
+  | base facts              | pending for {ELIDED} |
+  | base is ancestor of tip | pending for {ELIDED} |
   |------------------------------------------------------------|
   
   ("not showing line counts"

@@ -43,19 +43,15 @@ Make a repo with root and child features.
 
 Release.
 
-  $ function make-releasable {
-  >   fe tools mark-fully-reviewed $1 -for unix-login-for-testing
-  >   fe tools mark-fully-reviewed $1 -for user1 -reason reason
-  > }
   $ for f in root root/app root/app/child root/app/child/nested; do
   >     fe tools mark-fully-reviewed $f -for all -reason reason
   > done
-  $ make-releasable root/app/child/nested
+  $ make_releasable root/app/child/nested
 
-  $ fe diff root/app/child/nested | fe internal remove-color
+  $ fe diff root/app/child/nested | fe internal remove-color | stabilize_output root/app/child/nested
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base * | tip * (glob)
+  base {REVISION 3} | tip {REVISION 4}
   @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
   -|3
   +|4
@@ -71,7 +67,7 @@ Finally, the feature is releasable.
 
 Show the parent.
 
-  $ fe show root/app/child -show-included-feature-details
+  $ fe show root/app/child -show-included-feature-details | stabilize_output root/app/child
   root/app/child
   ==============
   description of child
@@ -86,8 +82,8 @@ Show the parent.
   | review is enabled       | true                          |
   | reviewing               | all                           |
   | is permanent            | false                         |
-  | tip                     | 5553da8f2039                  |
-  | base                    | c0486ef6b211                  |
+  | tip                     | {REVISION 4}                  |
+  | base                    | {REVISION 2}                  |
   |---------------------------------------------------------|
   
   |-----------------------------------------------|
@@ -108,12 +104,12 @@ Show the parent.
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | 643d151d5aac                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 3}                         |
   |----------------------------------------------------------------|
 
 Release a feature with included features into a non root
@@ -121,7 +117,7 @@ Release a feature with included features into a non root
   $ fe change -set-is-permanent true root
   $ fe change -set-is-permanent true root/app
   $ fe change -set-is-permanent true root/app/child
-  $ make-releasable root/app/child
+  $ make_releasable root/app/child
   $ fe release root/app/child
   $ feature_to_server root/app/child -fake-valid
   $ feature_to_server root/app -fake-valid
@@ -129,7 +125,7 @@ Release a feature with included features into a non root
   ()
   $ fe show root/app -included-features
   (root/app/child root/app/child/nested)
-  $ fe show root/app
+  $ fe show root/app | stabilize_output root/app
   root/app
   ========
   description of app
@@ -144,8 +140,8 @@ Release a feature with included features into a non root
   | review is enabled       | true                          |
   | reviewing               | all                           |
   | is permanent            | true                          |
-  | tip                     | 5553da8f2039                  |
-  | base                    | ed27b41fad7b                  |
+  | tip                     | {REVISION 4}                  |
+  | base                    | {REVISION 1}                  |
   | release into me         |                               |
   |   release process       | direct                        |
   |   who can release       | my owners                     |
@@ -161,7 +157,7 @@ Release a feature with included features into a non root
   Included features:
     root/app/child
     root/app/child/nested
-  $ fe show root/app -omit-description -omit-completed-review
+  $ fe show root/app -omit-description -omit-completed-review | stabilize_output root/app
   root/app
   ========
   
@@ -175,8 +171,8 @@ Release a feature with included features into a non root
   | review is enabled       | true                          |
   | reviewing               | all                           |
   | is permanent            | true                          |
-  | tip                     | 5553da8f2039                  |
-  | base                    | ed27b41fad7b                  |
+  | tip                     | {REVISION 4}                  |
+  | base                    | {REVISION 1}                  |
   | release into me         |                               |
   |   release process       | direct                        |
   |   who can release       | my owners                     |
@@ -228,7 +224,7 @@ Release a feature with included features into a non root
   =====================
   Description of nested child.
   With multiple lines.
-  $ fe show root/app -org-mode -show-diff-stat -show-included-feature-details
+  $ fe show root/app -org-mode -show-diff-stat -show-included-feature-details | stabilize_output root/app
   * root/app
   : description of app
   ** Attributes
@@ -242,8 +238,8 @@ Release a feature with included features into a non root
   | review is enabled       | true                          |
   | reviewing               | all                           |
   | is permanent            | true                          |
-  | tip                     | 5553da8f2039                  |
-  | base                    | ed27b41fad7b                  |
+  | tip                     | {REVISION 4}                  |
+  | base                    | {REVISION 1}                  |
   | release into me         |                               |
   |   release process       | direct                        |
   |   who can release       | my owners                     |
@@ -258,12 +254,12 @@ Release a feature with included features into a non root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | c0486ef6b211                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 2}                         |
   |----------------------------------------------------------------|
   *** Affected files
   : file |  2 +-
@@ -275,17 +271,17 @@ Release a feature with included features into a non root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | 643d151d5aac                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 3}                         |
   |----------------------------------------------------------------|
   **** Affected files
   : file |  2 +-
   : 1 files changed, 1 insertions(+), 1 deletions(-)
-  $ fe show root/app -show-included-feature-details -omit-completed-review
+  $ fe show root/app -show-included-feature-details -omit-completed-review | stabilize_output root/app
   root/app
   ========
   description of app
@@ -300,8 +296,8 @@ Release a feature with included features into a non root
   | review is enabled       | true                          |
   | reviewing               | all                           |
   | is permanent            | true                          |
-  | tip                     | 5553da8f2039                  |
-  | base                    | ed27b41fad7b                  |
+  | tip                     | {REVISION 4}                  |
+  | base                    | {REVISION 1}                  |
   | release into me         |                               |
   |   release process       | direct                        |
   |   who can release       | my owners                     |
@@ -324,12 +320,12 @@ Release a feature with included features into a non root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | c0486ef6b211                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 2}                         |
   |----------------------------------------------------------------|
   
   root/app/child/nested
@@ -340,12 +336,12 @@ Release a feature with included features into a non root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | 643d151d5aac                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 3}                         |
   |----------------------------------------------------------------|
 
 -org-mode works when not in the repo.
@@ -354,10 +350,10 @@ Release a feature with included features into a non root
 
 -org-mode -show-diff-stat fails well when not in the repo.
 
-  $ ( cd $IRON_TEST_DIR && \
+  $ ( cd $HOME/workspaces && \
   >     IRON_OPTIONS='((workspaces false))' fe show root/app -org-mode -show-diff-stat
   > )
-  -show-diff-stat requires being in a clone of $TESTTMP/repo.
+  -show-diff-stat requires being in a clone of $TESTCASE_ROOT/repo.
   [1]
 
 Checking persistency
@@ -371,8 +367,8 @@ Checking persistency
 
 Release a feature with included features into a root
 
-  $ make-releasable root/app
-  $ fe internal render-release-email root/app
+  $ make_releasable root/app
+  $ fe internal render-release-email root/app | stabilize_output root/app
   root/app
   ========
   description of app
@@ -380,15 +376,15 @@ Release a feature with included features into a root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
   | review is enabled       | true                                 |
   | reviewing               | all                                  |
   | is permanent            | true                                 |
-  | tip                     | 5553da8f2039                         |
-  | base                    | ed27b41fad7b                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 1}                         |
   | release into me         |                                      |
   |   release process       | direct                               |
   |   who can release       | my owners                            |
@@ -405,12 +401,12 @@ Release a feature with included features into a root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | c0486ef6b211                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 2}                         |
   |----------------------------------------------------------------|
   
   root/app/child/nested
@@ -421,12 +417,12 @@ Release a feature with included features into a root
   |----------------------------------------------------------------|
   | attribute               | value                                |
   |-------------------------+--------------------------------------|
-  | id                      | * | (glob)
+  | id                      | xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx |
   | owner                   | unix-login-for-testing               |
   | whole-feature reviewers | unix-login-for-testing, user1        |
   | seconder                | user1                                |
-  | tip                     | 5553da8f2039                         |
-  | base                    | 643d151d5aac                         |
+  | tip                     | {REVISION 4}                         |
+  | base                    | {REVISION 3}                         |
   |----------------------------------------------------------------|
   $ fe release root/app
   $ feature_to_server root/app -fake-valid
@@ -438,10 +434,10 @@ Release a feature with included features into a root
 
 Look at the diff of a released feature.  Make sure it is not the empty diff.
 
-  $ fe diff root/app/child/nested -archived | fe internal remove-color
+  $ fe diff root/app/child/nested -archived | fe internal remove-color | stabilize_output root
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny level10
-  base * | tip * (glob)
+  base {REVISION 3} | tip {REVISION 4}
   @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
   -|3
   +|4
@@ -466,7 +462,7 @@ Check that [fe show] displays the base and tip as of before the latest release.
   $ feature_to_server root/aap2 -fake-valid
   $ fe change -add-whole-feature-reviewers user1
   $ IRON_USER=user1 fe second
-  $ make-releasable root/aap2
+  $ make_releasable root/aap2
   $ fe release root/aap2
 
   $ fe show root -included-features -order-included-features-by-release-time | sexp query each
@@ -505,8 +501,8 @@ Check that tips of included features are ancestors of feature tip.
   $ fe internal invariant included-features root
   $ hg bookmark -f -r ${old_tip} root
   $ feature_to_server root -fake-valid
-  $ fe internal invariant included-features root
-  (root "has tip" 5553da8f2039
+  $ fe internal invariant included-features root |& stabilize_output root
+  (root "has tip" {REVISION 4}
    "which does not descend from these included features:" (root/aap2))
   [1]
   $ hg bookmark -f -r ${new_tip} root

@@ -198,7 +198,7 @@ Review managers test.
   | root    |          |
   |   baz   |        1 |
   |--------------------|
-  $ fe show
+  $ fe show | stabilize_output
   root/baz
   ========
   foo
@@ -213,8 +213,8 @@ Review managers test.
   | review is enabled       | true                    |
   | reviewing               | whole-feature reviewers |
   | is permanent            | false                   |
-  | tip                     | e26136c25e5a            |
-  | base                    | 2673d446e419            |
+  | tip                     | {REVISION 2}            |
+  | base                    | {REVISION 0}            |
   |---------------------------------------------------|
   
   |--------------------------------------------|
@@ -241,7 +241,7 @@ Review managers test.
   | root    |          |
   |   bzz   |        1 |
   |--------------------|
-  $ fe show
+  $ fe show | stabilize_output
   root/bzz
   ========
   foo
@@ -256,8 +256,8 @@ Review managers test.
   | review is enabled       | true                    |
   | reviewing               | whole-feature reviewers |
   | is permanent            | false                   |
-  | tip                     | e26136c25e5a            |
-  | base                    | 2673d446e419            |
+  | tip                     | {REVISION 2}            |
+  | base                    | {REVISION 0}            |
   |---------------------------------------------------|
   
   |--------------------------------------------|
@@ -288,7 +288,7 @@ Check consistency after restart.
   | root    |          |
   |   bzz   |        1 |
   |--------------------|
-  $ fe show
+  $ fe show | stabilize_output
   root/bzz
   ========
   foo
@@ -303,8 +303,8 @@ Check consistency after restart.
   | review is enabled       | true                    |
   | reviewing               | whole-feature reviewers |
   | is permanent            | false                   |
-  | tip                     | e26136c25e5a            |
-  | base                    | 2673d446e419            |
+  | tip                     | {REVISION 2}            |
+  | base                    | {REVISION 0}            |
   |---------------------------------------------------|
   
   |--------------------------------------------|

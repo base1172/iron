@@ -92,16 +92,16 @@ review_kind to move while the session is under review.  When a reviewer is the
 last one before review obligations are met, the kind used to move to optional in
 that very user's session, which was confusing.
 
-  $ IRON_USER=user1 fe session show root/child
-  Reviewing root/child to e1dfb03d82b0.
+  $ IRON_USER=user1 fe session show root/child | stabilize_output root/child
+  Reviewing root/child to {REVISION 3}.
   2 files to review: 4 lines total
      [ ] 2 file
      [ ] 2 other-file
 
   $ IRON_USER=user1 fe session mark-file root/child file
 
-  $ IRON_USER=user1 fe session show root/child
-  Reviewing root/child to e1dfb03d82b0.
+  $ IRON_USER=user1 fe session show root/child | stabilize_output root/child
+  Reviewing root/child to {REVISION 3}.
   1 files to review (1 already reviewed): 4 lines total
      [X] 2 file
      [ ] 2 other-file
@@ -139,8 +139,8 @@ partial review.  Instead what is left to review becomes a follow review.
 
 User2 has still the same current session.
 
-  $ fe session show -for user2
-  Reviewing root/child to dc0eb4634592.
+  $ fe session show -for user2 | stabilize_output
+  Reviewing root/child to {REVISION 2}.
   1 files to review (1 already reviewed): 4 lines total
   
   Required review.
@@ -151,11 +151,11 @@ User2 has still the same current session.
   However, you may review them anyway if you desire.
      [ ] 2 other-file
 
-  $ fe session diff -for user2 | fe internal remove-color
+  $ fe session diff -for user2 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 1} | tip {REVISION 2}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
@@ -199,8 +199,8 @@ session show] makes this distinction to guide the user.
   |   child |      2 |
   |------------------|
 
-  $ fe session show -for user2
-  Reviewing root/child to e1dfb03d82b0.
+  $ fe session show -for user2 | stabilize_output
+  Reviewing root/child to {REVISION 3}.
   2 files to review: 4 lines total
   
   Follow review.
@@ -213,11 +213,11 @@ session show] makes this distinction to guide the user.
   However, you may review them anyway if you desire.
      [ ] 2 other-file
 
-  $ fe session diff -for user2 | fe internal remove-color
+  $ fe session diff -for user2 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 1} | old tip {REVISION 2} | new tip {REVISION 3}
   _
   | @@@@@@@@ Hunk 1/2 @@@@@@@@
   | @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
@@ -227,7 +227,7 @@ session show] makes this distinction to guide the user.
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ other-file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | tip * (glob)
+  base {REVISION 1} | tip {REVISION 3}
   _
   | @@@@@@@@ Hunk 2/2 @@@@@@@@
   | @@@@@@@@ base 1,2 tip 1,2 @@@@@@@@
@@ -254,17 +254,17 @@ catch-up review.
 
 The diff on the other-file was not registered as part of the diffs to catch-up.
 
-  $ fe catch-up show root/child -for user2 -omit-header -omit-attribute
-  Reviewing root/child to e1dfb03d82b0.
+  $ fe catch-up show root/child -for user2 -omit-header -omit-attribute | stabilize_output
+  Reviewing root/child to {REVISION 3}.
   1 files to review: 2 lines total
   
   Catch-up.  The feature was released and you had partial review done on these files.
      [ ] 2 file
 
-  $ fe catch-up diff root/child -for user2 | fe internal remove-color
+  $ fe catch-up diff root/child -for user2 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 1} | old tip {REVISION 2} | new tip {REVISION 3}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|first-change
   +|second-change
@@ -336,7 +336,7 @@ user2 have partial review done in their session.
   | user2                       |
   |-----------------------------|
 
-  $ IRON_USER=user1 fe session show
+  $ IRON_USER=user1 fe session show | stabilize_output
   Warning: the feature has changed since this session was created.  It may be more suitable
   to review the feature to its most recent tip.  Consider committing your session:
   
@@ -346,7 +346,7 @@ user2 have partial review done in their session.
   |                    2 |                  2 |                   0 |
   |-----------------------------------------------------------------|
   
-  Reviewing root/child to * (glob)
+  Reviewing root/child to {REVISION 5}.
   1 files to review (1 already reviewed): 4 lines total
      [X] 2 file
      [ ] 2 other-file
@@ -375,10 +375,10 @@ releasable and user2's review turns into a follow review.
   | user1                  |        |         2 |
   |---------------------------------------------|
 
-  $ fe session diff -for user2 | fe internal remove-color
+  $ fe session diff -for user2 | fe internal remove-color | stabilize_output
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 3} | old tip {REVISION 5} | new tip {REVISION 6}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|transient
   +|new-state
@@ -404,10 +404,10 @@ releasable and user2's review turns into a follow review.
   |   child |        2 |
   |--------------------|
 
-  $ fe catch-up diff -for user2 root/child | fe internal remove-color
+  $ fe catch-up diff -for user2 root/child | fe internal remove-color | stabilize_output root
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ file @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   scrutiny normal
-  base * | old tip * | new tip * (glob)
+  base {REVISION 3} | old tip {REVISION 5} | new tip {REVISION 6}
   @@@@@@@@ old tip 1,2 new tip 1,2 @@@@@@@@
   -|transient
   +|new-state
