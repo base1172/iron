@@ -105,7 +105,7 @@ let load_as_per_IRON_CONFIG () =
   | Some s -> return (Sexp.of_string_conv_exn s t_of_sexp)
   | None ->
     (match Filename.parts Sys_unix.executable_name with
-     | "j" :: _ :: "app" :: "fe" :: _ -> prod ()
+     | "/" :: "j" :: _ :: "app" :: "fe" :: _ -> prod ()
      | _ ->
        failwithf
          "must define %s environment variable or call [Iron_config.use_prod_IRON_CONFIG] \
