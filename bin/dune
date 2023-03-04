@@ -15,7 +15,7 @@
 (install (section bin) (files (fe.exe as fe)))
 
 (rule
-  (deps fe.exe)
+  (deps fe.exe bashrc ../hg/hgrc)
   (mode promote)
   (action (
     with-stdout-to
@@ -24,7 +24,7 @@
      "./fe.exe internal rpc-to-server supported-by-client -max-output-columns 500"))))
 
 (rule
-  (deps fe.exe)
+  (deps fe.exe bashrc ../hg/hgrc)
   (mode promote)
   (action (
     with-stdout-to
