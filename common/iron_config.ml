@@ -67,6 +67,10 @@ let serializer_pause_timeout_default = Time.Span.of_min 1.
    perfectly fine *)
 let default_hydra_user = User_name.of_string "as-hydra"
 
+let default_valid_users_and_aliases_query =
+  "jadmin", [ "corpdir"; "query"; "-sexp"; "-attr"; "username"; "-attr"; "alias" ]
+;;
+
 (* Serialization must have adequate backward and forward compatibility properties, given
    the clients that need consume that type. *)
 type t =
@@ -76,6 +80,8 @@ type t =
   ; hgrc : Abspath.t
   ; hydra_user : User_name.t [@default default_hydra_user]
   ; serializer_pause_timeout : Time.Span.t [@default serializer_pause_timeout_default]
+  ; valid_users_and_aliases_query : string * string list
+       [@default default_valid_users_and_aliases_query]
   }
 [@@deriving fields, sexp] [@@sexp.allow_extra_fields]
 
@@ -140,6 +146,7 @@ let for_checking_invariants =
   ; hgrc = Abspath.of_string "/"
   ; hydra_user = default_hydra_user
   ; serializer_pause_timeout = serializer_pause_timeout_default
+  ; valid_users_and_aliases_query = default_valid_users_and_aliases_query
   }
 ;;
 
@@ -151,5 +158,6 @@ let invariant t =
       ~rpc_proxy_config:ignore
       ~hgrc:ignore
       ~hydra_user:ignore
-      ~serializer_pause_timeout:ignore)
+      ~serializer_pause_timeout:ignore
+      ~valid_users_and_aliases_query:ignore)
 ;;

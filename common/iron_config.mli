@@ -31,6 +31,7 @@ type t = private
   ; hgrc : Abspath.t
   ; hydra_user : User_name.t
   ; serializer_pause_timeout : Time.Span.t
+  ; valid_users_and_aliases_query : string * string list
   }
 [@@deriving fields, sexp_of]
 

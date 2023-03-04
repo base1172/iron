@@ -25,10 +25,9 @@ let command =
         then Reader.file_contents "/dev/stdin"
         else (
           let%map process =
-            Process.run
-              ~prog:"jadmin"
-              ~args:[ "corpdir"; "query"; "-sexp"; "-attr"; "username"; "-attr"; "alias" ]
-              ()
+            let%bind cfg = force Iron_config.as_per_IRON_CONFIG in
+            let prog, args = cfg.valid_users_and_aliases_query in
+            Process.run ~prog ~args ()
           in
           process |> ok_exn)
       in
