@@ -104,15 +104,15 @@ let load_as_per_IRON_CONFIG () =
   | Some ("prod" | "PROD") -> prod ()
   | Some s -> return (Sexp.of_string_conv_exn s t_of_sexp)
   | None ->
-    if String.is_prefix Sys_unix.executable_name ~prefix:"/j/office/app"
-    then prod ()
-    else
-      failwithf
-        "must define %s environment variable or call [Iron_config.use_prod_IRON_CONFIG] \
-         prior\n\
-         to forcing [as_per_IRON_CONFIG]"
-        env_var
-        ()
+    (match Filename.parts Sys_unix.executable_name with
+     | "j" :: _ :: "app" :: "fe" :: _ -> prod ()
+     | _ ->
+       failwithf
+         "must define %s environment variable or call [Iron_config.use_prod_IRON_CONFIG] \
+          prior\n\
+          to forcing [as_per_IRON_CONFIG]"
+         env_var
+         ())
 ;;
 
 let as_per_IRON_CONFIG = lazy (load_as_per_IRON_CONFIG ())
