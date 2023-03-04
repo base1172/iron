@@ -227,7 +227,8 @@ type _ how =
   | Share_io : unit how
 
 let hg_executable =
-  "/j/office/app/hg/versions/3.8.2+hgrc_env_vars+share_cache_fix+eliminate_bookmark_race/bin/hg"
+  (* "/j/office/app/hg/versions/3.8.2+hgrc_env_vars+share_cache_fix+eliminate_bookmark_race/bin/hg" *)
+  "/usr/bin/hg"
 ;;
 
 let hg_user_env_var = "HGUSER"
@@ -247,18 +248,9 @@ let hg_user_value =
 let env () =
   let%bind hgrc = force hgrc in
   let%map hg_user_value = hg_user_value () in
-  let python_path_var = "PYTHONPATH" in
-  let python_path =
-    let pyre2_dir =
-      "/j/office/app/hg/extra-python-libs/pyre2/build/lib.linux-x86_64-2.6"
-    in
-    match Sys.getenv python_path_var with
-    | None -> pyre2_dir
-    | Some old_python_path -> pyre2_dir ^ ":" ^ old_python_path
-  in
   Unix.unsetenv "HGMERGE";
   let env_alist =
-    [ "USE_THIS_HGRC_ONLY", Abspath.to_string hgrc; python_path_var, python_path ]
+    [ "USE_THIS_HGRC_ONLY", Abspath.to_string hgrc ]
     @
     match hg_user_value with
     | `Already_set -> []
@@ -717,7 +709,13 @@ let status_cleanliness_exn ?repo_is_clean repo_root =
 ;;
 
 let active_bookmark repo_root =
-  let%map stdout = hg ~repo_root "active-bookmark" ~args:[] ~how:Capture_stdout in
+  let%map stdout =
+    hg
+      ~repo_root
+      "bookmarks"
+      ~args:[ "--list"; "."; "--template"; "'{activebookmark}\\n'" ]
+      ~how:Capture_stdout
+  in
   match one_line stdout with
   | `One_line line -> Ok line
   | `Error e -> Error e
@@ -797,7 +795,7 @@ let commit ?(metadata = String.Map.empty) repo_root ~message =
         raise_s
           [%sexp
             "Cannot have a metadata key with '=' in it", (metadata : string String.Map.t)];
-      [ "--metadata"; key ^ "=" ^ value ])
+      [ "--extra"; key ^ "=" ^ value ])
   in
   let args = "-m" :: message :: metadata_args in
   hg ~repo_root "commit" ~args ~how:Share_io
@@ -805,7 +803,7 @@ let commit ?(metadata = String.Map.empty) repo_root ~message =
 
 let distclean repo_root =
   Async_interactive.Job.run !"Distcleaning %{Repo_root#hum}" repo_root ~f:(fun () ->
-    hg ~repo_root "distclean" ~args:[] ~how:Share_io)
+    hg ~repo_root "purge" ~args:[ "--ignored"; "--dirs"; "--files" ] ~how:Share_io)
 ;;
 
 let first_greatest_common_ancestor repo_root rev1 rev2 =
@@ -823,12 +821,12 @@ let greatest_common_ancestors repo_root rev1 rev2 =
   let%map output =
     hg
       ~repo_root
-      "gcas"
+      "log"
       ~args:
-        [ "--config"
-        ; "extensions.gcas=/j/office/app/hg/prod/jhg/greatest_common_ancestors_v1.py"
-        ; Rev.to_string_40 rev1
-        ; Rev.to_string_40 rev2
+        [ "-r"
+        ; sprintf !"gcas(%{Rev#40},%{Rev#40})" rev1 rev2
+        ; "--template"
+        ; node_template
         ]
       ~how:Capture_stdout
   in
@@ -1624,8 +1622,10 @@ let rebase
         match merge_tool with
         | None ->
           [ "--config"
+          ; "ui.merge=merge"
+          ; "--config"
           ; sprintf
-              "ui.merge=/usr/bin/merge -A -L %s -L %s -L %s"
+              "merge-tools.merge.args=-A -L %s -L %s -L %s $local $base $other"
               (sprintf
                  "'old tip: %s [%s]'"
                  (Feature_path.to_string feature_path)
@@ -2068,7 +2068,8 @@ let cat_from_scaffold repo_root file ~scaffold_requires_global_tag_or_rev_hash =
            Process.run
              ~prog:"ssh"
              ~args:
-               [ host
+               [ "-oBatchMode=yes"
+               ; host
                ; "--"
                ; "hg"
                ; "--cwd"

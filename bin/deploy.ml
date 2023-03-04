@@ -12,30 +12,36 @@ let deployed_check_obligations = Filename.concat prod_bin_directory "check-oblig
 
 let generic_deploy_arguments =
   Command.Spec.(
-    step (fun f message remaining_arguments ->
-      f ("-message" :: message :: remaining_arguments))
-    +> flag "-message" (required string) ~doc:" message given to sink deploy"
+    step (fun f remaining_arguments -> f remaining_arguments)
     +> flag
          "--"
          ~doc:" pass the remaining arguments to sink deploy"
          (map_flag escape ~f:(Option.value ~default:[])))
 ;;
 
-let fork_exec_wait ~prog ~args =
-  Core_unix.waitpid_exn (Core_unix.fork_exec ~prog ~argv:(prog :: args) ())
+let maybe_run ~dry_run ~cmd =
+  if dry_run
+  then (
+    Log.Global.raw "%s" (Shell.Process.to_string cmd);
+    Deferred.Or_error.ok_unit)
+  else
+    Deferred.create (fun ivar ->
+      Or_error.try_with (fun () -> Shell.Process.run cmd Shell.Process.discard)
+      |> Ivar.fill ivar)
 ;;
 
-let generic_deploy ~remaining_arguments ~src ~dst =
-  fork_exec_wait
-    ~prog:"/j/office/app/sink/prod/bin/sink"
-    ~args:
-      ([ "deploy"; "file"; src; "-allow-non-inlined-libraries" ]
-      @ List.map Iron_common.Std.Iron_config.deploy_offices ~f:(fun office ->
-          sprintf "as-fe@sink.%s:%s" office dst)
+let generic_deploy ~dry_run ~hosts ~user ~remaining_arguments ~src ~dst =
+  let cmd =
+    Shell.Process.cmd
+      "rsync"
+      ([ "-rltz"; sprintf "--chown=%s" user; src ]
+      @ List.map hosts ~f:(fun office -> sprintf "%s@%s:%s" user office dst)
       @ remaining_arguments)
+  in
+  maybe_run ~dry_run ~cmd
 ;;
 
-let check_exe_on_last_backup exe =
+let check_exe_on_last_backup ~dry_run exe =
   let command =
     sprintf
       "dir=$(mktemp --tmpdir -d);\n\
@@ -54,18 +60,25 @@ let check_exe_on_last_backup exe =
       Fe_config.backup_host
       exe
   in
-  fork_exec_wait ~prog:"bash" ~args:[ "-e"; "-u"; "-c"; command ]
+  let cmd = Shell.Process.cmd "bash" [ "-e"; "-u"; "-c"; command ] in
+  maybe_run ~dry_run ~cmd
 ;;
 
 let check_invariants_of_most_recent_prod_backup =
-  Command.basic_spec
+  Command.async_spec_or_error
     ~summary:"check the most recent backup of prod"
-    Command.Spec.empty
-    (fun () -> check_exe_on_last_backup Sys.executable_name)
+    Command.Spec.(
+      empty
+      +> flag
+           "-dry-run"
+           no_arg
+           ~doc:
+             " don't deploy, just print the operations that would be performed to stdout")
+    (fun dry_run () -> check_exe_on_last_backup ~dry_run Sys.executable_name)
 ;;
 
 let deploy =
-  Command.basic_spec
+  Command.async_spec_or_error
     ~summary:(sprintf "install the given executable to %s" deployed_exe)
     Command.Spec.(
       empty
@@ -87,8 +100,23 @@ let deploy =
            ~doc:
              " do not check the invariants of the last backup with the exe about to be \
               rolled"
+      +> flag
+           "-dry-run"
+           no_arg
+           ~doc:
+             " don't deploy, just print the operations that would be performed to stdout"
+      +> flag
+           "-hosts"
+           (optional_with_default
+              Iron_common.Std.Iron_config.deploy_offices
+              (Arg_type.comma_separated string))
+           ~doc:"HOSTS hosts to deploy on"
+      +> flag
+           "-user"
+           (optional_with_default "as-fe" string)
+           ~doc:"USER username to deploy as (default: as-fe)"
       ++ generic_deploy_arguments)
-    (fun exe hgrc bashrc no_backup_check remaining_arguments () ->
+    (fun exe hgrc bashrc no_backup_check dry_run hosts user remaining_arguments () ->
       let exe =
         match exe with
         | "none" -> None
@@ -108,21 +136,54 @@ let deploy =
         | "default" -> Some (exe_dir ^/ "bashrc")
         | file -> Some file
       in
-      if not no_backup_check then Option.iter exe ~f:check_exe_on_last_backup;
-      List.iter
+      let open Deferred.Or_error.Let_syntax in
+      let%bind () =
+        if no_backup_check
+        then Deferred.Or_error.ok_unit
+        else (
+          match exe with
+          | None -> Deferred.Or_error.ok_unit
+          | Some exe -> check_exe_on_last_backup ~dry_run exe)
+      in
+      Deferred.Or_error.List.iter
         [ exe, deployed_exe; hgrc, deployed_hgrc; bashrc, deployed_bashrc ]
         ~f:(fun (src_opt, dst) ->
           match src_opt with
-          | None -> ()
-          | Some src -> generic_deploy ~remaining_arguments ~src ~dst))
+          | None -> Deferred.Or_error.ok_unit
+          | Some src ->
+            generic_deploy ~dry_run ~hosts ~user ~remaining_arguments ~src ~dst))
 ;;
 
 let deploy_check_obligations =
-  Command.basic_spec
+  Command.async_spec_or_error
     ~summary:(sprintf "install the given script to %s" deployed_check_obligations)
     Command.Spec.(
-      empty +> anon ("file" %: Filename_unix.arg_type) ++ generic_deploy_arguments)
-    (fun file remaining_arguments () ->
-      fork_exec_wait ~prog:"bash" ~args:[ "-n"; file ];
-      generic_deploy ~remaining_arguments ~src:file ~dst:deployed_check_obligations)
+      empty
+      +> flag
+           "-dry-run"
+           no_arg
+           ~doc:
+             " don't deploy, just print the operations that would be performed to stdout"
+      +> flag
+           "-hosts"
+           (optional_with_default
+              Iron_common.Std.Iron_config.deploy_offices
+              (Arg_type.comma_separated string))
+           ~doc:"HOSTS hosts to deploy on"
+      +> flag
+           "-user"
+           (optional_with_default "as-fe" string)
+           ~doc:"USER username to deploy as (default: as-fe)"
+      +> anon ("file" %: Filename_unix.arg_type)
+      ++ generic_deploy_arguments)
+    (fun dry_run hosts user file remaining_arguments () ->
+      let open Deferred.Or_error.Let_syntax in
+      let%bind () = maybe_run ~dry_run ~cmd:(Shell.Process.cmd "bash" [ "-n"; file ]) in
+      generic_deploy
+        ~dry_run
+        ~hosts
+        ~user
+        ~remaining_arguments
+        ~src:file
+        ~dst:deployed_check_obligations)
 ;;
