@@ -41,14 +41,6 @@ module Stable = struct
       print_endline [%bin_digest: t];
       [%expect {| d9a8da25d5656b016fb4dbdc2e4197fb |}]
     ;;
-
-    (* let hash t = *)
-    (*   let open Core in *)
-    (*   let open Import in *)
-    (*   match t with *)
-    (*   | Ssh { host; path } -> Hashtbl.hash (String.hash host, Abspath.hash path) *)
-    (*   | File f -> Abspath.hash f *)
-    (* ;; *)
   end
 end
 
@@ -60,13 +52,13 @@ include Hashable.Make (Stable.V1)
 
 let invariant _ = ()
 let ssh host path = Ssh { host; path = Abspath.of_string path }
-let jane = ssh "hg" "/hg/jane"
-let jane_submissions = ssh "hg" "/hg/jane/submissions"
+let main = ssh "hg" "/hg/main"
+let main_submissions = ssh "hg" "/hg/main/submissions"
 let null = File (Abspath.of_string "/dev/null")
 
 let%test_unit _ =
-  let string = "ssh://hg//hg/jane/submissions" in
-  let t = jane_submissions in
+  let string = "ssh://hg//hg/main/submissions" in
+  let t = main_submissions in
   [%test_result: t] (of_string string) ~expect:t;
   [%test_result: string] (to_string t) ~expect:string
 ;;
@@ -82,7 +74,7 @@ let family t =
 
 let%test_unit _ =
   List.iter
-    [ Some "jane", jane_submissions
+    [ Some "main", main_submissions
     ; Some "friend", ssh "hg" "/hg/friend/branches/friend-assistant-109.60.01"
     ; None, File (Abspath.of_string "/tmp/foo")
     ]
@@ -98,6 +90,6 @@ let is_prefix ~prefix t =
   | Ssh _, File _ | File _, Ssh _ -> false
 ;;
 
-let is_in_jane = is_prefix ~prefix:jane
+let is_in_main = is_prefix ~prefix:main
 
-let%test _ = is_in_jane jane_submissions
+let%test _ = is_in_main main_submissions

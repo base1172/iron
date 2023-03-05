@@ -16,8 +16,8 @@ include Hashable.S with type t := t
 include Stringable.S with type t := t
 include Invariant.S with type t := t
 
-val is_in_jane : t -> bool
-val jane_submissions : t
+val is_in_main : t -> bool
+val main_submissions : t
 val null : t
 
 (** Only works for repositories on the hg box. *)

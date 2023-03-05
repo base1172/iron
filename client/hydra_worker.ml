@@ -391,7 +391,7 @@ let infer_base_command =
         Option.value_map
           remote_repo_path
           ~f:Remote_repo_path.of_string
-          ~default:Remote_repo_path.jane_submissions
+          ~default:Remote_repo_path.main_submissions
       in
       let%map base =
         infer_base_of_bookmark remote_repo_path (ok_exn Repo_root.program_started_in) rev
@@ -844,7 +844,7 @@ let serverless_command =
       let tip = ok_exn tip in
       let%bind base =
         match base_opt with
-        | None -> infer_base_of_bookmark Remote_repo_path.jane_submissions repo_root tip
+        | None -> infer_base_of_bookmark Remote_repo_path.main_submissions repo_root tip
         | Some base -> Raw_rev.resolve_exn base ~in_:(Ok repo_root)
       in
       printf
