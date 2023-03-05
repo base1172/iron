@@ -218,7 +218,7 @@ let%test_unit _ =
       [%test_result: Feature_name.t option]
         ~expect:(Option.map ~f:Feature_name.of_string expected)
         (match_default_line line))
-    [ "default = ssh://hg//hg/jane/submissions", Some "jane"
+    [ "default = ssh://hg//hg/main/submissions", Some "main"
     ; "  default   =  ssh://hg//hg/scaffoo/submissions ", Some "scaffoo"
     ; "default = ssh://jdoe@blah//some/random/path/blah", None
     ]

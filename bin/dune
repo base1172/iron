@@ -1,5 +1,5 @@
 (executables
-  (names fe)
+  (names fe hydra)
   (libraries
    async
    core
@@ -12,7 +12,11 @@
    iron_server)
   (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
 
-(install (section bin) (files (fe.exe as fe)))
+(install
+  (section bin)
+  (files
+    (fe.exe    as fe)
+    (hydra.exe as hydra)))
 
 (rule
   (deps fe.exe bashrc ../hg/hgrc)

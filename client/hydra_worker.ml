@@ -349,7 +349,7 @@ let compute_worker_rev_facts
 let infer_base_of_repository remote_repo_path repo_root =
   let tag_root =
     match Remote_repo_path.family remote_repo_path with
-    | None -> "jane"
+    | None -> "main"
     | Some family -> family
   in
   let%bind all_tags =
