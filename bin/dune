@@ -1,6 +1,7 @@
-(executables
-  (names fe hydra)
-  (libraries
+(executable
+ (name    fe)
+ (modules fe admin deploy import fe_config)
+ (libraries
    async
    core
    core_unix.command_unix
@@ -10,7 +11,14 @@
    iron_obligations
    iron_protocol
    iron_server)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+
+ (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+
+(executable
+ (name    hydra)
+ (modules hydra)
+ (libraries async core core_unix.command_unix)
+ (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
 
 (install
   (section bin)
