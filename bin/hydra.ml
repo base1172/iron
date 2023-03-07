@@ -397,59 +397,84 @@ module Worker = struct
       }
   ;;
 
+  let update_bookmark bookmark =
+    let open Deferred.Or_error.Let_syntax in
+    let%bind repo_root = Deferred.return Repo_root.program_started_in in
+    let%bind bookmark =
+      match bookmark with
+      | Some bookmark -> Deferred.Or_error.return bookmark
+      | None -> Hg.current_bookmark repo_root
+    in
+    let%bind rev_zero = Hg.create_rev_zero repo_root |> Deferred.map ~f:Result.return in
+    let%bind tip =
+      Hg.create_rev
+        repo_root
+        (Hg.Revset.bookmark (Hg.Bookmark.Feature (Feature_path.of_string bookmark)))
+    in
+    Log.Global.info !"tip = %s, bookmark = %s\n" (Rev.to_string_40 tip) bookmark;
+    let%bind feature_path = Deferred.return (Feature_path.of_string_or_error bookmark) in
+    let%bind { base
+             ; feature_id
+             ; need_diff4s_starting_from
+             ; aliases
+             ; lines_required_to_separate_ddiff_hunks
+             ; worker_cache
+             }
+      =
+      Hydra_worker.rpc_to_server { feature_path; rev_zero; tip = Some tip }
+    in
+    let worker_cache_session = Worker_cache.Worker_session.create worker_cache in
+    let%bind info =
+      let need_diff4s_starting_from = List.map need_diff4s_starting_from ~f:fst in
+      maybe_update_bookmark
+        ~repo_root
+        ~feature_path
+        ~base
+        ~aliases
+        ~tip
+        ~need_diff4s_starting_from
+        ~lines_required_to_separate_ddiff_hunks
+        ~worker_cache_session
+    in
+    Update_bookmark.rpc_to_server
+      { feature_path
+      ; feature_id
+      ; info = Ok info
+      ; augment_worker_cache =
+          Worker_cache.Worker_session.back_to_server worker_cache_session
+      }
+  ;;
+
   module Cmd = struct
+    (* let monitor () = *)
+    (*   let open Command.Let_syntax in *)
+    (*   Async.Command.async_or_error *)
+    (*     ~summary:"start a hydra worker to monitor a local repo" *)
+    (*     [%map_open *)
+    (*       let repo_path = anon (maybe ("PATH" %: string)) *)
+    (*       and from_bookmark = flag "from-bookmark" (optional string) ~doc:"start monitoring from bookmark" *)
+    (*       in *)
+    (*       fun () -> *)
+    (*         let from_bookmark = *)
+    (*           Option.value_or_thunk from_bookmark ~default:(fun () -> *)
+
+    (*             ) *)
+    (*         in *)
+    (*         let open Deferred.Let_syntax in           *)
+    (*         let%bind pipe_r = Async_inotify.create ~recursive:true (repo_path ^/ ".hg") in *)
+    (*         Hg.current_bookmark             *)
+    (*         Pipe.iter pipe_r ~continue_on_error:false ~f:(fun (inotify,files,event) -> *)
+    (*           update_bookmark *)
+    (*         ) *)
+    (*     ] *)
+
     let update_bookmark () =
       let open Command.Let_syntax in
       Async.Command.async_or_error
         ~summary:"start a hydra worker to update the bookmark for a feature"
         [%map_open
-          let bookmark = anon (maybe ("BOOKMARK feature name or bookmark" %: string)) in
-          fun () ->
-            let open Deferred.Or_error.Let_syntax in
-            let%bind repo_root = Deferred.return Repo_root.program_started_in in
-            let%bind bookmark =
-              match bookmark with
-              | Some bookmark -> Deferred.Or_error.return bookmark
-              | None -> Hg.current_bookmark repo_root
-            in
-            let%bind rev_zero =
-              Hg.create_rev_zero repo_root |> Deferred.map ~f:Result.return
-            in
-            let%bind tip = Hg.create_rev repo_root Hg.Revset.dot in
-            Log.Global.info !"tip = %s, bookmark = %s\n" (Rev.to_string_40 tip) bookmark;
-            let%bind feature_path =
-              Deferred.return (Feature_path.of_string_or_error bookmark)
-            in
-            let%bind { base
-                     ; feature_id
-                     ; need_diff4s_starting_from
-                     ; aliases
-                     ; lines_required_to_separate_ddiff_hunks
-                     ; worker_cache
-                     }
-              =
-              Hydra_worker.rpc_to_server { feature_path; rev_zero; tip = Some tip }
-            in
-            let worker_cache_session = Worker_cache.Worker_session.create worker_cache in
-            let%bind info =
-              let need_diff4s_starting_from = List.map need_diff4s_starting_from ~f:fst in
-              maybe_update_bookmark
-                ~repo_root
-                ~feature_path
-                ~base
-                ~aliases
-                ~tip
-                ~need_diff4s_starting_from
-                ~lines_required_to_separate_ddiff_hunks
-                ~worker_cache_session
-            in
-            Update_bookmark.rpc_to_server
-              { feature_path
-              ; feature_id
-              ; info = Ok info
-              ; augment_worker_cache =
-                  Worker_cache.Worker_session.back_to_server worker_cache_session
-              }]
+          let bookmark = anon (maybe ("BOOKMARK" %: string)) in
+          fun () -> update_bookmark bookmark]
     ;;
 
     let group () =
