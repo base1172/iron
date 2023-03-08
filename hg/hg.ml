@@ -1260,14 +1260,6 @@ let push repo_root bookmarks ~to_ ~overwrite_bookmark =
         in
         let%map results =
           with_temp_share repo_root ~f:(fun repo_root ->
-            (* share doesn't copy the bookmarks over (but checking in case it changes) *)
-            let%bind () =
-              let%map bookmarks_after_sharing = list_bookmarks repo_root in
-              [%test_result: string list] bookmarks_after_sharing ~expect:[]
-            in
-            let%bind () =
-              pull ~even_if_unclean:true repo_root ~from:to_ (`Bookmarks bookmarks)
-            in
             Deferred.List.map bookmark_and_revs ~f:(fun (b, local_rev) ->
               let%bind remote_rev = create_rev_exn repo_root (Revset.bookmark b) in
               match%map
