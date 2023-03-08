@@ -32,6 +32,7 @@ type t = private
   ; hydra_user : User_name.t
   ; serializer_pause_timeout : Time.Span.t
   ; valid_users_and_aliases_query : string * string list
+  ; domain_name : string
   }
 [@@deriving fields, sexp_of]
 

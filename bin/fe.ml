@@ -125,6 +125,7 @@ let cmd_top =
     ; "enable-review", Iron_client.Cmd_enable_review.enable_command
     ; "fact", Iron_client.Cmd_fact.command
     ; "glog", Iron_client.Cmd_glog.command
+    ; "hydra", Iron_hydra.command ()
     ; "internal", internal
     ; "is-releasable", Iron_client.Cmd_is_releasable.command
     ; "is-unlocked", Iron_client.Cmd_is_unlocked.command

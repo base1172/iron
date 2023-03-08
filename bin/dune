@@ -1,22 +1,20 @@
 (executables
- (names    fe hydra)
- (libraries
+  (names fe)
+  (libraries
    async
+   async_inotify
    core
    core_unix.command_unix
+   iron_hydra
    iron_client
    iron_common
    iron_hg
    iron_obligations
    iron_protocol
    iron_server)
- (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
 
-(install
-  (section bin)
-  (files
-    (fe.exe    as fe)
-    (hydra.exe as hydra)))
+(install (section bin) (files (fe.exe as fe)))
 
 (rule
   (deps fe.exe bashrc ../hg/hgrc)

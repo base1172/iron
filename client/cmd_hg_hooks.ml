@@ -114,7 +114,7 @@ let command =
       in
       Core_unix.mkdir_p (Abspath.to_string hookdir);
       let basedir = Core_unix.mkdtemp (Abspath.to_string hookdir ^/ "run") in
-      let main ~basedir:_ =
+      let main ~basedir:_ ~instance:_ ~mode:_ =
         match%bind
           Monitor.try_with_or_error ~extract_exn:true (fun () ->
             main ~repo_root ~hook_name)
@@ -127,8 +127,10 @@ let command =
       App_harness.start
         ~init_stds:false
         ~log_format:`Text
+        ~appname:"iron-hg-hooks"
         ~main
         ~basedir
+        ~instance:None
         ~mode:`Prod
         ~fg
         ())

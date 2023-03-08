@@ -1,0 +1,1 @@
+let command () = Hydra.command ()

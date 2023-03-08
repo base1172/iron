@@ -2,12 +2,25 @@ open! Core
 open! Async
 open! Import
 
+module Mode : sig
+  type t =
+    [ `Prod
+    | `Dev
+    ]
+
+  include Comparable.S with type t := t
+  include Stringable.S with type t := t
+  include Sexpable.S with type t := t
+end
+
 val start
   :  init_stds:bool
   -> log_format:Log.Output.Format.t
-  -> main:(basedir:string -> unit Deferred.t)
+  -> appname:string
+  -> main:(basedir:string -> instance:string option -> mode:Mode.t -> unit Deferred.t)
   -> basedir:string
-  -> mode:[ `Dev | `Prod ]
+  -> instance:string option
+  -> mode:Mode.t
   -> fg:bool
   -> unit
   -> unit
@@ -17,6 +30,9 @@ val commands
   -> appdir_for_doc:string
   -> appdir:string
   -> log_format:Log.Output.Format.t
-  -> start_spec:('a, basedir:string -> unit Deferred.t) Command.Spec.t
+  -> start_spec:
+       ( 'a
+       , basedir:string -> instance:string option -> mode:Mode.t -> unit Deferred.t )
+       Command.Spec.t
   -> start_main:'a
   -> (string * Command.t) list

@@ -82,6 +82,7 @@ type t =
   ; serializer_pause_timeout : Time.Span.t [@default serializer_pause_timeout_default]
   ; valid_users_and_aliases_query : string * string list
        [@default default_valid_users_and_aliases_query]
+  ; domain_name : string
   }
 [@@deriving fields, sexp] [@@sexp.allow_extra_fields]
 
@@ -147,6 +148,7 @@ let for_checking_invariants =
   ; hydra_user = default_hydra_user
   ; serializer_pause_timeout = serializer_pause_timeout_default
   ; valid_users_and_aliases_query = default_valid_users_and_aliases_query
+  ; domain_name = "localhost"
   }
 ;;
 
@@ -159,5 +161,6 @@ let invariant t =
       ~hgrc:ignore
       ~hydra_user:ignore
       ~serializer_pause_timeout:ignore
-      ~valid_users_and_aliases_query:ignore)
+      ~valid_users_and_aliases_query:ignore
+      ~domain_name:ignore)
 ;;

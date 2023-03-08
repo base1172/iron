@@ -11,12 +11,12 @@ module Mode = struct
       ]
     [@@deriving compare]
 
-    let to_string = function
+    let to_string : t -> string = function
       | `Prod -> "prod"
       | `Dev -> "dev"
     ;;
 
-    let of_string = function
+    let of_string : string -> t = function
       | "Prod" | "prod" -> `Prod
       | "Dev" | "dev" -> `Dev
       | str -> failwithf "Illegal string %s. Expected 'prod' or 'dev'." str ()
@@ -25,18 +25,25 @@ module Mode = struct
 
   include T
   include Sexpable.Of_stringable (T)
+
+  include Comparable.Make (struct
+    include T
+    include Sexpable.Of_stringable (T)
+  end)
 end
 
 let common_flags ~appdir_for_doc ~appdir =
   Command.Spec.(
-    step (fun k ~appdir ~mode ->
+    step (fun k ~appdir ~instance ~mode ->
       let basedir = appdir ^/ Mode.to_string mode in
-      k ~basedir ~mode)
+      k ~basedir ~instance ~mode)
     ++ step (fun k x -> k ~appdir:x)
     +> flag
          "-appdir"
          (optional_with_default appdir Filename_unix.arg_type)
          ~doc:("DIR override default APPDIR of " ^ appdir_for_doc)
+    ++ step (fun k x -> k ~instance:x)
+    +> flag "-instance" (optional string) ~doc:"INSTANCE instance name"
     ++ step (fun k x -> k ~mode:x)
     +> flag
          "-mode"
@@ -45,16 +52,20 @@ let common_flags ~appdir_for_doc ~appdir =
 ;;
 
 module Lock_file = struct
-  let path ~lockdir = lockdir ^/ "lock"
+  let path ~appname ~instance ~lockdir =
+    match instance with
+    | None -> lockdir ^/ sprintf "%s.lock" appname
+    | Some instance -> lockdir ^/ sprintf "%s.%s.lock" instance appname
+  ;;
 
-  let create_exn ~lockdir =
+  let create_exn ~appname ~instance ~lockdir =
     let timeout = Core.Time.Span.of_sec 1. in
-    let lock_file = path ~lockdir in
+    let lock_file = path ~appname ~instance ~lockdir in
     Lock_file_blocking.Nfs.blocking_create ~timeout lock_file
   ;;
 
-  let read_exn ~basedir:lockdir =
-    let lock_file = path ~lockdir in
+  let read_exn ~appname ~instance ~basedir:lockdir =
+    let lock_file = path ~appname ~instance ~lockdir in
     let is_locked =
       try
         Lock_file_blocking.Nfs.critical_section
@@ -92,7 +103,7 @@ let configure_log ~log_format ~logdir ~fg =
   Log.Global.set_output (if fg then Log.Output.stderr () :: outputs else outputs)
 ;;
 
-let start ~init_stds ~log_format ~main ~basedir ~mode ~fg () =
+let start ~init_stds ~log_format ~appname ~main ~basedir ~instance ~mode ~fg () =
   let keep_stdout_and_stderr = not fg in
   let logdir = basedir in
   let release_io =
@@ -109,7 +120,7 @@ let start ~init_stds ~log_format ~main ~basedir ~mode ~fg () =
         ()
       |> unstage)
   in
-  Lock_file.create_exn ~lockdir:basedir;
+  Lock_file.create_exn ~appname ~instance ~lockdir:basedir;
   configure_log ~log_format ~logdir ~fg;
   Signal.handle [ Signal.term; Signal.int ] ~f:(fun signal ->
     if keep_stdout_and_stderr
@@ -148,7 +159,7 @@ let start ~init_stds ~log_format ~main ~basedir ~mode ~fg () =
        | `Dev ->
          Log.Global.set_level `Debug;
          Log.Global.debug "logging at level `Debug because we're in dev mode");
-      main ~basedir)
+      main ~basedir ~instance ~mode)
   in
   upon main (function
     | Ok () -> shutdown 0
@@ -166,7 +177,7 @@ let start_command ~appname ~appdir_for_doc ~appdir ~log_format spec main =
     ~readme
     Command.Spec.(
       spec
-      ++ step (fun main -> start ~init_stds:true ~log_format ~main)
+      ++ step (fun main -> start ~init_stds:true ~log_format ~appname ~main)
       ++ common_flags ~appdir_for_doc ~appdir
       ++ step (fun k x -> k ~fg:x)
       +> flag "-fg" no_arg ~doc:" run in foreground, don't daemonize")
@@ -177,8 +188,8 @@ let stop_command ~appname ~appdir_for_doc ~appdir =
   Command.basic_spec
     ~summary:("stop " ^ appname)
     (common_flags ~appdir_for_doc ~appdir)
-    (fun ~basedir ~mode:_ () ->
-    let _, pid = Lock_file.read_exn ~basedir in
+    (fun ~basedir ~instance ~mode:_ () ->
+    let _, pid = Lock_file.read_exn ~appname ~instance ~basedir in
     match Signal_unix.send Signal.term (`Pid pid) with
     | `Ok -> ()
     | `No_such_process -> failwithf !"Attempt to kill nonexistent pid %{Pid}" pid ())
@@ -188,9 +199,9 @@ let status_command ~appname ~appdir_for_doc ~appdir =
   Command.basic_spec
     ~summary:("status of " ^ appname)
     (common_flags ~appdir_for_doc ~appdir)
-    (fun ~basedir ~mode:_ () ->
+    (fun ~basedir ~instance ~mode:_ () ->
     try
-      let host, pid = Lock_file.read_exn ~basedir in
+      let host, pid = Lock_file.read_exn ~appname ~instance ~basedir in
       Core.printf "%s: RUNNING on host %s pid %d\n%!" appname host (Pid.to_int pid);
       Core_unix.exit_immediately 0
     with

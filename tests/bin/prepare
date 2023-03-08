@@ -87,6 +87,7 @@ EOF
  (rpc_proxy_config ())
  (hgrc $IRON_HGRC)
  (hydra_user as-hydra)
+ (domain_name local)
 )
 EOF
     export IRON_CONFIG="$(cat $IRON_CONFIG_PATH)"		

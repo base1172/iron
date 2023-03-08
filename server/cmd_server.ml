@@ -38,7 +38,7 @@ let load_state ~root_directory ~server_config ~only_checking_invariants =
   create_state ~server_config
 ;;
 
-let load_state_and_start_async_rpc_server ~basedir =
+let load_state_and_start_async_rpc_server ~basedir ~instance:_ ~mode:_ =
   let basedir = Abspath.of_string basedir in
   let%bind server_config = Iron_config.load_exn ~basedir in
   (match server_config.host with
@@ -101,7 +101,7 @@ module Proxy = struct
                "-where-to-listen"
                (optional int)
                ~doc:"PORT specify a port where to listen.  default is same forward port")
-      ~start_main:(fun where_to_connect listen_port ~basedir:_ ->
+      ~start_main:(fun where_to_connect listen_port ~basedir:_ ~instance:_ ~mode:_ ->
         let%bind real_server =
           match where_to_connect with
           | Some host_and_port -> return host_and_port

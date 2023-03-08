@@ -238,8 +238,9 @@ let hg_user_value =
     if is_some (Sys.getenv hg_user_env_var)
     then return `Already_set
     else (
+      let%bind iron_config = force Iron_config.as_per_IRON_CONFIG in
       let user = User_name.(to_string unix_login) in
-      let email = sprintf "%s@janestreet.com" user in
+      let email = sprintf "%s@%s" user iron_config.domain_name in
       match%map Unix.Passwd.getbyname user with
       | None -> `Inferred email
       | Some { gecos; _ } -> `Inferred (sprintf "%s <%s>" gecos email)))
@@ -250,7 +251,8 @@ let env () =
   let%map hg_user_value = hg_user_value () in
   Unix.unsetenv "HGMERGE";
   let env_alist =
-    [ "USE_THIS_HGRC_ONLY", Abspath.to_string hgrc ]
+    [ "HGRCPATH", Abspath.to_string hgrc; "HGRCSKIPREPO", "1" ]
+    (* [ "USE_THIS_HGRC_ONLY", Abspath.to_string hgrc ] *)
     @
     match hg_user_value with
     | `Already_set -> []
@@ -1112,8 +1114,10 @@ let with_temp_share ?in_dir repo_root ~f =
     let () = ok_exn result in
     let hg_cache = Path_in_repo.of_string ".hg/cache" in
     let source_cache = Repo_root.append repo_root hg_cache in
-    let%bind () =
-      match%bind Abspath.file_exists_exn source_cache with
+    let hg_bookmarks = Path_in_repo.of_string ".hg/bookmarks" in
+    let source_bookmarks = Repo_root.append repo_root hg_bookmarks in
+    let copy_to_temp_share_if_exists src dst =
+      match%bind Abspath.file_exists_exn src with
       | false ->
         (* May not exist for caches newly created with [hg share] (rather than
              [hg quick-share]). There isn't much we can do at this point. *)
@@ -1125,14 +1129,15 @@ let with_temp_share ?in_dir repo_root ~f =
             ~args:
               [ "-a"
               ; "--"
-              ; Abspath.to_string source_cache
-              ; Abspath.to_string
-                  (Abspath.append temp_dir (Path_in_repo.to_relpath hg_cache))
+              ; Abspath.to_string src
+              ; Abspath.to_string (Abspath.append temp_dir (Path_in_repo.to_relpath dst))
               ]
             ()
         in
         ignore (ok_exn result : string)
     in
+    let%bind () = copy_to_temp_share_if_exists source_cache hg_cache
+    and () = copy_to_temp_share_if_exists source_bookmarks hg_bookmarks in
     let human_readable =
       let prefix = "temp share of " in
       let human_readable = Repo_root.to_string_hum repo_root in
