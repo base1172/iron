@@ -6,7 +6,6 @@ let prod_directory = "/j/office/app/fe/prod"
 let prod_bin_directory = Filename.concat prod_directory "bin"
 let prod_etc_directory = Filename.concat prod_directory "etc"
 let deployed_exe = Filename.concat prod_bin_directory "fe"
-let deployed_hydra = Filename.concat prod_bin_directory "hydra"
 let deployed_hgrc = Filename.concat prod_etc_directory "hgrc"
 let deployed_bashrc = Filename.concat prod_etc_directory "bashrc"
 let deployed_check_obligations = Filename.concat prod_bin_directory "check-obligations"
@@ -89,10 +88,6 @@ let deploy =
            (optional_with_default "self" Filename_unix.arg_type)
            ~doc:"(EXE|self|none) which executable to roll (defaults to self)"
       +> flag
-           "-hydra"
-           (optional_with_default (exe_dir ^/ "hydra.exe") Filename_unix.arg_type)
-           ~doc:"(EXE|none) which hydra executable to roll (defaults to hydra.exe)"
-      +> flag
            "-hgrc"
            (optional_with_default "default" Filename_unix.arg_type)
            ~doc:"(HGRC|default|none) which hgrc to roll"
@@ -122,16 +117,11 @@ let deploy =
            (optional_with_default "as-fe" string)
            ~doc:"USER username to deploy as (default: as-fe)"
       ++ generic_deploy_arguments)
-    (fun exe hydra hgrc bashrc no_backup_check dry_run hosts user remaining_arguments () ->
+    (fun exe hgrc bashrc no_backup_check dry_run hosts user remaining_arguments () ->
       let exe =
         match exe with
         | "none" -> None
         | "self" -> Some Sys.executable_name
-        | file -> Some file
-      in
-      let hydra =
-        match hydra with
-        | "none" -> None
         | file -> Some file
       in
       let hgrc =
@@ -156,11 +146,7 @@ let deploy =
           | Some exe -> check_exe_on_last_backup ~dry_run exe)
       in
       Deferred.Or_error.List.iter
-        [ exe, deployed_exe
-        ; hydra, deployed_hydra
-        ; hgrc, deployed_hgrc
-        ; bashrc, deployed_bashrc
-        ]
+        [ exe, deployed_exe; hgrc, deployed_hgrc; bashrc, deployed_bashrc ]
         ~f:(fun (src_opt, dst) ->
           match src_opt with
           | None -> Deferred.Or_error.ok_unit
