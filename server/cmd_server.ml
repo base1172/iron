@@ -71,13 +71,13 @@ let load_state_and_check_invariants =
       Deferred.unit)
 ;;
 
-let home = Sys.getenv "HOME" |> Option.value_exn ~here:[%here]
+let appdir = "/j/office/app/fe"
 
 let commands =
   App_harness.commands
     ~appname:"fe"
-    ~appdir_for_doc:"$HOME"
-    ~appdir:home
+    ~appdir_for_doc:appdir
+    ~appdir
     ~log_format:(if am_functional_testing then `Sexp_hum else `Sexp)
     ~start_spec:Command.Spec.empty
     ~start_main:load_state_and_start_async_rpc_server
@@ -87,8 +87,8 @@ module Proxy = struct
   let commands =
     App_harness.commands
       ~appname:"fe-proxy"
-      ~appdir_for_doc:"$HOME/proxy"
-      ~appdir:(home ^/ "proxy")
+      ~appdir_for_doc:(appdir ^/ "proxy")
+      ~appdir:(appdir ^/ "proxy")
       ~log_format:(if am_functional_testing then `Sexp_hum else `Sexp)
       ~start_spec:
         Command.Spec.(
