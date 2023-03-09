@@ -453,7 +453,7 @@ module Workspaces = struct
     | Some value -> value
     | None ->
       (match t.workspaces.are_enabled with
-       | `default -> false
+       | `default -> true
        | `set_to bool -> bool)
   ;;
 
