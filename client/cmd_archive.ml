@@ -3,6 +3,7 @@ open! Async
 open! Import
 
 let main { Fe.Archive.Action.feature_path; for_; reason_for_archiving } =
+  let%bind iron_config = force Iron_config.as_per_IRON_CONFIG in
   let%bind repo_root =
     Cmd_workspace.repo_for_hg_operations_exn feature_path ~use:`Clone
   in
@@ -29,7 +30,9 @@ let main { Fe.Archive.Action.feature_path; for_; reason_for_archiving } =
   let%bind () =
     Hg.delete_bookmarks repo_root [ Feature feature_path ] (`Push_to remote_repo_path)
   in
-  if (not am_functional_testing) && Set.mem feature.send_email_upon Archive
+  if (not am_functional_testing)
+     && Set.mem feature.send_email_upon Archive
+     && Iron_config.send_email_notices_to_users iron_config
   then
     Async_smtp.Simplemail.send
       ~subject:(sprintf !"feature was archived: %{Feature_path}" feature_path)

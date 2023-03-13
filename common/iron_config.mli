@@ -33,6 +33,7 @@ type t = private
   ; serializer_pause_timeout : Time.Span.t
   ; valid_users_and_aliases_query : string * string list
   ; domain_name : string
+  ; send_email_notices_to_users : bool
   }
 [@@deriving fields, sexp_of]
 

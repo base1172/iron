@@ -120,16 +120,19 @@ let main { Fe.Release.Action.feature_path; for_; included_features_order } =
               |> Email_message.Email_address.of_string_exn)
           else None
         in
-        Async_smtp.Simplemail.send
-          ?reply_to
-          ~subject:(sprintf !"feature was released: %{Feature_path}" feature_path)
-          ~to_:
-            (Set.to_list send_release_email_to
-            |> List.map ~f:Email_address.to_string
-            |> List.map ~f:Email_message.Email_address.of_string_exn)
-          (Cmd_show.render_email_body feature ~included_features_order ~event:Released
-          |> Async_smtp.Email.Simple.Content.text_utf8)
-        >>| Or_error.ok_exn)
+        match Iron_config.send_email_notices_to_users iron_config with
+        | false -> Deferred.unit
+        | true ->
+          Async_smtp.Simplemail.send
+            ?reply_to
+            ~subject:(sprintf !"feature was released: %{Feature_path}" feature_path)
+            ~to_:
+              (Set.to_list send_release_email_to
+              |> List.map ~f:Email_address.to_string
+              |> List.map ~f:Email_message.Email_address.of_string_exn)
+            (Cmd_show.render_email_body feature ~included_features_order ~event:Released
+            |> Async_smtp.Email.Simple.Content.text_utf8)
+          >>| Or_error.ok_exn)
   in
   let%bind () =
     match disposition with

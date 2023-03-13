@@ -81,6 +81,7 @@ let command =
     in
     fun () ->
       let open! Deferred.Let_syntax in
+      let%bind iron_config = force Iron_config.as_per_IRON_CONFIG in
       let feature_path = ok_exn feature_path in
       (* Re-encode [-users user,...] flag to go out over the wire: *)
       let users : Remind.Action.active_user_set =
@@ -154,18 +155,21 @@ let command =
             print_string "Aborted\n";
             Deferred.unit
           | `Yes ->
-            let me =
-              User_name.unix_login
-              |> User_name.to_string
-              |> Email_message.Email_address.of_string_exn
-            in
-            Async_smtp.Simplemail.send
-              ~subject
-              ~to_:recipients
-              ~cc:(me :: cc)
-              (Async_smtp.Email.Simple.Content.text_utf8 body)
-            >>| Or_error.ok_exn
-            >>| fun () -> print_string "Email sent.\n"
+            (match Iron_config.send_email_notices_to_users iron_config with
+             | false -> Deferred.unit
+             | true ->
+               let me =
+                 User_name.unix_login
+                 |> User_name.to_string
+                 |> Email_message.Email_address.of_string_exn
+               in
+               Async_smtp.Simplemail.send
+                 ~subject
+                 ~to_:recipients
+                 ~cc:(me :: cc)
+                 (Async_smtp.Email.Simple.Content.text_utf8 body)
+               >>| Or_error.ok_exn
+               >>| fun () -> print_string "Email sent.\n")
           | `Edit ->
             let%bind draft_msg = Editor.invoke_editor draft_msg in
             loop_until_sent_or_quit (ok_exn draft_msg)

@@ -83,6 +83,7 @@ type t =
   ; valid_users_and_aliases_query : string * string list
        [@default default_valid_users_and_aliases_query]
   ; domain_name : string
+  ; send_email_notices_to_users : bool
   }
 [@@deriving fields, sexp] [@@sexp.allow_extra_fields]
 
@@ -149,6 +150,7 @@ let for_checking_invariants =
   ; serializer_pause_timeout = serializer_pause_timeout_default
   ; valid_users_and_aliases_query = default_valid_users_and_aliases_query
   ; domain_name = "localhost"
+  ; send_email_notices_to_users = true
   }
 ;;
 
@@ -162,5 +164,6 @@ let invariant t =
       ~hydra_user:ignore
       ~serializer_pause_timeout:ignore
       ~valid_users_and_aliases_query:ignore
-      ~domain_name:ignore)
+      ~domain_name:ignore
+      ~send_email_notices_to_users:ignore)
 ;;

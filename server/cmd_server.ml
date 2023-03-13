@@ -75,6 +75,7 @@ let appdir = "/j/office/app/fe"
 
 let commands =
   App_harness.commands
+    ~instance_arg:Optional
     ~appname:"fe"
     ~appdir_for_doc:appdir
     ~appdir
@@ -86,6 +87,7 @@ let commands =
 module Proxy = struct
   let commands =
     App_harness.commands
+      ~instance_arg:Optional
       ~appname:"fe-proxy"
       ~appdir_for_doc:(appdir ^/ "proxy")
       ~appdir:(appdir ^/ "proxy")

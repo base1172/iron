@@ -125,6 +125,7 @@ let command =
           Shutdown.exit 1
       in
       App_harness.start
+        ~instance_arg:Optional
         ~init_stds:false
         ~log_format:`Text
         ~appname:"iron-hg-hooks"

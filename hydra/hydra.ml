@@ -708,6 +708,7 @@ module Repo_controller = struct
 
     let command () =
       App_harness.commands
+        ~instance_arg:Required
         ~appname:"hydra"
         ~appdir_for_doc:"/j/office/app/fe"
         ~appdir:"/j/office/app/fe"
@@ -715,13 +716,14 @@ module Repo_controller = struct
         ~start_spec:
           Command.Spec.(
             empty
-            +> flag
-                 "name"
-                 (map_flag (required string) ~f:Repo_controller_name.of_string)
-                 ~doc:"name of the repo controller"
             +> anon (map_anons ("REMOTE_REPO" %: string) ~f:Remote_repo_path.of_string))
-        ~start_main:(fun controller_name remote_repo_path ~basedir ~instance:_ ~mode:_ ->
-          match%map start ~basedir ~controller_name ~remote_repo_path with
+        ~start_main:(fun remote_repo_path ~basedir ~instance ~mode:_ ->
+          match%map
+            start
+              ~basedir
+              ~controller_name:(Repo_controller_name.of_string instance)
+              ~remote_repo_path
+          with
           | Ok () -> ()
           | Error err -> Error.raise err)
       |> Command.group ~summary:"hydra repo controller"

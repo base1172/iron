@@ -13,13 +13,20 @@ module Mode : sig
   include Sexpable.S with type t := t
 end
 
+module Instance_arg : sig
+  type 'a t =
+    | Optional : string option t
+    | Required : string t
+end
+
 val start
-  :  init_stds:bool
+  :  instance_arg:'a Instance_arg.t
+  -> init_stds:bool
   -> log_format:Log.Output.Format.t
   -> appname:string
-  -> main:(basedir:string -> instance:string option -> mode:Mode.t -> unit Deferred.t)
+  -> main:(basedir:string -> instance:'a -> mode:Mode.t -> unit Deferred.t)
   -> basedir:string
-  -> instance:string option
+  -> instance:'a
   -> mode:Mode.t
   -> fg:bool
   -> unit
@@ -29,10 +36,11 @@ val commands
   :  appname:string
   -> appdir_for_doc:string
   -> appdir:string
+  -> instance_arg:'a Instance_arg.t
   -> log_format:Log.Output.Format.t
   -> start_spec:
-       ( 'a
-       , basedir:string -> instance:string option -> mode:Mode.t -> unit Deferred.t )
+       ( 'b
+       , basedir:string -> instance:'a -> mode:Mode.t -> unit Deferred.t )
        Command.Spec.t
-  -> start_main:'a
+  -> start_main:'b
   -> (string * Command.t) list
