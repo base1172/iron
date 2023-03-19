@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
@@ -19,8 +18,7 @@ module Stable = struct
     end
 
     module V1 = struct
-      type t = Feature_id.V1.t
-      [@@deriving bin_io]
+      type t = Feature_id.V1.t [@@deriving bin_io]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -28,10 +26,7 @@ module Stable = struct
       ;;
 
       let to_model feature_id =
-        V2.to_model
-          { feature_id
-          ; when_to_first_notify = At_next_change
-          }
+        V2.to_model { feature_id; when_to_first_notify = At_next_change }
       ;;
     end
 
@@ -40,9 +35,10 @@ module Stable = struct
 
   module Reaction = struct
     module V7 = struct
-      type t = [ `Updated of Feature.Stable.V23.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V23.t
+        | `Archived
+        ]
       [@@deriving bin_io, sexp_of]
 
       let%expect_test _ =
@@ -54,9 +50,10 @@ module Stable = struct
     end
 
     module V6 = struct
-      type t = [ `Updated of Feature.Stable.V22.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V22.t
+        | `Archived
+        ]
       [@@deriving bin_io]
 
       let%expect_test _ =
@@ -71,9 +68,10 @@ module Stable = struct
     end
 
     module V5 = struct
-      type t = [ `Updated of Feature.Stable.V21.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V21.t
+        | `Archived
+        ]
       [@@deriving bin_io]
 
       let%expect_test _ =
@@ -88,9 +86,10 @@ module Stable = struct
     end
 
     module V4 = struct
-      type t = [ `Updated of Feature.Stable.V20.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V20.t
+        | `Archived
+        ]
       [@@deriving bin_io]
 
       let%expect_test _ =
@@ -105,9 +104,10 @@ module Stable = struct
     end
 
     module V3 = struct
-      type t = [ `Updated of Feature.Stable.V19.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V19.t
+        | `Archived
+        ]
       [@@deriving bin_io]
 
       let%expect_test _ =
@@ -122,9 +122,10 @@ module Stable = struct
     end
 
     module V2 = struct
-      type t = [ `Updated of Feature.Stable.V18.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V18.t
+        | `Archived
+        ]
       [@@deriving bin_io]
 
       let%expect_test _ =
@@ -139,9 +140,10 @@ module Stable = struct
     end
 
     module V1 = struct
-      type t = [ `Updated of Feature.Stable.V17.t
-               | `Archived
-               ]
+      type t =
+        [ `Updated of Feature.Stable.V17.t
+        | `Archived
+        ]
       [@@deriving bin_io]
 
       let%expect_test _ =
@@ -159,41 +161,64 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make_pipe_rpc
-    (struct let name = "notify-on-feature-updates" end)
-    (struct let version = 7 end)
+include
+  Iron_versioned_rpc.Make_pipe_rpc
+    (struct
+      let name = "notify-on-feature-updates"
+    end)
+    (struct
+      let version = 7
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V7)
 
-include Register_old_rpc
-    (struct let version = 6 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 6
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V6)
 
-include Register_old_rpc
-    (struct let version = 5 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 5
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V5)
 
-include Register_old_rpc
-    (struct let version = 4 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 4
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V4)
 
-include Register_old_rpc
-    (struct let version = 3 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 3
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V3)
 
-include Register_old_rpc
-    (struct let version = 2 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V2)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

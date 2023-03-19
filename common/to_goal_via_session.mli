@@ -8,7 +8,7 @@ open! Import
 type 'a t =
   | Fully_known of 'a
   | Partially_known of
-      { to_finish_session        : 'a
+      { to_finish_session : 'a
       ; from_session_end_to_goal : Error.t Or_pending.t
       }
 [@@deriving compare, sexp_of]
@@ -16,6 +16,5 @@ type 'a t =
 include Invariant.S1 with type 'a t := 'a t
 
 val map : 'a t -> f:('a -> 'b) -> 'b t
-
-val fully_known_exn       : 'a t -> 'a
+val fully_known_exn : 'a t -> 'a
 val maybe_partially_known : 'a t -> 'a

@@ -23,8 +23,7 @@ module Stable = struct
 
   module Reaction = struct
     module V1 = struct
-      type t = User_name_by_alternate_name.V1.t
-      [@@deriving bin_io, compare, sexp_of]
+      type t = User_name_by_alternate_name.V1.t [@@deriving bin_io, compare, sexp_of]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -41,11 +40,16 @@ end
 open! Core
 open! Import
 
-include Iron_versioned_rpc.Make
-    (struct let name = "get-alternate-names" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "get-alternate-names"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.  Model
+module Action = Stable.Action.Model
 module Reaction = Stable.Reaction.Model

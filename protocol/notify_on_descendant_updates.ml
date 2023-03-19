@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
@@ -19,8 +18,7 @@ module Stable = struct
     end
 
     module V1 = struct
-      type t = Feature_path.V1.t
-      [@@deriving bin_io]
+      type t = Feature_path.V1.t [@@deriving bin_io]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -28,10 +26,7 @@ module Stable = struct
       ;;
 
       let to_model feature_path =
-        V2.to_model
-          { feature_path
-          ; when_to_first_notify = At_next_change
-          }
+        V2.to_model { feature_path; when_to_first_notify = At_next_change }
       ;;
     end
 
@@ -59,16 +54,24 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make_pipe_rpc
-    (struct let name = "notify-on-descendant-updates" end)
-    (struct let version = 2 end)
+include
+  Iron_versioned_rpc.Make_pipe_rpc
+    (struct
+      let name = "notify-on-descendant-updates"
+    end)
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

@@ -12,4 +12,4 @@ type t =
 val create : source:string -> int -> string list -> t
 
 val prepend : string list -> t -> t
-val append  : t -> string list -> t
+val append : t -> string list -> t

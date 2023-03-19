@@ -4,9 +4,9 @@ open! Import
 module Action : sig
   type t =
     { feature_path : Feature_path.t
-    ; rev_zero     : Rev.t
-    ; tagged_tip   : Rev.t option
-    ; for_         : User_name.t
+    ; rev_zero : Rev.t
+    ; tagged_tip : Rev.t option
+    ; for_ : User_name.t
     }
   [@@deriving fields, sexp_of]
 end
@@ -14,12 +14,7 @@ end
 module Reasons_for_not_archiving : sig
   type t
 
-  val create
-    : [ `Feature_is_permanent
-      | `Feature_has_children
-      ] list
-    -> t
-
+  val create : [ `Feature_is_permanent | `Feature_has_children ] list -> t
   val to_string_hum : t -> string
 end
 
@@ -33,8 +28,8 @@ end
 
 module Reaction : sig
   type t =
-    { disposition           : Disposition.t
-    (** [send_release_email_to] is the list of users to send release mail to -- this
+    { disposition : Disposition.t
+        (** [send_release_email_to] is the list of users to send release mail to -- this
         includes the feature's owners and its parent's owners, as well as their
         [send_release_email_to]s. *)
     ; send_release_email_to : Email_address.Set.t
@@ -42,6 +37,4 @@ module Reaction : sig
   [@@deriving sexp_of]
 end
 
-include Iron_versioned_rpc.S
-  with type action   = Action.t
-  with type reaction = Reaction.t
+include Iron_versioned_rpc.S with type action = Action.t with type reaction = Reaction.t

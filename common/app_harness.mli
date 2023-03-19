@@ -2,13 +2,13 @@ open! Core
 open! Async
 open! Import
 
-val start :
-  init_stds:bool
+val start
+  :  init_stds:bool
   -> log_format:Log.Output.format
   -> main:(basedir:string -> unit Deferred.t)
   -> basedir:string
   -> mode:[ `Dev | `Prod ]
-  -> fg: bool
+  -> fg:bool
   -> unit
   -> unit
 

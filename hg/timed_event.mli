@@ -9,29 +9,18 @@ module Id : Iron_common.Iron_uuid_intf.S
 
 module Action : sig
   module Next_base_update_expiration : sig
-    type t =
-      { feature_id    : Feature_id.t
-      }
-    [@@deriving compare, sexp_of]
+    type t = { feature_id : Feature_id.t } [@@deriving compare, sexp_of]
   end
 
-  type t =
-    | Next_base_update_expiration of Next_base_update_expiration.t
+  type t = Next_base_update_expiration of Next_base_update_expiration.t
   [@@deriving compare, sexp_of]
 end
 
-type t
-[@@deriving sexp_of]
+type t [@@deriving sexp_of]
 
 include Invariant.S with type t := t
 
-val run
-  : [ `After of Time.Span.t
-    | `At    of Time.t
-    ]
-  -> Action.t
-  -> t
-
+val run : [ `After of Time.Span.t | `At of Time.t ] -> Action.t -> t
 val abort_if_possible : t -> unit
 
 (** This should be used when an event is executing, to check whether the event is still
@@ -39,19 +28,17 @@ val abort_if_possible : t -> unit
 val has_id : t -> Id.t -> bool
 
 val scheduled_at : t -> Time.t
-
 val set_execute_exn : execute:(Id.t -> Action.t -> unit) -> unit
 
 module Table : sig
-  type t
-  [@@deriving sexp_of]
+  type t [@@deriving sexp_of]
 
   include Invariant.S with type t := t
 
   val dump : t -> Sexp.t
 
   module Errors : sig
-    val get   : t -> Error.t list
+    val get : t -> Error.t list
     val clear : t -> unit
   end
 end

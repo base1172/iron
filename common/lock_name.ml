@@ -34,18 +34,18 @@ module Stable = struct
     let of_v3 (v3 : V3.t) =
       match v3 with
       | Create_child -> None
-      | Rebase       -> Some Rebase
-      | Release      -> Some Release
+      | Rebase -> Some Rebase
+      | Release -> Some Release
       | Release_into -> Some Release_into
-      | Rename       -> Some Rename
-      | Second       -> None
+      | Rename -> Some Rename
+      | Second -> None
     ;;
 
     let to_v3 = function
-      | Rebase       -> V3.Rebase
-      | Release      -> Release
+      | Rebase -> V3.Rebase
+      | Release -> Release
       | Release_into -> Release_into
-      | Rename       -> Rename
+      | Rename -> Rename
     ;;
   end
 
@@ -66,15 +66,15 @@ module Stable = struct
 
     let of_v2 (v2 : V2.t) =
       match v2 with
-      | Rebase       -> Some Rebase
-      | Release      -> Some Release
+      | Rebase -> Some Rebase
+      | Release -> Some Release
       | Release_into -> Some Release_into
-      | Rename       -> None
+      | Rename -> None
     ;;
 
     let to_v2 = function
-      | Rebase       -> V2.Rebase
-      | Release      -> Release
+      | Rebase -> V2.Rebase
+      | Release -> Release
       | Release_into -> Release_into
     ;;
   end
@@ -84,14 +84,14 @@ end
 
 module T = struct
   include Stable.Model
+
   let hash = Hashtbl.hash
 end
 
 open! Core
 open! Import
-
 include T
 include Comparable.Make_plain (T)
-include Hashable.  Make_plain (T)
+include Hashable.Make_plain (T)
 
 let to_string_hum t = Enum.to_string_hum (module T) t

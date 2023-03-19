@@ -5,7 +5,7 @@ open! Import
 module Subscription = struct
   type 'a t =
     { subscriber : User_name.t
-    ; writer     : 'a Or_error.t Pipe.Writer.t
+    ; writer : 'a Or_error.t Pipe.Writer.t
     }
 
   let tick { subscriber = _; writer } ~value =
@@ -16,20 +16,18 @@ module Subscription = struct
 end
 
 module Make (Key : sig
-    type t [@@deriving sexp_of]
-    include Hashable.S_plain with type t := t
-  end) : sig
+  type t [@@deriving sexp_of]
+
+  include Hashable.S_plain with type t := t
+end) : sig
   type 'a t [@@deriving sexp_of]
 
   val invariant : _ t -> unit
-
-  val dump   : _ t -> Sexp.t
+  val dump : _ t -> Sexp.t
   val create : unit -> _ t
-  val tick   : 'a t -> Key.t -> 'a -> unit
-  val add
-    : 'a t -> _ Query.t -> Key.t -> initial:'a option -> 'a Or_error.t Pipe.Reader.t
-  val close  : 'a t -> Key.t -> reason:'a -> unit
-
+  val tick : 'a t -> Key.t -> 'a -> unit
+  val add : 'a t -> _ Query.t -> Key.t -> initial:'a option -> 'a Or_error.t Pipe.Reader.t
+  val close : 'a t -> Key.t -> reason:'a -> unit
 end = struct
   type 'a t = 'a Subscription.t Bag.t Key.Table.t
 
@@ -37,7 +35,7 @@ end = struct
     Hashtbl.map t ~f:(fun bag ->
       let decreasing_counts =
         let table = User_name.Table.create () in
-        Bag.iter bag ~f:(fun { Subscription. subscriber; writer = _ } ->
+        Bag.iter bag ~f:(fun { Subscription.subscriber; writer = _ } ->
           Hashtbl.incr table subscriber);
         table
         |> Hashtbl.to_alist
@@ -47,10 +45,7 @@ end = struct
       match decreasing_counts with
       | [ one ] -> one |> [%sexp_of: int * User_name.t]
       | _ ->
-        [%sexp
-          (Bag.length bag : int) :: (decreasing_counts : (int * User_name.t) list)
-        ]
-    )
+        [%sexp (Bag.length bag : int) :: (decreasing_counts : (int * User_name.t) list)])
     |> Hashtbl.to_alist
     |> List.sort ~cmp:(fun (k1, _) (k2, _) -> Key.compare k1 k2)
     |> [%sexp_of: (Key.t * Sexp.t) list]
@@ -62,8 +57,7 @@ end = struct
     Invariant.invariant [%here] t [%sexp_of: _ t] (fun () ->
       let no_empty_bags t =
         Hashtbl.iteri t ~f:(fun ~key ~data:bag ->
-          if Bag.is_empty bag
-          then raise_s [%sexp "bag is empty for key", (key : Key.t)])
+          if Bag.is_empty bag then raise_s [%sexp "bag is empty for key", (key : Key.t)])
       in
       no_empty_bags t)
   ;;
@@ -71,17 +65,16 @@ end = struct
   let create () = Key.Table.create ()
 
   let tick t key value =
-    Option.iter (Hashtbl.find t key)
-      ~f:(Bag.iter ~f:(Subscription.tick ~value))
+    Option.iter (Hashtbl.find t key) ~f:(Bag.iter ~f:(Subscription.tick ~value))
   ;;
 
   let add t query key ~initial =
     let bag = Hashtbl.find_or_add t key ~default:Bag.create in
-    let (reader, writer) = Pipe.create () in
+    let reader, writer = Pipe.create () in
     (match initial with
      | None -> ()
      | Some v -> Pipe.write_without_pushback writer (Ok v));
-    let subscription = { Subscription. subscriber = Query.by query; writer } in
+    let subscription = { Subscription.subscriber = Query.by query; writer } in
     let elt = Bag.add bag subscription in
     upon (Pipe.closed writer) (fun () ->
       Bag.remove bag elt;

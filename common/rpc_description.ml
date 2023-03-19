@@ -3,9 +3,9 @@ module Stable = struct
 
   module V2 = struct
     type t =
-      { name                : string
-      ; version             : int
-      ; query_bin_digest    : string Lazy.V1.t
+      { name : string
+      ; version : int
+      ; query_bin_digest : string Lazy.V1.t
       ; response_bin_digest : string Lazy.V1.t
       }
     [@@deriving bin_io, compare, fields, sexp]
@@ -16,12 +16,11 @@ module Stable = struct
     ;;
 
     let of_model m = m
-
   end
 
   module V1 = struct
     type t = Async.Rpc.Description.t =
-      { name    : string
+      { name : string
       ; version : int
       }
     [@@deriving bin_io, compare, fields, sexp]
@@ -37,9 +36,8 @@ module Stable = struct
       let { V2.name; version; query_bin_digest = _; response_bin_digest = _ } =
         V2.of_model m
       in
-      { name; version; }
+      { name; version }
     ;;
-
   end
 
   module Model = V2
@@ -47,7 +45,6 @@ end
 
 open! Core
 open! Import
-
 include Stable.Model
 
 let create ~name ~version ~query ~response =
@@ -56,7 +53,7 @@ let create ~name ~version ~query ~response =
   in
   { name
   ; version
-  ; query_bin_digest    = digest query
+  ; query_bin_digest = digest query
   ; response_bin_digest = digest response
   }
 ;;
@@ -66,19 +63,18 @@ module Compare_by_name_and_version = struct
 
   let compare t t' =
     let rv = [%compare: string] t.name t'.name in
-    if Int.(<>) rv 0
-    then rv
-    else [%compare: int] t.version t'.version
+    if Int.( <> ) rv 0 then rv else [%compare: int] t.version t'.version
   ;;
 end
 
 let to_ascii_table (ts : t list) =
   Iron_ascii_table.create
     ~rows:(List.sort ts ~cmp:[%compare: Compare_by_name_and_version.t])
-    ~columns:Iron_ascii_table.Column.(
-      [ string ~header:"name"     (cell name)
-      ; int    ~header:"version"  (cell version)
-      ; string ~header:"query"    (cell (Fn.compose force query_bin_digest))
-      ; string ~header:"response" (cell (Fn.compose force response_bin_digest))
-      ])
+    ~columns:
+      Iron_ascii_table.Column.
+        [ string ~header:"name" (cell name)
+        ; int ~header:"version" (cell version)
+        ; string ~header:"query" (cell (Fn.compose force query_bin_digest))
+        ; string ~header:"response" (cell (Fn.compose force response_bin_digest))
+        ]
 ;;

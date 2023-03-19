@@ -11,11 +11,8 @@ type t =
 [@@deriving compare, sexp_of]
 
 val same_variant : t -> t -> bool
-
 val am_expecting_bookmark_update : t -> bool
-
 val to_or_error_or_pending : t -> unit Or_error.t Or_pending.t
-
 val is_transition_to_update_expected : from:t -> to_:t -> bool
 
 module Stable : sig

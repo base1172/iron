@@ -3,7 +3,7 @@ open! Import
 
 type t =
   { feature_path : Feature_path.t
-  ; reason       : Unclean_workspace_reason.t
+  ; reason : Unclean_workspace_reason.t
   }
 [@@deriving compare, fields, sexp_of]
 
@@ -18,6 +18,7 @@ module Stable : sig
 
   module V1 : sig
     include Stable_without_comparator
+
     val of_v2 : V2.t -> t
     val to_v2 : t -> V2.t
   end

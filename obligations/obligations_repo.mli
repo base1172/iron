@@ -28,24 +28,21 @@ open! Import
 
 (** Fields are ordered following a topologic ordering of dependency. *)
 type t = private
-  { users                   : Unresolved_name.Set.t
-  ; groups                  : Groups.t
-  ; tags                    : Tag.Set.t
-  ; scrutinies              : Scrutiny.t Scrutiny_name.Map.t
-  ; build_projections       : Build_projection.t Build_projection_name.Map.t
+  { users : Unresolved_name.Set.t
+  ; groups : Groups.t
+  ; tags : Tag.Set.t
+  ; scrutinies : Scrutiny.t Scrutiny_name.Map.t
+  ; build_projections : Build_projection.t Build_projection_name.Map.t
   ; disallow_useless_dot_fe : bool
-  ; allow_review_for        : Allow_review_for.t
-  ; obligations_version     : Obligations_version.t
+  ; allow_review_for : Allow_review_for.t
+  ; obligations_version : Obligations_version.t
   }
 [@@deriving sexp_of]
 
 module Defined_in_local_repo : sig
   (** This is used to run some additional validation during [fe obligations check].  Does
       not need to be carried away past the validation. *)
-  type t = private
-    { tags : Tag.Set.t
-    }
-  [@@deriving sexp_of]
+  type t = private { tags : Tag.Set.t } [@@deriving sexp_of]
 end
 
 val load

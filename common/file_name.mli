@@ -8,7 +8,7 @@ open! Import
 type t
 
 include Identifiable with type t := t
-include Invariant.S  with type t := t
+include Invariant.S with type t := t
 
 val alphabetic_compare : t -> t -> int
 
@@ -17,14 +17,12 @@ val alphabetic_compare : t -> t -> int
 val default_review_compare : t -> t -> int
 
 (** Special Unix filenames *)
-val dot    : t
+val dot : t
+
 val dotdot : t
-
 val dot_fe : t
-
 val scaffold_sexp : t
 
 module Stable : sig
   module V1 : Stable_without_comparator with type t = t
 end
-

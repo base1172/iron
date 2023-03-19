@@ -1,8 +1,8 @@
 module Stable = struct
   open Core.Core_stable
+
   module V1 = struct
-    type t = bool
-    [@@deriving bin_io, compare, sexp]
+    type t = bool [@@deriving bin_io, compare, sexp]
 
     let%expect_test _ =
       print_endline [%bin_digest: t];
@@ -13,5 +13,4 @@ end
 
 open Core
 open! Import
-
 include Bool

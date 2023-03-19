@@ -1,15 +1,16 @@
 module Stable = struct
-
   open Core.Core_stable
 
   module V1 = struct
-
     module T = struct
-
       type t =
         | Ssh of ssh
         | File of Abspath.Stable.V1.t
-      and ssh = { host : string; path : Abspath.Stable.V1.t }
+
+      and ssh =
+        { host : string
+        ; path : Abspath.Stable.V1.t
+        }
 
       open Import
 
@@ -19,7 +20,7 @@ module Stable = struct
         | Some rest ->
           (* This doesn't parse rare things like user names and ports. *)
           let host, path = String.lsplit2_exn rest ~on:'/' in
-          Ssh { host; path = (Abspath.of_string path) }
+          Ssh { host; path = Abspath.of_string path }
       ;;
 
       let to_string = function
@@ -28,13 +29,12 @@ module Stable = struct
       ;;
 
       let compare t1 t2 = String.compare (to_string t1) (to_string t2)
-
       let equal t1 t2 = compare t1 t2 = 0
     end
 
     include T
-    include Sexpable .Of_stringable.V1 (T)
-    include Binable  .Of_stringable.V1 (T)
+    include Sexpable.Of_stringable.V1 (T)
+    include Binable.Of_stringable.V1 (T)
 
     let%expect_test _ =
       print_endline [%bin_digest: t];
@@ -54,17 +54,13 @@ end
 open! Core
 open! Async
 open! Import
-
 include Stable.V1
 include Hashable.Make (Stable.V1)
 
 let invariant _ = ()
-
 let ssh host path = Ssh { host; path = Abspath.of_string path }
-
 let jane = ssh "hg" "/hg/jane"
 let jane_submissions = ssh "hg" "/hg/jane/submissions"
-
 let null = File (Abspath.of_string "/dev/null")
 
 let%test_unit _ =
@@ -84,24 +80,23 @@ let family t =
 ;;
 
 let%test_unit _ =
-  List.iter [ Some "jane"  , jane_submissions
-            ; Some "friend", ssh "hg" "/hg/friend/branches/friend-assistant-109.60.01"
-            ; None         , File (Abspath.of_string "/tmp/foo")
-            ]
+  List.iter
+    [ Some "jane", jane_submissions
+    ; Some "friend", ssh "hg" "/hg/friend/branches/friend-assistant-109.60.01"
+    ; None, File (Abspath.of_string "/tmp/foo")
+    ]
     ~f:(fun (expect, remote_repo_path) ->
       [%test_result: string option] ~expect (family remote_repo_path))
 ;;
 
 let is_prefix ~prefix t =
-  match (prefix,t) with
-  | (File pf, File tf) -> Abspath.is_prefix ~prefix:pf tf
+  match prefix, t with
+  | File pf, File tf -> Abspath.is_prefix ~prefix:pf tf
   | Ssh pssh, Ssh tssh ->
-    String.equal pssh.host tssh.host
-    && Abspath.is_prefix ~prefix:pssh.path tssh.path
-  | (Ssh  _,  File _)
-  | (File _,  Ssh  _)  -> false
+    String.equal pssh.host tssh.host && Abspath.is_prefix ~prefix:pssh.path tssh.path
+  | Ssh _, File _ | File _, Ssh _ -> false
 ;;
 
 let is_in_jane = is_prefix ~prefix:jane
 
-let%test _ = is_in_jane jane_submissions ;;
+let%test _ = is_in_jane jane_submissions

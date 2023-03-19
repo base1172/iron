@@ -19,11 +19,11 @@ module type Config = sig
   (** A config is defined by a sequence of statements.  [create] creates a default config,
       while [update] mutates the config to reflect the effect of a statement. *)
   val create : unit -> t
+
   val update : t -> Statement.t -> unit
 end
 
 module type S = sig
-
   type t
 
   (** This module holds a lazy value that loads the config from [home_basename] in the
@@ -43,14 +43,13 @@ module type S = sig
       $ fe tools validate-ferc
       $ patdiff4 validate-config
   *)
-  val get    : unit -> t
-  val errors : unit -> Error.t list
+  val get : unit -> t
 
+  val errors : unit -> Error.t list
   val validate_config : Command.t
 end
 
 module type Make_intf = sig
-
   module type Config = Config
   module type S = S
 
@@ -58,13 +57,13 @@ module type Make_intf = sig
 
   module Utils : sig
     type t = Sexp.t list -> unit
+
     val empty : t
 
     type flag
 
-    val (+>) : t -> flag -> t
-
+    val ( +> ) : t -> flag -> t
     val no_arg : string -> (unit -> unit) -> flag
-    val flag   : string -> (Sexp.t -> 'a) -> ('a -> unit) -> flag
+    val flag : string -> (Sexp.t -> 'a) -> ('a -> unit) -> flag
   end
 end

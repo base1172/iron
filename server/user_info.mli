@@ -21,7 +21,6 @@
     Obligations can be defined in terms of aliases but not typos. In contrast, CRs can use
     either. *)
 
-
 open! Core
 open! Import
 
@@ -50,24 +49,22 @@ val are_acting_for_themselves_or_for_invalid_user
     [invalid_users] to complain. *)
 val refresh_existing_users
   :  t
-  -> occurrences_by_user_name : User_name_occurrence.t list User_name.Table.t
+  -> occurrences_by_user_name:User_name_occurrence.t list User_name.Table.t
   -> unit
 
 val invalid_users : t -> Iron_protocol.Get_invalid_users.Reaction.t
-
 val deserializer : t Deserializer.t
-
 val define_typos_exn : t -> Iron_protocol.Define_typos.Definition.t list -> unit
 
 val alternate_names
-  : t
+  :  t
   -> which:Iron_protocol.Get_alternate_names.Action.t
   -> User_name_by_alternate_name.t
 
 val remove_alternate_names_exn
   :  t
   -> Alternate_name.t list
-  -> which : [< `Aliases | `Typos ]
+  -> which:[< `Aliases | `Typos ]
   -> unit
 
 (** Raises if the new values contain an alias resolution that clashes with an existing
@@ -79,15 +76,15 @@ val update_valid_users_and_aliases_exn
 
 module User_set : sig
   module type S = sig
-    val add      : t -> User_name.Set.t -> idempotent:bool -> unit Or_error.t
-    val remove   : t -> User_name.Set.t -> idempotent:bool -> unit Or_error.t
-    val mem      : t -> User_name.t -> bool
-    val get_set  : t -> User_name.Set.t
+    val add : t -> User_name.Set.t -> idempotent:bool -> unit Or_error.t
+    val remove : t -> User_name.Set.t -> idempotent:bool -> unit Or_error.t
+    val mem : t -> User_name.t -> bool
+    val get_set : t -> User_name.Set.t
   end
 end
 
-module Admins                : User_set.S
-module Feeding_metrics       : User_set.S
+module Admins : User_set.S
+module Feeding_metrics : User_set.S
 module Using_locked_sessions : User_set.S
 
 val get_user_set : Iron_protocol.User_set.t -> (module User_set.S)

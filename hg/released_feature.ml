@@ -1,23 +1,22 @@
 module Stable = struct
   open! Core.Core_stable
   open Import_stable
-
   module Rev = Rev.Stable
 
   module V3 = struct
     type t =
-      { feature_id              : Feature_id.V1.t
-      ; feature_path            : Feature_path.V1.t
-      ; description             : string
-      ; owners                  : User_name.V1.t list
+      { feature_id : Feature_id.V1.t
+      ; feature_path : Feature_path.V1.t
+      ; description : string
+      ; owners : User_name.V1.t list
       ; whole_feature_followers : User_name.V1.Set.t
       ; whole_feature_reviewers : User_name.V1.Set.t
-      ; seconder                : User_name.V1.t
-      ; base                    : Rev.V1.t
-      ; tip                     : Rev.V1.t
-      ; properties              : Properties.V1.t
-      ; includes                : t list
-      ; release_cause           : unit Query.V1.t
+      ; seconder : User_name.V1.t
+      ; base : Rev.V1.t
+      ; tip : Rev.V1.t
+      ; properties : Properties.V1.t
+      ; includes : t list
+      ; release_cause : unit Query.V1.t
       }
     [@@deriving bin_io, compare, fields, sexp]
 
@@ -34,17 +33,17 @@ module Stable = struct
 
   module V2 = struct
     type t =
-      { feature_id              : Feature_id.V1.t
-      ; feature_path            : Feature_path.V1.t
-      ; description             : string
-      ; owners                  : User_name.V1.t list
+      { feature_id : Feature_id.V1.t
+      ; feature_path : Feature_path.V1.t
+      ; description : string
+      ; owners : User_name.V1.t list
       ; whole_feature_reviewers : User_name.V1.Set.t
-      ; seconder                : User_name.V1.t
-      ; base                    : Rev.V1.t
-      ; tip                     : Rev.V1.t
-      ; properties              : Properties.V1.t
-      ; includes                : t list
-      ; release_cause           : unit Query.V1.t
+      ; seconder : User_name.V1.t
+      ; base : Rev.V1.t
+      ; tip : Rev.V1.t
+      ; properties : Properties.V1.t
+      ; includes : t list
+      ; release_cause : unit Query.V1.t
       }
     [@@deriving sexp, bin_io, compare]
 
@@ -57,50 +56,6 @@ module Stable = struct
     open! Import
 
     let rec to_v3
-              { feature_id
-              ; feature_path
-              ; description
-              ; owners
-              ; whole_feature_reviewers
-              ; seconder
-              ; base
-              ; tip
-              ; properties
-              ; includes
-              ; release_cause
-              } =
-      { V3.
-        feature_id
-      ; feature_path
-      ; description
-      ; owners
-      ; whole_feature_followers = User_name.Set.empty
-      ; whole_feature_reviewers
-      ; seconder
-      ; base
-      ; tip
-      ; properties
-      ; includes                = List.map includes ~f:to_v3
-      ; release_cause
-      }
-    ;;
-
-    let to_model t = V3.to_model (to_v3 t)
-
-    let rec of_v3 { V3.
-                    feature_id
-                  ; feature_path
-                  ; description
-                  ; owners
-                  ; whole_feature_reviewers
-                  ; seconder
-                  ; base
-                  ; tip
-                  ; properties
-                  ; includes
-                  ; release_cause
-                  ; _
-                  } =
       { feature_id
       ; feature_path
       ; description
@@ -110,27 +65,71 @@ module Stable = struct
       ; base
       ; tip
       ; properties
-      ; includes                = List.map includes ~f:of_v3
+      ; includes
+      ; release_cause
+      }
+      =
+      { V3.feature_id
+      ; feature_path
+      ; description
+      ; owners
+      ; whole_feature_followers = User_name.Set.empty
+      ; whole_feature_reviewers
+      ; seconder
+      ; base
+      ; tip
+      ; properties
+      ; includes = List.map includes ~f:to_v3
+      ; release_cause
+      }
+    ;;
+
+    let to_model t = V3.to_model (to_v3 t)
+
+    let rec of_v3
+      { V3.feature_id
+      ; feature_path
+      ; description
+      ; owners
+      ; whole_feature_reviewers
+      ; seconder
+      ; base
+      ; tip
+      ; properties
+      ; includes
+      ; release_cause
+      ; _
+      }
+      =
+      { feature_id
+      ; feature_path
+      ; description
+      ; owners
+      ; whole_feature_reviewers
+      ; seconder
+      ; base
+      ; tip
+      ; properties
+      ; includes = List.map includes ~f:of_v3
       ; release_cause
       }
     ;;
 
     let of_model m = of_v3 (V3.of_model m)
-
   end
 
   module V1 = struct
     type t =
-      { feature_id              : Feature_id.V1.t
-      ; feature_path            : Feature_path.V1.t
-      ; description             : string
-      ; owners                  : User_name.V1.t list
+      { feature_id : Feature_id.V1.t
+      ; feature_path : Feature_path.V1.t
+      ; description : string
+      ; owners : User_name.V1.t list
       ; whole_feature_reviewers : User_name.V1.Set.t
-      ; seconder                : User_name.V1.t
-      ; base                    : Rev.V1.t
-      ; tip                     : Rev.V1.t
-      ; includes                : t list
-      ; release_cause           : unit Query.V1.t
+      ; seconder : User_name.V1.t
+      ; base : Rev.V1.t
+      ; tip : Rev.V1.t
+      ; includes : t list
+      ; release_cause : unit Query.V1.t
       }
     [@@deriving sexp, bin_io, compare]
 
@@ -143,47 +142,6 @@ module Stable = struct
     open! Import
 
     let rec to_v2
-              { feature_id
-              ; feature_path
-              ; description
-              ; owners
-              ; whole_feature_reviewers
-              ; seconder
-              ; base
-              ; tip
-              ; includes
-              ; release_cause
-              } =
-      { V2.
-        feature_id
-      ; feature_path
-      ; description
-      ; owners
-      ; whole_feature_reviewers
-      ; seconder
-      ; base
-      ; tip
-      ; properties              = Properties.empty
-      ; includes                = List.map includes ~f:to_v2
-      ; release_cause
-      }
-    ;;
-
-    let to_model t = V2.to_model (to_v2 t)
-
-    let rec of_v2 { V2.
-                    feature_id
-                  ; feature_path
-                  ; description
-                  ; owners
-                  ; whole_feature_reviewers
-                  ; seconder
-                  ; base
-                  ; tip
-                  ; includes
-                  ; release_cause
-                  ; _
-                  } =
       { feature_id
       ; feature_path
       ; description
@@ -192,20 +150,60 @@ module Stable = struct
       ; seconder
       ; base
       ; tip
-      ; includes                = List.map includes ~f:of_v2
+      ; includes
+      ; release_cause
+      }
+      =
+      { V2.feature_id
+      ; feature_path
+      ; description
+      ; owners
+      ; whole_feature_reviewers
+      ; seconder
+      ; base
+      ; tip
+      ; properties = Properties.empty
+      ; includes = List.map includes ~f:to_v2
+      ; release_cause
+      }
+    ;;
+
+    let to_model t = V2.to_model (to_v2 t)
+
+    let rec of_v2
+      { V2.feature_id
+      ; feature_path
+      ; description
+      ; owners
+      ; whole_feature_reviewers
+      ; seconder
+      ; base
+      ; tip
+      ; includes
+      ; release_cause
+      ; _
+      }
+      =
+      { feature_id
+      ; feature_path
+      ; description
+      ; owners
+      ; whole_feature_reviewers
+      ; seconder
+      ; base
+      ; tip
+      ; includes = List.map includes ~f:of_v2
       ; release_cause
       }
     ;;
 
     let of_model m = of_v2 (V2.of_model m)
-
   end
 end
 
 open! Core
 open! Async
 open! Import
-
 include Stable.Model
 
 let rec invariant t =
@@ -223,8 +221,7 @@ let rec invariant t =
       ~tip:(check Rev.invariant)
       ~properties:(check Properties.invariant)
       ~includes:(check (List.iter ~f:invariant))
-      ~release_cause:(check (Query.invariant (ignore:unit->unit)))
-  )
+      ~release_cause:(check (Query.invariant (ignore : unit -> unit))))
 ;;
 
 let released_at t = Query.at t.release_cause
@@ -236,8 +233,8 @@ let user_names_to_string user_names =
 
 let user_list name users =
   match users with
-  | [ user ] -> (name, User_name.to_string user)
-  | users -> (concat [ name; "s"], user_names_to_string users)
+  | [ user ] -> name, User_name.to_string user
+  | users -> concat [ name; "s" ], user_names_to_string users
 ;;
 
 let attribute_table t =
@@ -246,16 +243,14 @@ let attribute_table t =
     ; user_list "owner" t.owners
     ; user_list "whole-feature reviewer" (Set.to_list t.whole_feature_reviewers)
     ; "seconder", User_name.to_string t.seconder
-    ; "tip" , Rev.to_string_hum t.tip
+    ; "tip", Rev.to_string_hum t.tip
     ; "base", Rev.to_string_hum t.base
     ]
     @ Properties.to_rows t.properties
   in
   let columns =
-    Ascii_table.Column.(
-      [ string ~header:"attribute" (cell fst)
-      ; string ~header:"value"     (cell snd)
-      ])
+    Ascii_table.Column.
+      [ string ~header:"attribute" (cell fst); string ~header:"value" (cell snd) ]
   in
   Ascii_table.create ~columns ~rows
 ;;

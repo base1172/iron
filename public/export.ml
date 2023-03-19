@@ -8,9 +8,10 @@ module Iron = struct
   include Iron_common.Std
   include Iron_obligations.Std
   include Iron_hg.Std
-  include (struct
+
+  include struct
     (* non RPC modules from Iron_protocol *)
     open Iron_protocol
-    module Feature        = Feature
-  end)
+    module Feature = Feature
+  end
 end

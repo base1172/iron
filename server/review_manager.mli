@@ -24,8 +24,9 @@ include Invariant.S with type t := t
 
 module Register_catch_up : sig
   type t =
-    { f : 'a .
-            'a Query.t
+    { f :
+        'a.
+        'a Query.t
         -> Review_session.t
         -> Catch_up_session.Id_and_kind.t list
         -> unit Or_error.t
@@ -33,38 +34,37 @@ module Register_catch_up : sig
 end
 
 val deserializer
-  : (whole_feature_followers        : User_name.Set.t
-     -> whole_feature_reviewers     : User_name.Set.t
-     -> users_using_locked_sessions : User_name.Set.t
-     -> review_goal                 : Review_goal.t Or_error.t
-     -> indexed_diff4s              : Indexed_diff4s.t Or_error.t Or_pending.t
-     -> register_catch_up           : Register_catch_up.t
-     -> feature_cache_invalidator   : Cached.Invalidator.t
-     -> dynamic_upgrade_state       : Dynamic_upgrade.State.t
-     -> t
-    ) Deserializer.t
+  : (whole_feature_followers:User_name.Set.t
+     -> whole_feature_reviewers:User_name.Set.t
+     -> users_using_locked_sessions:User_name.Set.t
+     -> review_goal:Review_goal.t Or_error.t
+     -> indexed_diff4s:Indexed_diff4s.t Or_error.t Or_pending.t
+     -> register_catch_up:Register_catch_up.t
+     -> feature_cache_invalidator:Cached.Invalidator.t
+     -> dynamic_upgrade_state:Dynamic_upgrade.State.t
+     -> t)
+    Deserializer.t
 
 val create
   :  User_name.t
-  -> is_whole_feature_follower : bool
-  -> is_whole_feature_reviewer : bool
-  -> is_using_locked_sessions  : bool
-  -> cr_comments               : Cr_comment.t list
-  -> base_facts                : Rev_facts.t Or_pending.t
-  -> register_catch_up         : Register_catch_up.t
-  -> feature_cache_invalidator : Cached.Invalidator.t
-  -> dynamic_upgrade_state     : Dynamic_upgrade.State.t
+  -> is_whole_feature_follower:bool
+  -> is_whole_feature_reviewer:bool
+  -> is_using_locked_sessions:bool
+  -> cr_comments:Cr_comment.t list
+  -> base_facts:Rev_facts.t Or_pending.t
+  -> register_catch_up:Register_catch_up.t
+  -> feature_cache_invalidator:Cached.Invalidator.t
+  -> dynamic_upgrade_state:Dynamic_upgrade.State.t
   -> Serializer.t
   -> t
 
 (** Accessors. *)
 val brain : t -> Brain.t
-val user_name : t -> User_name. t
+
+val user_name : t -> User_name.t
 val is_whole_feature_follower : t -> bool
 val is_whole_feature_reviewer : t -> bool
-
 val reviewer : t -> Reviewer.t
-
 val have_done_some_review : t -> bool
 val have_session_in_progress : t -> bool
 val reviewed_diff4s_output_in_current_session : t -> Diff2.t list
@@ -99,22 +99,23 @@ module Review_authorization : sig
       This also allows breaking circular dependency between [Review_manager], [State] and
       [User_info] *)
   type t
+
   type review_manager
 
   val create
     :  review_manager
-    -> allow_review_for : Allow_review_for.t
-    -> are_acting_for_themselves_or_for_invalid_user :
+    -> allow_review_for:Allow_review_for.t
+    -> are_acting_for_themselves_or_for_invalid_user:
          (for_:User_name.t -> by:User_name.t -> bool)
-    -> current_feature_goal_subset : Goal_subset.t
+    -> current_feature_goal_subset:Goal_subset.t
     -> reason:[ `Not_supported | `This of string ]
     -> create_catch_up_for_me:bool
     -> _ Query.t
     -> t Or_error.t
 
   val unauthorized_for_user_with_only_follow_lines : t -> unit Or_error.t
-
-end with type review_manager := t
+end
+with type review_manager := t
 
 (** [line_count_remaining_to_review] tries to be consistent with [fe review] when the
     review goal is an error, since this is used in todo. *)
@@ -123,27 +124,16 @@ val line_count_remaining_to_review
   -> Goal_subset.t
   -> Line_count.Review.t To_goal_via_session.t
 
-val line_count_cached_in_feature
-  :  t
-  -> Goal_subset.t
-  -> Line_count.Cached_in_feature.t
-
-val dump_review_lines
-  :  t
-  -> Goal_subset.t
-  -> Sexp.t
+val line_count_cached_in_feature : t -> Goal_subset.t -> Line_count.Cached_in_feature.t
+val dump_review_lines : t -> Goal_subset.t -> Sexp.t
 
 (** [can_make_progress t = (num_lines_remaining t goal_subset).review > 0]. *)
-val can_make_progress
-  :  t
-  -> Goal_subset.t
-  -> bool
+val can_make_progress : t -> Goal_subset.t -> bool
 
-val crs      : t -> Cr_comment.t list Or_error.t
-val num_crs  : t -> int Or_error.t
+val crs : t -> Cr_comment.t list Or_error.t
+val num_crs : t -> int Or_error.t
 val num_xcrs : t -> int Or_error.t
-
-val check_cr_clean       : t -> unit Or_error.t
+val check_cr_clean : t -> unit Or_error.t
 
 val reviewed
   :  t
@@ -158,9 +148,7 @@ val reviewed
 val forget_from_brain_exn
   :  t
   -> Review_authorization.t
-  -> what_to_forget:[ `All
-                    | `Files of Path_in_repo.t list
-                    ]
+  -> what_to_forget:[ `All | `Files of Path_in_repo.t list ]
   -> unit
 
 val forget_from_current_session_exn
@@ -168,49 +156,39 @@ val forget_from_current_session_exn
   -> Review_authorization.t
   -> _ Query.t
   -> Session_id.t
-  -> what_to_forget:[ `All
-                    | `Files of Path_in_repo.t list
-                    ]
+  -> what_to_forget:[ `All | `Files of Path_in_repo.t list ]
   -> unit
 
 val get_session_exn
   :  t
   -> Goal_subset.t
-  -> may_be_reviewed_by : Allow_review_for.Users.t
-  -> lines_required_to_separate_ddiff_hunks: int
-  -> which_session : Which_session.t
+  -> may_be_reviewed_by:Allow_review_for.Users.t
+  -> lines_required_to_separate_ddiff_hunks:int
+  -> which_session:Which_session.t
   -> [ `Review_session of Iron_protocol.Get_review_session.Review_session.t
      | `Up_to_date
      ]
 
-val commit_current_session_exn
-  :  t
-  -> Review_authorization.t
-  -> Session_id.t
-  -> unit
+val commit_current_session_exn : t -> Review_authorization.t -> Session_id.t -> unit
 
 val set_session_is_locked_exn
   :  t
   -> Review_authorization.t
   -> _ Query.t
-  -> which_session: Which_session.t
+  -> which_session:Which_session.t
   -> bool
   -> unit
 
-val update_crs
-  :  t
-  -> Cr_comment.t list
-  -> base_facts:Rev_facts.t Or_pending.t
-  -> unit
+val update_crs : t -> Cr_comment.t list -> base_facts:Rev_facts.t Or_pending.t -> unit
 
 (** [diff4s] is computed by hydra, and is an [Or_error.t] to reflect that the computation
     can fail on the hydra side. *)
 val update_review_goal
   :  t
-  -> review_goal               : Review_goal.t Or_error.t
-  -> indexed_diff4s            : Indexed_diff4s.t Or_error.t
-  -> is_whole_feature_follower : bool
-  -> is_whole_feature_reviewer : bool
+  -> review_goal:Review_goal.t Or_error.t
+  -> indexed_diff4s:Indexed_diff4s.t Or_error.t
+  -> is_whole_feature_follower:bool
+  -> is_whole_feature_reviewer:bool
   -> unit
 
 val set_is_using_locked_sessions : t -> bool -> unit
@@ -224,7 +202,6 @@ val mark_fully_reviewed
   -> unit
 
 val need_diff4s_starting_from : t -> Review_edge.Set.t
-
 val check_session_id : t -> Session_id.t -> unit Or_error.t
 
 val de_alias_brain
@@ -235,7 +212,4 @@ val de_alias_brain
      | `Nothing_to_do
      ]
 
-val release
-  :  t
-  -> _ Query.t
-  -> unit
+val release : t -> _ Query.t -> unit

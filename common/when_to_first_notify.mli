@@ -16,7 +16,7 @@ type t =
   | At_next_change
 [@@deriving sexp_of]
 
-include Enum.S     with type t := t
+include Enum.S with type t := t
 include Comparable with type t := t
 
 module Stable : sig

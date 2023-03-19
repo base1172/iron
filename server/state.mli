@@ -30,5 +30,4 @@ include Invariant.S with type t := t
 
 val initialize_and_sync_file_system : Serializer.t -> unit Deferred.t
 val deserializer : (server_config:Iron_config.t -> t) Deserializer.t
-
 val rpc_implementations : t Rpc.Implementations.t

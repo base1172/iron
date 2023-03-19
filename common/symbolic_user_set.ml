@@ -1,6 +1,6 @@
 module Stable_format = struct
   open! Core.Core_stable
-  module User_name  = User_name.Stable
+  module User_name = User_name.Stable
   module Group_name = Group_name.Stable
 
   module V1 = struct
@@ -28,17 +28,20 @@ let invariant _ = ()
 
 module Stable = struct
   module V1 = struct
-    include Make_stable.Of_stable_format.V1 (Stable_format.V1) (struct
-        type nonrec t = t [@@deriving compare]
+    include
+      Make_stable.Of_stable_format.V1
+        (Stable_format.V1)
+        (struct
+          type nonrec t = t [@@deriving compare]
 
-        let to_stable_format t = Stable_format.V1.Users t
+          let to_stable_format t = Stable_format.V1.Users t
 
-        let of_stable_format = function
-          | Stable_format.V1.Users users  -> users
-          | v1 ->
-            raise_s [%sexp "Symbolic_user_set.of_stable", (v1 : Stable_format.V1.t)]
-        ;;
-      end)
+          let of_stable_format = function
+            | Stable_format.V1.Users users -> users
+            | v1 ->
+              raise_s [%sexp "Symbolic_user_set.of_stable", (v1 : Stable_format.V1.t)]
+          ;;
+        end)
 
     let%expect_test _ =
       print_endline [%bin_digest: t];

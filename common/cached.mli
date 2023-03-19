@@ -19,11 +19,10 @@ open! Import
 module Invalidator : sig
   type t [@@deriving sexp_of]
 
-  include Equal.S     with type t := t
+  include Equal.S with type t := t
   include Invariant.S with type t := t
 
   val create : debug_information:Sexp.t -> t
-
   val invalidate_dependents : t -> unit
 
   (** Attach a call back to be run when [invalidate_dependents] is ticked.  Invariant: it
@@ -41,14 +40,15 @@ include Invariant.S1 with type 'a t := 'a t
 
 module type S = sig
   type t [@@deriving sexp_of]
+
   include Equal.S with type t := t
 end
 
 (** If [compute_result] raises, then the error is cached and [get _] returns the error. *)
 val create
   :  (module S with type t = 'a)
-  -> compute_result     : (unit -> 'a)
-  -> compute_depends_on : (unit -> Invalidator.t list)
+  -> compute_result:(unit -> 'a)
+  -> compute_depends_on:(unit -> Invalidator.t list)
   -> 'a t
 
 val get : 'a t -> 'a Or_error.t
@@ -61,14 +61,8 @@ val clear : _ t -> unit
     actual value. *)
 val uninitialized : name:string -> unit -> _ t
 
-val check
-  :  'a t
-  -> ignore_diffs_in_errors : bool
-  -> unit Or_error.t
+val check : 'a t -> ignore_diffs_in_errors:bool -> unit Or_error.t
 
 (** Will raise if we are not in functional test or if there is an error while computing
     dependencies *)
-val force_set_for_test_exn
-  :  'a t
-  -> 'a Or_error.t
-  -> unit
+val force_set_for_test_exn : 'a t -> 'a Or_error.t -> unit

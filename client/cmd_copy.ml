@@ -18,19 +18,20 @@ let copy_feature ~from_ ~to_ ~without_copying_review =
 ;;
 
 let command =
-  Command.async' ~summary:"copy a feature"
+  Command.async'
+    ~summary:"copy a feature"
     (let open Command.Let_syntax in
-     let%map_open () = return ()
-     and from_ = feature_path
-     and to_ = absolute_feature_path
-     and without_copying_review =
-       no_arg_flag Switch.without_copying_review
-         ~doc:"proceed even though completed review will not be copied"
-     in
-     fun () ->
-       let open! Deferred.Let_syntax in
-       let from_ = ok_exn from_ in
-       let to_  = ok_exn to_    in
-       copy_feature ~from_ ~to_ ~without_copying_review
-    )
+    let%map_open () = return ()
+    and from_ = feature_path
+    and to_ = absolute_feature_path
+    and without_copying_review =
+      no_arg_flag
+        Switch.without_copying_review
+        ~doc:"proceed even though completed review will not be copied"
+    in
+    fun () ->
+      let open! Deferred.Let_syntax in
+      let from_ = ok_exn from_ in
+      let to_ = ok_exn to_ in
+      copy_feature ~from_ ~to_ ~without_copying_review)
 ;;

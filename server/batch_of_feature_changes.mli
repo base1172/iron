@@ -8,13 +8,11 @@ open! Import
 type t
 
 val empty : t
-
 val to_feature_updates : Feature.t -> t -> Iron_protocol.Change_feature.Update.t list
-
 val add_whole_feature_reviewers : t -> whole_feature_reviewers:User_name.Set.t -> t
-val add_properties              : t -> properties:Properties.t -> t
+val add_properties : t -> properties:Properties.t -> t
 
 val add_inherited_from_parent
-  : t
+  :  t
   -> parent_inheritable_attributes:Feature_inheritable_attributes.t
   -> t

@@ -17,13 +17,12 @@ let command =
   Command.async'
     ~summary:"print files from manifest below current dir in build dependency order"
     (let open Command.Let_syntax in
-     let%map_open () = return () in
-     fun () ->
-       let open! Deferred.Let_syntax in
-       let repo_root = ok_exn Repo_root.program_started_in in
-       let below = Repo_root.relativize_exn repo_root Abspath.program_started_in in
-       let%map files = sort repo_root ~below in
-       List.iter files ~f:(fun (_path_in_repo, relpath) ->
-         Print.printf "%s\n" (Relpath.to_string relpath))
-    )
+    let%map_open () = return () in
+    fun () ->
+      let open! Deferred.Let_syntax in
+      let repo_root = ok_exn Repo_root.program_started_in in
+      let below = Repo_root.relativize_exn repo_root Abspath.program_started_in in
+      let%map files = sort repo_root ~below in
+      List.iter files ~f:(fun (_path_in_repo, relpath) ->
+        Print.printf "%s\n" (Relpath.to_string relpath)))
 ;;

@@ -12,7 +12,6 @@ module Rpc_proxy_config : sig
 end
 
 module Restricted_for_rpcs : sig
-
   (** [load_as_per_IRON_CONFIG] isn't [lazy] like [as_per_IRON_CONFIG] below, so that one
       can call it multiple times over the life of a program, and get different results if
       the Iron config has changed.  E.g. hydra uses this so that it can pick up
@@ -26,12 +25,12 @@ end
 (** [hydra_user] determines how [fe release] works with continuous release.  For ordinary
     users, [fe release] does [Hg.push], but hydra, it does a direct release. *)
 type t = private
-  { host                       : string
-  ; async_rpc_port             : Async_rpc_port.t
-  ; rpc_proxy_config           : Rpc_proxy_config.t
-  ; hgrc                       : Abspath.t
-  ; hydra_user                 : User_name.t
-  ; serializer_pause_timeout   : Time.Span.t
+  { host : string
+  ; async_rpc_port : Async_rpc_port.t
+  ; rpc_proxy_config : Rpc_proxy_config.t
+  ; hgrc : Abspath.t
+  ; hydra_user : User_name.t
+  ; serializer_pause_timeout : Time.Span.t
   }
 [@@deriving fields, sexp_of]
 
@@ -49,9 +48,7 @@ val load_exn : basedir:Abspath.t -> t Deferred.t
 val as_per_IRON_CONFIG : t Deferred.t Lazy.t
 
 val prod_basedir : Abspath.t
-val prod_etc     : Abspath.t
-val prod_var     : Abspath.t
-
+val prod_etc : Abspath.t
+val prod_var : Abspath.t
 val deploy_offices : string list
-
 val serializer_pause_timeout_default : Time.Span.t

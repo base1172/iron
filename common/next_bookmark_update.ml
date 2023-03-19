@@ -1,6 +1,5 @@
 module Stable = struct
   open Core.Core_stable
-
   module Iron_time = Iron_time.Stable
 
   module V1 = struct
@@ -32,23 +31,20 @@ let am_expecting_bookmark_update = function
 ;;
 
 let to_or_error_or_pending : t -> unit Or_error.t Or_pending.t = function
-  | Update_expected_since time               -> Pending_since time
-  | No_update_expected                       -> Known (Ok ())
+  | Update_expected_since time -> Pending_since time
+  | No_update_expected -> Known (Ok ())
   | No_update_expected_due_to_iron_bug error -> Known (Error error)
 ;;
 
 let same_variant t1 t2 =
   match t1, t2 with
-  | Update_expected_since _             , Update_expected_since _
-  | No_update_expected                  , No_update_expected
-  | No_update_expected_due_to_iron_bug _, No_update_expected_due_to_iron_bug _ ->
-    true
-  | (Update_expected_since _
-    | No_update_expected
-    | No_update_expected_due_to_iron_bug _), _
-    -> false
+  | Update_expected_since _, Update_expected_since _
+  | No_update_expected, No_update_expected
+  | No_update_expected_due_to_iron_bug _, No_update_expected_due_to_iron_bug _ -> true
+  | ( (Update_expected_since _ | No_update_expected | No_update_expected_due_to_iron_bug _)
+    , _ ) -> false
 ;;
 
 let is_transition_to_update_expected ~from ~to_ =
-  not (am_expecting_bookmark_update from) && am_expecting_bookmark_update to_
+  (not (am_expecting_bookmark_update from)) && am_expecting_bookmark_update to_
 ;;

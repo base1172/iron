@@ -1,14 +1,12 @@
 module Stable = struct
-
   open! Core.Core_stable
   open! Import_stable
-
   module First_12 = Node_hash.First_12.Stable
 
   module Rev_info = struct
     module V1 = struct
       type t =
-        { first_12_of_rev     : First_12.V1.t
+        { first_12_of_rev : First_12.V1.t
         ; rev_author_or_error : User_name.V1.t Or_error.V2.t
         }
       [@@deriving bin_io, compare, fields, sexp]
@@ -18,6 +16,7 @@ module Stable = struct
         [%expect {| 9328f6880f732cb029b0f0eecf487008 |}]
       ;;
     end
+
     module Model = V1
   end
 
@@ -26,7 +25,7 @@ module Stable = struct
       type t =
         { last_working : Rev_info.V1.t option
         ; first_broken : Rev_info.V1.t
-        ; last_broken  : Rev_info.V1.t
+        ; last_broken : Rev_info.V1.t
         }
       [@@deriving bin_io, compare, fields, sexp]
 
@@ -35,6 +34,7 @@ module Stable = struct
         [%expect {| e8f4f7d624a6d870c86276d677a99281 |}]
       ;;
     end
+
     module Model = V1
   end
 
@@ -42,7 +42,7 @@ module Stable = struct
     module V1 = struct
       type t =
         | Working of Rev_info.V1.t
-        | Broken  of Broken_info.V1.t
+        | Broken of Broken_info.V1.t
       [@@deriving bin_io, compare, sexp]
 
       let%expect_test _ =
@@ -50,6 +50,7 @@ module Stable = struct
         [%expect {| b5002cb2d9234e107dc8ab74969d36d8 |}]
       ;;
     end
+
     module Model = V1
   end
 
@@ -57,7 +58,7 @@ module Stable = struct
     module V1 = struct
       type t =
         { finished : Finished_compilation.V1.t option
-        ; pending  : Rev_info.V1.t list
+        ; pending : Rev_info.V1.t list
         }
       [@@deriving bin_io, fields, sexp]
 
@@ -66,6 +67,7 @@ module Stable = struct
         [%expect {| 10892c034923c936e01c33202711d0e1 |}]
       ;;
     end
+
     module Model = V1
   end
 
@@ -73,10 +75,10 @@ module Stable = struct
     module V2 = struct
       type one = Hydra_compilation_status_for_repo_controller.V1.t =
         { finished : Finished_compilation.V1.t option
-        ; pending  : Rev_info.V1.t list
+        ; pending : Rev_info.V1.t list
         }
-      and t = one Repo_controller_name.V1.Map.t
-      [@@deriving bin_io, sexp]
+
+      and t = one Repo_controller_name.V1.Map.t [@@deriving bin_io, sexp]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -93,6 +95,7 @@ module Stable = struct
         [%expect {| 155c7429e86d37591536a600c7b6ea1b |}]
       ;;
     end
+
     module Model = V2
   end
 
@@ -100,9 +103,9 @@ module Stable = struct
     module Pending_rev = struct
       module V1 = struct
         type t =
-          { first_12_of_rev     : First_12.V1.t
+          { first_12_of_rev : First_12.V1.t
           ; rev_author_or_error : User_name.V1.t Or_error.V2.t
-          ; pending_since       : Time.V1_round_trippable.t
+          ; pending_since : Time.V1_round_trippable.t
           }
         [@@deriving bin_io, compare, fields, sexp]
 
@@ -111,31 +114,34 @@ module Stable = struct
           [%expect {| 68395b34acca4288b2a852b6b4a72d83 |}]
         ;;
       end
+
       module Model = V1
     end
+
     module V1 = struct
       type one =
         { finished : Finished_compilation.V1.t option
-        ; pending  : Pending_rev.V1.t list
+        ; pending : Pending_rev.V1.t list
         }
-      and t = one Repo_controller_name.V1.Map.t
-      [@@deriving bin_io, compare, fields, sexp]
+
+      and t = one Repo_controller_name.V1.Map.t [@@deriving bin_io, compare, fields, sexp]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
         [%expect {| f7ad1a1586ea5c3cbe3b0d3a017c420e |}]
       ;;
     end
+
     module Model = V1
   end
 
   module V3 = struct
     type t =
-      { bookmark                  : string
-      ; rev_info                  : Rev_info.V1.t
-      ; status                    : [ `Done              | `Pending_or_working_on_it ]
+      { bookmark : string
+      ; rev_info : Rev_info.V1.t
+      ; status : [ `Done | `Pending_or_working_on_it ]
       ; continuous_release_status : [ `Not_working_on_it | `Pending_or_working_on_it ]
-      ; compilation_status        : Hydra_compilation_status.V2.t
+      ; compilation_status : Hydra_compilation_status.V2.t
       }
     [@@deriving bin_io, sexp]
 
@@ -147,11 +153,11 @@ module Stable = struct
 
   module V2 = struct
     type t =
-      { bookmark                  : string
-      ; rev_info                  : Rev_info.V1.t
-      ; status                    : [ `Done              | `Pending_or_working_on_it ]
+      { bookmark : string
+      ; rev_info : Rev_info.V1.t
+      ; status : [ `Done | `Pending_or_working_on_it ]
       ; continuous_release_status : [ `Not_working_on_it | `Pending_or_working_on_it ]
-      ; compilation_status        : Hydra_compilation_status.V1.t
+      ; compilation_status : Hydra_compilation_status.V1.t
       }
     [@@deriving bin_io, sexp]
 
@@ -163,32 +169,25 @@ module Stable = struct
     open! Core
     open! Import
 
-    let to_v3 { bookmark
-              ; rev_info
-              ; status
-              ; continuous_release_status
-              ; compilation_status
-              } =
-      { V3.
-        bookmark
+    let to_v3
+      { bookmark; rev_info; status; continuous_release_status; compilation_status }
+      =
+      { V3.bookmark
       ; rev_info
       ; status
       ; continuous_release_status
       ; compilation_status =
-          List.map ~f:(fun (repo_controller, compilation_status) ->
-            Repo_controller_name.of_string repo_controller, compilation_status)
+          List.map
+            ~f:(fun (repo_controller, compilation_status) ->
+              Repo_controller_name.of_string repo_controller, compilation_status)
             compilation_status
           |> Repo_controller_name.Map.of_alist_reduce ~f:(fun first _ -> first)
       }
     ;;
 
-    let of_v3 { V3.
-                bookmark
-              ; rev_info
-              ; status
-              ; continuous_release_status
-              ; compilation_status
-              } =
+    let of_v3
+      { V3.bookmark; rev_info; status; continuous_release_status; compilation_status }
+      =
       { bookmark
       ; rev_info
       ; status
@@ -196,18 +195,17 @@ module Stable = struct
       ; compilation_status =
           Map.to_alist compilation_status
           |> List.map ~f:(fun (repo_controller, compilation_status) ->
-            Repo_controller_name.to_string repo_controller, compilation_status)
+               Repo_controller_name.to_string repo_controller, compilation_status)
       }
     ;;
-
   end
 
   module V1 = struct
     type t =
-      { bookmark            : string
-      ; first_12_of_rev     : First_12.V1.t
+      { bookmark : string
+      ; first_12_of_rev : First_12.V1.t
       ; rev_author_or_error : User_name.V1.t Or_error.V1.t
-      ; status              : [ `Done | `Pending_or_working_on_it ]
+      ; status : [ `Done | `Pending_or_working_on_it ]
       }
     [@@deriving bin_io]
 
@@ -216,32 +214,24 @@ module Stable = struct
       [%expect {| 628d0b4b48a6047e9c10b74763eb770c |}]
     ;;
 
-    let to_v2 { bookmark
-              ; first_12_of_rev
-              ; rev_author_or_error
-              ; status
-              } =
-      { V2.
-        bookmark
-      ; rev_info                  = { first_12_of_rev; rev_author_or_error }
+    let to_v2 { bookmark; first_12_of_rev; rev_author_or_error; status } =
+      { V2.bookmark
+      ; rev_info = { first_12_of_rev; rev_author_or_error }
       ; status
       ; continuous_release_status = `Not_working_on_it
-      ; compilation_status        = []
+      ; compilation_status = []
       }
     ;;
 
-    let of_v2 { V2.
-                bookmark
-              ; rev_info = { first_12_of_rev; rev_author_or_error }
-              ; status
-              ; continuous_release_status = _
-              ; compilation_status        = _
-              } =
-      { bookmark
-      ; first_12_of_rev
-      ; rev_author_or_error
+    let of_v2
+      { V2.bookmark
+      ; rev_info = { first_12_of_rev; rev_author_or_error }
       ; status
+      ; continuous_release_status = _
+      ; compilation_status = _
       }
+      =
+      { bookmark; first_12_of_rev; rev_author_or_error; status }
     ;;
   end
 
@@ -272,7 +262,7 @@ module Broken_info = struct
       Fields.iter
         ~last_working:(check (Option.invariant Rev_info.invariant))
         ~first_broken:(check Rev_info.invariant)
-        ~last_broken: (check Rev_info.invariant))
+        ~last_broken:(check Rev_info.invariant))
   ;;
 end
 

@@ -8,26 +8,23 @@ open! Import
 
 module Attributed_files_analysis : sig
   type t =
-    { completed_review                                       : User_name.Set.t
+    { completed_review : User_name.Set.t
     ; completed_review_satisfies_non_wfr_obligations_in_base : bool
-    ; completed_review_satisfies_non_wfr_obligations_in_tip  : bool
+    ; completed_review_satisfies_non_wfr_obligations_in_tip : bool
     }
   [@@deriving sexp_of]
 end
 
 module Diff2_analysis : sig
   type t =
-    { actually_reviewed                    : Attributed_files_analysis.t
+    { actually_reviewed : Attributed_files_analysis.t
     ; assuming_expected_users_are_finished : Attributed_files_analysis.t
     }
   [@@deriving sexp_of]
 end
 
 module Whole_feature_reviewer_analysis : sig
-  type t =
-    { obligations_are_satisfied : bool
-    }
-  [@@deriving sexp_of]
+  type t = { obligations_are_satisfied : bool } [@@deriving sexp_of]
 end
 
 type t =

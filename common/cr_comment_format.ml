@@ -20,9 +20,6 @@ let of_int = function
 ;;
 
 let sexp_of_t t = sexp_of_int (to_int t)
-
 let t_of_sexp sexp = of_int (int_of_sexp sexp)
-
 let latest = List.hd_exn (List.sort all ~cmp:(fun x y -> compare y x))
-
 let is_after_format t ~format = compare t format >= 0

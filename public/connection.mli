@@ -16,12 +16,11 @@ module Command_rpc : sig
     ]
   [@@deriving sexp_of]
 
-  val process      : t -> Process.t
+  val process : t -> Process.t
   val fe_exec_args : string list
 end
 
 module Rpc_to_server : sig
-
   type t =
     [ `Default
     | `Explicit of Host_and_port.t
@@ -30,7 +29,7 @@ module Rpc_to_server : sig
 end
 
 type t =
-  { command_rpc   : Command_rpc.t
+  { command_rpc : Command_rpc.t
   ; rpc_to_server : Rpc_to_server.t
   }
 [@@deriving fields, sexp_of]

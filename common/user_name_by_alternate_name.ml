@@ -14,7 +14,6 @@ end
 
 open! Core
 open! Import
-
 include Stable.V1
 
 let invariant t =
@@ -40,19 +39,16 @@ let to_user_name_opt t unresolved_name =
 
 let to_user_name t unresolved_name =
   match to_user_name_opt t unresolved_name with
-  | None           -> user_name_of_unresolved_name unresolved_name
+  | None -> user_name_of_unresolved_name unresolved_name
   | Some user_name -> user_name
 ;;
 
 let remove_if_present t ~alternate_name =
-  if Map.mem t alternate_name
-  then Some (Map.remove t alternate_name)
-  else None
+  if Map.mem t alternate_name then Some (Map.remove t alternate_name) else None
 ;;
 
 let no_duplicate_exn alternate_name u u' ~on_error =
-  if User_name.(<>) u u'
-  then never_returns (on_error alternate_name [ u; u' ]);
+  if User_name.( <> ) u u' then never_returns (on_error alternate_name [ u; u' ])
 ;;
 
 let add_exn t ~alternate_name ~user_name ~on_error =

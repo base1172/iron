@@ -1,13 +1,12 @@
 module Stable = struct
   open! Import_stable
-
   module Rev = Rev.Stable
 
   module Update_expected = struct
     module V1 = struct
       type t =
-        { rev            : Rev.V1.t
-        ; by             : User_name.V1.t
+        { rev : Rev.V1.t
+        ; by : User_name.V1.t
         ; expected_since : Time.V1_round_trippable.t
         }
       [@@deriving bin_io, compare, sexp]
@@ -41,8 +40,8 @@ open! Import
 
 module Update_expected = struct
   type t = Stable.Update_expected.Model.t =
-    { rev            : Rev.t
-    ; by             : User_name.t
+    { rev : Rev.t
+    ; by : User_name.t
     ; expected_since : Time.t (* has shorter sexp_of than [Time.V1_round_trippable.t] *)
     }
   [@@deriving fields, sexp_of]

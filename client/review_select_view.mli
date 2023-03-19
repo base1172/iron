@@ -6,9 +6,9 @@ open! Async
     coordinate (with equality determined by [to_string]), with the following exception: if
     this list is empty, [available] is returned instead. *)
 val select
-  :  to_string: ('a -> string) (** should be injective *)
-  -> available: ('a * 'b) list
-  -> configuration: 'a list
+  :  to_string:('a -> string) (** should be injective *)
+  -> available:('a * 'b) list
+  -> configuration:'a list
   -> ('a * 'b) list
 
 (** Given two sets [available] and [configuration], where [configuration] should be a
@@ -17,15 +17,11 @@ val select
     its intersection with [available] is taken.) *)
 val toggle
   :  menu_name:string
-  -> to_string: ('a -> string) (** should be injective *)
-  -> display_prefix_in_list: ('a -> string) option
-  -> available: 'a list
-  -> configuration: 'a list
-  -> [ `New_configuration of 'a list
-     | `File_by_file
-     | `Global_diff
-     | `Quit
-     ] Deferred.t
+  -> to_string:('a -> string) (** should be injective *)
+  -> display_prefix_in_list:('a -> string) option
+  -> available:'a list
+  -> configuration:'a list
+  -> [ `New_configuration of 'a list | `File_by_file | `Global_diff | `Quit ] Deferred.t
 
 (** [navigate] returns an optional element of [available].  Which element is returned
     depends on whether [`Pred_view] or [`Succ_view] is passed.
@@ -45,8 +41,8 @@ val toggle
     After entering the circle, navigate is called with [configuration:[current_view]]
 *)
 val navigate
-  :  to_string: ('a -> string) (** should be injective *)
-  -> available: 'a list
-  -> configuration: 'a list
+  :  to_string:('a -> string) (** should be injective *)
+  -> available:'a list
+  -> configuration:'a list
   -> [ `Pred_view | `Succ_view ]
   -> 'a option

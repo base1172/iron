@@ -6,8 +6,8 @@ open! Import
 
 module Update_expected : sig
   type t =
-    { rev            : Rev.t
-    ; by             : User_name.t
+    { rev : Rev.t
+    ; by : User_name.t
     ; expected_since : Time.t
     }
   [@@deriving sexp_of]

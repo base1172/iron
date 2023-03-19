@@ -2,7 +2,7 @@ open! Core
 open! Async
 open! Import
 
-let main { Fe.Archive.Action. feature_path; for_; reason_for_archiving } =
+let main { Fe.Archive.Action.feature_path; for_; reason_for_archiving } =
   let%bind repo_root =
     Cmd_workspace.repo_for_hg_operations_exn feature_path ~use:`Clone
   in
@@ -13,7 +13,7 @@ let main { Fe.Archive.Action. feature_path; for_; reason_for_archiving } =
   let%bind () = Cmd_workspace.If_enabled.delete_workspace feature_path in
   let%bind rev_zero = Hg.create_rev_zero repo_root in
   let%bind feature =
-    Get_feature.rpc_to_server_exn { feature_path; rev_zero  = Some rev_zero }
+    Get_feature.rpc_to_server_exn { feature_path; rev_zero = Some rev_zero }
   in
   let%bind { remote_repo_path; send_email_to } =
     Archive_feature.rpc_to_server_exn
@@ -22,7 +22,8 @@ let main { Fe.Archive.Action. feature_path; for_; reason_for_archiving } =
   let%bind () =
     Cmd_unbookmarked_head.prune
       ~root_feature:(Feature_path.root feature_path)
-      (Rev.with_human_readable feature.tip
+      (Rev.with_human_readable
+         feature.tip
          ~human_readable:(Feature_path.to_string feature_path))
   in
   let%bind () =
@@ -31,11 +32,11 @@ let main { Fe.Archive.Action. feature_path; for_; reason_for_archiving } =
   let module Sendmail =
     Core_extended.Std.Sendmail.Deprecated_use_async_smtp_std_simplemail
   in
-  if not am_functional_testing
-  && Set.mem feature.send_email_upon Archive
+  if (not am_functional_testing) && Set.mem feature.send_email_upon Archive
   then
     Sendmail.send
-      (Cmd_show.render_email_body feature
+      (Cmd_show.render_email_body
+         feature
          ~included_features_order:`Name
          ~event:(Archived { reason_for_archiving }))
       ~subject:(sprintf !"feature was archived: %{Feature_path}" feature_path)
@@ -44,15 +45,15 @@ let main { Fe.Archive.Action. feature_path; for_; reason_for_archiving } =
 ;;
 
 let command =
-  Command.async' ~summary:"archive a feature (it can later be unarchived)"
+  Command.async'
+    ~summary:"archive a feature (it can later be unarchived)"
     (let open Command.Let_syntax in
-     let%map_open () = return ()
-     and feature_path = feature_path
-     and for_ = for_
-     and reason_for_archiving = reason_for_archiving
-     in
-     fun () ->
-       let open! Deferred.Let_syntax in
-       let feature_path = ok_exn feature_path in
-       main { feature_path; for_; reason_for_archiving })
+    let%map_open () = return ()
+    and feature_path = feature_path
+    and for_ = for_
+    and reason_for_archiving = reason_for_archiving in
+    fun () ->
+      let open! Deferred.Let_syntax in
+      let feature_path = ok_exn feature_path in
+      main { feature_path; for_; reason_for_archiving })
 ;;

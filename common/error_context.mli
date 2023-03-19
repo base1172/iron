@@ -16,14 +16,7 @@ open! Import
 type t
 
 val within : file:Path.t -> (t -> 'a) -> 'a Or_error.t
-
-val augment
-  :  ?annotated_sexp : Sexp.Annotated.t
-  -> ?info           : Info.t
-  -> ?sexp           : Sexp.t
-  -> t
-  -> t
-
+val augment : ?annotated_sexp:Sexp.Annotated.t -> ?info:Info.t -> ?sexp:Sexp.t -> t -> t
 val raise_f : t -> ('r, unit, string, unit -> _) format4 -> 'r
 val raise_s : t -> Sexp.t -> _
-val raise   : t -> Error.t -> _
+val raise : t -> Error.t -> _

@@ -4,7 +4,7 @@ open! Core
     another. *)
 type 'a t =
   { from : 'a
-  ; to_  : 'a
+  ; to_ : 'a
   }
 [@@deriving sexp_of, fields]
 

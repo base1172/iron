@@ -8,9 +8,9 @@
 
 type ('syntax, 'sexp) t =
   { syntax : 'syntax
-  ; sexp   : 'sexp option
+  ; sexp : 'sexp option
   }
 [@@deriving sexp]
 
-val create  : 'syntax      -> ('syntax, _) t
+val create : 'syntax -> ('syntax, _) t
 val creates : 'syntax list -> ('syntax, _) t list

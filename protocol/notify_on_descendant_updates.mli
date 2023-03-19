@@ -8,7 +8,7 @@ open! Import
 
 module Action : sig
   type t =
-    { feature_path         : Feature_path.t
+    { feature_path : Feature_path.t
     ; when_to_first_notify : When_to_first_notify.t
     }
   [@@deriving sexp_of]
@@ -23,6 +23,7 @@ module Reaction : sig
   [@@deriving sexp_of]
 end
 
-include Iron_versioned_rpc.S_pipe_rpc
-  with type action   = Action.t
-  with type reaction = Reaction.t
+include
+  Iron_versioned_rpc.S_pipe_rpc
+    with type action = Action.t
+    with type reaction = Reaction.t

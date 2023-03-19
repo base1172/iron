@@ -3,7 +3,6 @@
 
 open! Core
 open! Import
-
 include Validated_string.S
 
 val to_unresolved_name : t -> Unresolved_name.t

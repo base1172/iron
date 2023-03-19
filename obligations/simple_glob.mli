@@ -10,5 +10,4 @@ type t
 include Identifiable with type t := t
 
 val star : t
-
 val matches : t -> File_name.t -> bool

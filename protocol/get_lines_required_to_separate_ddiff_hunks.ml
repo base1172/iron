@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
@@ -15,8 +14,10 @@ module Stable = struct
         print_endline [%bin_digest: t];
         [%expect {| fcf3bde1887a9be31d901fd242a36e8b |}]
       ;;
+
       let of_model m = m
     end
+
     module Model = V1
   end
 end
@@ -24,11 +25,16 @@ end
 open! Core
 open! Import
 
-include Iron_versioned_rpc.Make
-    (struct let name = "get-lines-required-to-separate-ddiff-hunks" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "get-lines-required-to-separate-ddiff-hunks"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action         = Stable.Action.         Model
-module Reaction       = Stable.Reaction.       Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

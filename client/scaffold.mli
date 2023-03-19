@@ -23,10 +23,10 @@ module Satellite : sig
       resolved later, when we have access to a repo.  It can be a global tag or 40-char
       rev. *)
   type t = private
-    { repo_root        : Relpath.t
+    { repo_root : Relpath.t
     ; remote_repo_path : Remote_repo_path.t
-    ; human_readable   : string
-    ; revision         : string
+    ; human_readable : string
+    ; revision : string
     }
   [@@deriving sexp_of]
 end
@@ -49,15 +49,15 @@ module Center_relative_to_enclosing_repo : sig
   (** We keep a file at the root of the enclosing repo to keep track of where the root of
       the center repo is relative to it. *)
   val load_exn : enclosing_repo_root_abspath:Abspath.t -> Relpath.t Deferred.t
+
   val save_exn : enclosing_repo_root_abspath:Abspath.t -> Relpath.t -> unit Deferred.t
 end
 
 val find_enclosing_repo_root
   :  t
   -> center_repo_root:Repo_root.t
-  -> [ `Enclosing_repo_root of Repo_root.t
-     | `Isolated_repo_has_no_enclosing_repo_root
-     ] Deferred.t
+  -> [ `Enclosing_repo_root of Repo_root.t | `Isolated_repo_has_no_enclosing_repo_root ]
+     Deferred.t
 
 (** [update_satellite_repos] does nothing if [center_repo_root] is isolated. *)
 val update_satellite_repos : t -> center_repo_root:Repo_root.t -> unit Deferred.t

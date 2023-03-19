@@ -9,6 +9,4 @@ module Reaction : sig
   type t = (Fact.Scope.t * Fact.Evidence.t) list [@@deriving sexp_of]
 end
 
-include Iron_versioned_rpc.S
-  with type action   = Action.t
-  with type reaction = Reaction.t
+include Iron_versioned_rpc.S with type action = Action.t with type reaction = Reaction.t

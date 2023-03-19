@@ -1,12 +1,11 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
     module V2 = struct
       type t =
-        { feature_path         : Feature_path.V1.t
-        ; for_                 : User_name.V1.t
+        { feature_path : Feature_path.V1.t
+        ; for_ : User_name.V1.t
         ; reason_for_archiving : string
         }
       [@@deriving bin_io, sexp]
@@ -22,7 +21,7 @@ module Stable = struct
     module V1 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; for_         : User_name.V1.t
+        ; for_ : User_name.V1.t
         }
       [@@deriving bin_io]
 
@@ -32,10 +31,7 @@ module Stable = struct
       ;;
 
       let to_model { feature_path; for_ } =
-        V2.to_model { feature_path
-                    ; for_
-                    ; reason_for_archiving = ""
-                    }
+        V2.to_model { feature_path; for_; reason_for_archiving = "" }
       ;;
     end
 
@@ -48,16 +44,24 @@ module Stable = struct
   end
 end
 
-include Iron_command_rpc.Make
-    (struct let name = "archive" end)
-    (struct let version = 2 end)
+include
+  Iron_command_rpc.Make
+    (struct
+      let name = "archive"
+    end)
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

@@ -3,7 +3,7 @@ open! Async
 open! Import
 
 type t =
-  | Static  of int
+  | Static of int
   | Dynamic of string (** file *)
 [@@deriving sexp]
 

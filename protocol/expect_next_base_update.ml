@@ -4,8 +4,8 @@ module Stable = struct
   module Action = struct
     module V1 = struct
       type t =
-        { feature_path  : Feature_path.V1.t
-        ; for_          : User_name.V1.t
+        { feature_path : Feature_path.V1.t
+        ; for_ : User_name.V1.t
         ; expected_base : Rev.V1.t
         }
       [@@deriving bin_io, compare, fields, sexp]
@@ -17,6 +17,7 @@ module Stable = struct
 
       let to_model t = t
     end
+
     module Model = V1
   end
 
@@ -29,11 +30,16 @@ end
 open! Core
 open! Import
 
-include Iron_versioned_rpc.Make
-    (struct let name = "expect-next-base-update" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "expect-next-base-update"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.  Model
+module Action = Stable.Action.Model
 module Reaction = Stable.Reaction.Model

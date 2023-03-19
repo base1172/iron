@@ -10,9 +10,6 @@ type t [@@deriving sexp_of, compare]
 include Invariant.S with type t := t
 
 val empty : t
-
 val force_next_time : t -> t
-
 val should_force : t -> t option
-
 val can_retry : t -> t option

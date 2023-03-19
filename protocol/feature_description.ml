@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
@@ -37,19 +36,14 @@ module Stable = struct
     end
 
     module V1 = struct
-      type t =
-        { feature_path : Feature_path.V1.t
-        }
-      [@@deriving bin_io]
+      type t = { feature_path : Feature_path.V1.t } [@@deriving bin_io]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
         [%expect {| 82e9dd83ba682394b6a7532a1bdf9e67 |}]
       ;;
 
-      let to_model { feature_path } =
-        V2.to_model (V2.existing_feature_path feature_path)
-      ;;
+      let to_model { feature_path } = V2.to_model (V2.existing_feature_path feature_path)
     end
 
     module Model = V4
@@ -57,10 +51,7 @@ module Stable = struct
 
   module Reaction = struct
     module V1 = struct
-      type t =
-        { description : string
-        }
-      [@@deriving bin_io, sexp_of]
+      type t = { description : string } [@@deriving bin_io, sexp_of]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -74,26 +65,40 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "feature-description" end)
-    (struct let version = 4 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "feature-description"
+    end)
+    (struct
+      let version = 4
+    end)
     (Stable.Action.V4)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 3 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 3
+    end)
     (Stable.Action.V3)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 2 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 2
+    end)
     (Stable.Action.V2)
     (Stable.Reaction.V1)
 
-include Register_old_rpc
-    (struct let version = 1 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.  Model
+module Action = Stable.Action.Model
 module Reaction = Stable.Reaction.Model

@@ -1,12 +1,11 @@
 module Stable = struct
   open! Core.Core_stable
-
   module Feature_path = Feature_path.Stable
 
   module Feature = struct
     module V1 = struct
       type t =
-        { feature_path        : Feature_path.V1.t
+        { feature_path : Feature_path.V1.t
         ; include_descendants : bool
         }
       [@@deriving bin_io, compare, sexp]
@@ -38,19 +37,14 @@ module Stable = struct
 end
 
 module Feature = Stable.Feature.Model
-
 include Stable.Model
-
 open! Core
 open! Import
 
 let these_features feature_paths =
   Features
     (List.map feature_paths ~f:(fun feature_path ->
-       { Feature.
-         feature_path
-       ; include_descendants = false
-       }))
+       { Feature.feature_path; include_descendants = false }))
 ;;
 
 let mem t feature_path =
@@ -60,7 +54,7 @@ let mem t feature_path =
     List.exists features ~f:(fun which_feature ->
       Feature_path.equal which_feature.feature_path feature_path
       || (which_feature.include_descendants
-          && Feature_path.is_ancestor
-               ~ancestor:which_feature.feature_path
-               ~descendant:feature_path))
+         && Feature_path.is_ancestor
+              ~ancestor:which_feature.feature_path
+              ~descendant:feature_path))
 ;;

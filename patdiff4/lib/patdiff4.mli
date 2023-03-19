@@ -26,7 +26,6 @@ end
 
     If [P] does not hold, the behavior of that module is unspecified. *)
 
-
 val hunks
   :  ?verbose:bool
   -> ?view_ids_computed:View_ids_computed.t

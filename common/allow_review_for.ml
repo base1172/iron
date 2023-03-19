@@ -24,7 +24,7 @@ module Stable = struct
   module V1 = struct
     type one =
       { reviewed_for : Users.V1.t
-      ; reviewed_by  : Users.V1.t
+      ; reviewed_by : Users.V1.t
       }
     [@@deriving bin_io, compare, sexp]
 
@@ -33,8 +33,7 @@ module Stable = struct
       [%expect {| 212e584615015f7a824c361545d3f6cd |}]
     ;;
 
-    type t = one list
-    [@@deriving bin_io, compare, sexp]
+    type t = one list [@@deriving bin_io, compare, sexp]
 
     let%expect_test _ =
       print_endline [%bin_digest: t];
@@ -42,9 +41,7 @@ module Stable = struct
     ;;
 
     let hash_one { reviewed_for; reviewed_by } =
-      Hash_consing.fold_hash
-        (Users.V1.hash reviewed_for)
-        (Users.V1.hash reviewed_by)
+      Hash_consing.fold_hash (Users.V1.hash reviewed_for) (Users.V1.hash reviewed_by)
     ;;
 
     let hash t = Hash_consing.list_hash hash_one t
@@ -59,18 +56,17 @@ module Users = struct
 
   let all_users = All_users
   let empty = Users User_name.Set.empty
-
   let users users = Users users
 
   let mem t user =
     match t with
-    | All_users   -> true
+    | All_users -> true
     | Users users -> User_name.Set.mem users user
   ;;
 
   let add t user =
     match t with
-    | All_users   -> All_users
+    | All_users -> All_users
     | Users users -> Users (User_name.Set.add users user)
   ;;
 
@@ -86,36 +82,25 @@ end
 include Stable.V1
 
 let none = []
-
-let all =
-  [ { reviewed_for = Users.all_users
-    ; reviewed_by  = Users.all_users
-    }
-  ]
-;;
-
+let all = [ { reviewed_for = Users.all_users; reviewed_by = Users.all_users } ]
 let also_allow t ~reviewed_for ~reviewed_by = { reviewed_by; reviewed_for } :: t
 
 let may_be_reviewed_by t ~reviewed_for =
   Users.union_list
     (List.filter_map t ~f:(fun one ->
-       if Users.mem one.reviewed_for reviewed_for
-       then Some one.reviewed_by
-       else None))
+       if Users.mem one.reviewed_for reviewed_for then Some one.reviewed_by else None))
 ;;
 
 let check t ~reviewed_for ~reviewed_by =
   let may_be_reviewed_by = may_be_reviewed_by t ~reviewed_for in
-  if User_name.equal reviewed_by reviewed_for
-  || Users.mem may_be_reviewed_by reviewed_by
+  if User_name.equal reviewed_by reviewed_for || Users.mem may_be_reviewed_by reviewed_by
   then Ok ()
   else
     error_s
       [%sexp
-        "this is not allowed -- see [Allow_review_for] in .fe/obligations-repo.sexp",
-        { reviewed_for       : User_name.t
-        ; reviewed_by        : User_name.t
-        ; may_be_reviewed_by : Users.t
-        }
-      ]
+        "this is not allowed -- see [Allow_review_for] in .fe/obligations-repo.sexp"
+        , { reviewed_for : User_name.t
+          ; reviewed_by : User_name.t
+          ; may_be_reviewed_by : Users.t
+          }]
 ;;

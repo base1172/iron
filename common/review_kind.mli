@@ -16,16 +16,17 @@ type t =
   | Ownership_change
 [@@deriving compare, sexp_of]
 
-
 include Invariant.S with type t := t
-include Equal.S     with type t := t
+include Equal.S with type t := t
 
 val to_string_hum : t -> string
 
 module Stable : sig
   module Model : T with type t = t
+
   module V1 : sig
     include Stable_without_comparator with type t = Model.t
+
     val of_model : Model.t -> t
     val to_model : t -> Model.t
   end

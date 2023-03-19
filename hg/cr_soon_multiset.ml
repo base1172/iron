@@ -1,13 +1,12 @@
 module Pre_stable = struct
   open! Import_stable
-
   module Cr_soon = Cr_comment.Stable.Cr_soon
 
   module Cr_soon_in_feature = struct
     module V1 = struct
       type t =
         { feature_path : Feature_path.V1.t
-        ; cr_soon      : Cr_soon.V1.t
+        ; cr_soon : Cr_soon.V1.t
         }
       [@@deriving bin_io, compare, fields, sexp]
 
@@ -23,11 +22,10 @@ open! Core
 open! Import
 
 module Cr_soon_in_feature = struct
-
   module T = struct
     include Pre_stable.Cr_soon_in_feature.V1
 
-    let hash t    = Cr_soon.Compare_ignoring_minor_text_changes.hash t.cr_soon
+    let hash t = Cr_soon.Compare_ignoring_minor_text_changes.hash t.cr_soon
 
     let compare t1 t2 =
       Cr_soon.Compare_ignoring_minor_text_changes.compare t1.cr_soon t2.cr_soon
@@ -44,38 +42,30 @@ module Cr_soon_in_feature = struct
         ~cr_soon:(check Cr_soon.invariant))
   ;;
 
-  let assignee   t = Cr_soon.assignee   t.cr_soon
+  let assignee t = Cr_soon.assignee t.cr_soon
   let cr_comment t = Cr_soon.cr_comment t.cr_soon
-  let path       t = Cr_soon.path       t.cr_soon
+  let path t = Cr_soon.path t.cr_soon
   let start_line t = Cr_soon.start_line t.cr_soon
-
   let family t = Feature_path.root t.feature_path
 
   let active_in t =
-    if Feature_path.is_root t.feature_path
-    then None
-    else Some t.feature_path
+    if Feature_path.is_root t.feature_path then None else Some t.feature_path
   ;;
 
   module For_sorted_output = struct
-
     type nonrec t = t
 
     let compare t1 t2 =
       let c = Feature_name.compare (family t1) (family t2) in
-      if c <> 0
-      then c
-      else Cr_soon.For_sorted_output.compare t1.cr_soon t2.cr_soon
+      if c <> 0 then c else Cr_soon.For_sorted_output.compare t1.cr_soon t2.cr_soon
     ;;
   end
 
   include Comparable.Make_plain (T)
-  include Hashable.  Make_plain (T)
+  include Hashable.Make_plain (T)
 
   let rename_feature ({ cr_soon; feature_path } as t) ~from ~to_ =
-    if Feature_path.equal feature_path from
-    then { cr_soon; feature_path = to_ }
-    else t
+    if Feature_path.equal feature_path from then { cr_soon; feature_path = to_ } else t
   ;;
 end
 
@@ -90,22 +80,20 @@ let invariant (t : t) : unit =
 ;;
 
 let empty = Cr_soon_map.empty
-
 let is_empty = Cr_soon_map.is_empty
-
 let of_alist_exn = Cr_soon_map.of_alist_exn
-
 let to_alist = Map.to_alist
 
 let of_list list =
-  Cr_soon_map.of_alist_fold (List.map list ~f:(fun x -> (x, ())))
-    ~init:0 ~f:(fun n () -> n + 1)
+  Cr_soon_map.of_alist_fold
+    (List.map list ~f:(fun x -> x, ()))
+    ~init:0
+    ~f:(fun n () -> n + 1)
 ;;
 
 let create cr_soons feature_path =
   of_list
-    (List.map cr_soons ~f:(fun cr_soon ->
-       { Cr_soon_in_feature. cr_soon; feature_path }))
+    (List.map cr_soons ~f:(fun cr_soon -> { Cr_soon_in_feature.cr_soon; feature_path }))
 ;;
 
 let to_list t =
@@ -123,9 +111,8 @@ let choose_feature_path t =
 
 let rename_feature t ~from ~to_ =
   to_alist t
-  |> List.map
-       ~f:(fun (cr_soon_in_feature, n) ->
-         (Cr_soon_in_feature.rename_feature cr_soon_in_feature ~from ~to_, n))
+  |> List.map ~f:(fun (cr_soon_in_feature, n) ->
+       Cr_soon_in_feature.rename_feature cr_soon_in_feature ~from ~to_, n)
   |> of_alist_exn
 ;;
 
@@ -169,22 +156,23 @@ let unions ts =
 let partition_by_assignee t alternate_names =
   List.map (Map.to_alist t) ~f:(fun (cr_soon, count) ->
     let assignee = Cr_soon_in_feature.assignee cr_soon in
-    (User_name_by_alternate_name.to_user_name alternate_names assignee, (cr_soon, count)))
+    User_name_by_alternate_name.to_user_name alternate_names assignee, (cr_soon, count))
   |> User_name.Map.of_alist_multi
   |> Map.map ~f:of_alist_exn
 ;;
 
 module Stable = struct
-
   include Pre_stable
 
   module V1 = struct
-    include Make_stable.Of_stable_format.V1
+    include
+      Make_stable.Of_stable_format.V1
         (struct
           type t = (Cr_soon_in_feature.V1.t * int) list [@@deriving bin_io, sexp]
         end)
         (struct
           type nonrec t = t [@@deriving compare]
+
           let of_stable_format = of_alist_exn
           let to_stable_format x = to_alist x
         end)
@@ -194,5 +182,4 @@ module Stable = struct
       [%expect {| 6a97a4c3fe9fa833dcf1d598e874eea3 |}]
     ;;
   end
-  ;;
 end

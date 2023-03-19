@@ -1,6 +1,7 @@
 module Stable = struct
   open! Core.Core_stable
   module User_name = User_name.Stable
+
   module V2 = struct
     type t =
       { user_name : User_name.V1.t
@@ -14,7 +15,9 @@ module Stable = struct
       [%expect {| a4e2e7c93927f169d3243a7fb3c6b5c8 |}]
     ;;
   end
+
   module Model = V2
+
   module V1 = struct
     type t =
       | Normal_reviewer of User_name.V1.t
@@ -31,7 +34,6 @@ end
 
 open! Core
 open! Import
-
 include Stable.Model
 
 let equal t1 t2 = compare t1 t2 = 0

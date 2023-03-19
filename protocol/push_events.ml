@@ -6,7 +6,7 @@ module Stable = struct
       module V1 = struct
         type t =
           { feature_id : Feature_id.V1.t
-          ; tip        : Rev.V1.t
+          ; tip : Rev.V1.t
           }
         [@@deriving bin_io, sexp]
 
@@ -32,9 +32,9 @@ module Stable = struct
       module V1 = struct
         type t =
           | Clear_all
-          | Clear_features           of Feature_id.V1.t list
-          | Clear_revs               of Rev.V1.t list
-          | Clear_users              of User_name.V1.t list
+          | Clear_features of Feature_id.V1.t list
+          | Clear_revs of Rev.V1.t list
+          | Clear_users of User_name.V1.t list
           | Set_max_size_per_feature of int
         [@@deriving bin_io, sexp]
 
@@ -77,25 +77,35 @@ end
 module Add = struct
   module Stable = Stable.Add
 
-  include Iron_versioned_rpc.Make
-      (struct let name = "push-event-add" end)
-      (struct let version = 1 end)
+  include
+    Iron_versioned_rpc.Make
+      (struct
+        let name = "push-event-add"
+      end)
+      (struct
+        let version = 1
+      end)
       (Stable.Action.V1)
       (Stable.Reaction.V1)
 
-  module Action   = Stable.Action.   Model
-  module Reaction = Stable.Reaction. Model
+  module Action = Stable.Action.Model
+  module Reaction = Stable.Reaction.Model
 end
 
 module Change = struct
   module Stable = Stable.Change
 
-  include Iron_versioned_rpc.Make
-      (struct let name = "push-event-change" end)
-      (struct let version = 1 end)
+  include
+    Iron_versioned_rpc.Make
+      (struct
+        let name = "push-event-change"
+      end)
+      (struct
+        let version = 1
+      end)
       (Stable.Action.V1)
       (Stable.Reaction.V1)
 
-  module Action   = Stable.Action.   Model
-  module Reaction = Stable.Reaction. Model
+  module Action = Stable.Action.Model
+  module Reaction = Stable.Reaction.Model
 end

@@ -1,5 +1,4 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
@@ -13,11 +12,16 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "invalidate-cached-feature-attributes" end)
-    (struct let version = 1 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "invalidate-cached-feature-attributes"
+    end)
+    (struct
+      let version = 1
+    end)
     (Stable.Action.V1)
     (Stable.Reaction.V1)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

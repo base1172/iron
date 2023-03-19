@@ -17,8 +17,7 @@ type t =
 
 include Stringable with type t := t
 include Comparable with type t := t
-include Hashable   with type t := t
+include Hashable with type t := t
 
 val simple_diff : from:Diamond.Node.t -> to_:Diamond.Node.t -> t
-
 val is_simple_diff : t -> bool

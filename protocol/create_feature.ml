@@ -1,25 +1,21 @@
 module Stable = struct
-
   open! Import_stable
 
   module Action = struct
-
     module V5 = struct
       type t =
-        { feature_path                : Feature_path.V1.t
-        ; owners                      : User_name.V1.t list
-        ; is_permanent                : bool
-        ; description                 : string
-        ; base                        : Rev.V1.t option
-        ; tip                         : Rev.V1.t option
+        { feature_path : Feature_path.V1.t
+        ; owners : User_name.V1.t list
+        ; is_permanent : bool
+        ; description : string
+        ; base : Rev.V1.t option
+        ; tip : Rev.V1.t option
         ; add_whole_feature_reviewers : User_name.V1.Set.t
-        ; reviewing                   : [ `Whole_feature_reviewers
-                                        | `First_owner
-                                        ]
-        ; rev_zero                    : Rev.V1.t
-        ; remote_repo_path            : Remote_repo_path.V1.t option
-        ; allow_non_cr_clean_base     : bool
-        ; properties                  : Properties.V1.t option
+        ; reviewing : [ `Whole_feature_reviewers | `First_owner ]
+        ; rev_zero : Rev.V1.t
+        ; remote_repo_path : Remote_repo_path.V1.t option
+        ; allow_non_cr_clean_base : bool
+        ; properties : Properties.V1.t option
         }
       [@@deriving bin_io, fields, sexp]
 
@@ -33,17 +29,17 @@ module Stable = struct
 
     module V4 = struct
       type t =
-        { feature_path                : Feature_path.V1.t
-        ; owners                      : User_name.V1.t list
-        ; is_permanent                : bool
-        ; description                 : string
-        ; base                        : Rev.V1.t option
-        ; tip                         : Rev.V1.t option
+        { feature_path : Feature_path.V1.t
+        ; owners : User_name.V1.t list
+        ; is_permanent : bool
+        ; description : string
+        ; base : Rev.V1.t option
+        ; tip : Rev.V1.t option
         ; add_whole_feature_reviewers : User_name.V1.Set.t
-        ; rev_zero                    : Rev.V1.t
-        ; remote_repo_path            : Remote_repo_path.V1.t option
-        ; allow_non_cr_clean_base     : bool
-        ; properties                  : Properties.V1.t option
+        ; rev_zero : Rev.V1.t
+        ; remote_repo_path : Remote_repo_path.V1.t option
+        ; allow_non_cr_clean_base : bool
+        ; properties : Properties.V1.t option
         }
       [@@deriving bin_io]
 
@@ -53,18 +49,19 @@ module Stable = struct
       ;;
 
       let to_model
-            { feature_path
-            ; owners
-            ; is_permanent
-            ; description
-            ; base
-            ; tip
-            ; add_whole_feature_reviewers
-            ; rev_zero
-            ; remote_repo_path
-            ; allow_non_cr_clean_base
-            ; properties
-            } =
+        { feature_path
+        ; owners
+        ; is_permanent
+        ; description
+        ; base
+        ; tip
+        ; add_whole_feature_reviewers
+        ; rev_zero
+        ; remote_repo_path
+        ; allow_non_cr_clean_base
+        ; properties
+        }
+        =
         V5.to_model
           { feature_path
           ; owners
@@ -88,9 +85,9 @@ module Stable = struct
   module Reaction = struct
     module V4 = struct
       type t =
-        { feature_id       : Feature_id.V1.t
+        { feature_id : Feature_id.V1.t
         ; remote_repo_path : Remote_repo_path.V1.t
-        ; tip              : Rev.V1.t
+        ; tip : Rev.V1.t
         }
       [@@deriving bin_io, fields, sexp_of]
 
@@ -105,7 +102,7 @@ module Stable = struct
     module V3 = struct
       type t =
         { remote_repo_path : Remote_repo_path.V1.t
-        ; tip              : Rev.V1.t
+        ; tip : Rev.V1.t
         }
       [@@deriving bin_io]
 
@@ -115,14 +112,8 @@ module Stable = struct
       ;;
 
       let of_model m =
-        let { V4.
-              feature_id = _
-            ; remote_repo_path
-            ; tip
-            } = V4.of_model m in
-        { remote_repo_path
-        ; tip
-        }
+        let { V4.feature_id = _; remote_repo_path; tip } = V4.of_model m in
+        { remote_repo_path; tip }
       ;;
     end
 
@@ -130,21 +121,32 @@ module Stable = struct
   end
 end
 
-include Iron_versioned_rpc.Make
-    (struct let name = "create-feature" end)
-    (struct let version = 7 end)
+include
+  Iron_versioned_rpc.Make
+    (struct
+      let name = "create-feature"
+    end)
+    (struct
+      let version = 7
+    end)
     (Stable.Action.V5)
     (Stable.Reaction.V4)
 
-include Register_old_rpc
-    (struct let version = 6 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 6
+    end)
     (Stable.Action.V4)
     (Stable.Reaction.V4)
 
-include Register_old_rpc
-    (struct let version = 5 end)
+include
+  Register_old_rpc
+    (struct
+      let version = 5
+    end)
     (Stable.Action.V4)
     (Stable.Reaction.V3)
 
-module Action   = Stable.Action.   Model
-module Reaction = Stable.Reaction. Model
+module Action = Stable.Action.Model
+module Reaction = Stable.Reaction.Model

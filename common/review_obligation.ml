@@ -1,17 +1,16 @@
 module Stable_format = struct
-
   module V1 = struct
     open! Core.Core_stable
     module Symbolic_user_set = Symbolic_user_set.Stable
-    module User_name         = User_name.Stable
+    module User_name = User_name.Stable
 
     type t =
-      | All             of Symbolic_user_set.V1.t
-      | At_least_wide   of int * Symbolic_user_set.V1.t
+      | All of Symbolic_user_set.V1.t
+      | At_least_wide of int * Symbolic_user_set.V1.t
       | At_least_narrow of int * Symbolic_user_set.V1.t
-      | And             of t list
-      | Or_wide         of t list
-      | Or_narrow       of t list
+      | And of t list
+      | Or_wide of t list
+      | Or_narrow of t list
     [@@deriving bin_io, compare, sexp]
 
     let%expect_test _ =
@@ -26,20 +25,20 @@ open! Import
 
 module T = struct
   type t =
-    | All_of        of User_name.Set.t
+    | All_of of User_name.Set.t
     | At_least_wide of int * User_name.Set.t
-    | And           of t list
-    | Or_wide       of t list
+    | And of t list
+    | Or_wide of t list
   [@@deriving compare, sexp_of]
 
   let module_name = "Iron_common.Review_obligation"
-
   let hash_users = User_name.Stable.V1.Set.hash
+
   let rec hash = function
     | All_of users -> Hash_consing.fold_hash 1 (hash_users users)
-    | At_least_wide (k, users) -> Hash_consing.(fold_hash (fold_hash 2 k)
-                                                  (hash_users users))
-    | And ts     -> Hash_consing.fold_hash 3 (Hash_consing.list_hash hash ts)
+    | At_least_wide (k, users) ->
+      Hash_consing.(fold_hash (fold_hash 2 k) (hash_users users))
+    | And ts -> Hash_consing.fold_hash 3 (Hash_consing.list_hash hash ts)
     | Or_wide ts -> Hash_consing.fold_hash 4 (Hash_consing.list_hash hash ts)
   ;;
 end
@@ -54,10 +53,9 @@ let invariant t =
       | All_of users -> Set.iter users ~f:User_name.invariant
       | At_least_wide (k, users) ->
         Set.iter users ~f:User_name.invariant;
-        if k <= 0
-        then raise_s [%sexp "At_least_wide with k <= 0", (t : t)];
+        if k <= 0 then raise_s [%sexp "At_least_wide with k <= 0", (t : t)];
         if k > Set.length users
-        then raise_s [%sexp "unsatisfiable At_least_wide", (t : t)];
+        then raise_s [%sexp "unsatisfiable At_least_wide", (t : t)]
       | And ts -> List.iter ts ~f:aux
       | Or_wide ts ->
         if List.is_empty ts then failwith "empty Or_wide";
@@ -113,17 +111,16 @@ let rec min_reviewers t =
   | At_least_wide (k, users) -> k, users
   | And ts ->
     let combine (at_least, from) (at_least', from') =
-      Int.max
-        (Int.max at_least at_least')
-        (at_least + at_least' - Set.(length (inter from from')))
-    , Set.union from from'
+      ( Int.max
+          (Int.max at_least at_least')
+          (at_least + at_least' - Set.(length (inter from from')))
+      , Set.union from from' )
     in
-    List.fold ts ~init:(0, User_name.Set.empty)
-      ~f:(fun acc t -> combine acc (min_reviewers t))
+    List.fold ts ~init:(0, User_name.Set.empty) ~f:(fun acc t ->
+      combine acc (min_reviewers t))
   | Or_wide ts ->
     let combine (at_least, from) (at_least', from') =
-      Int.min at_least at_least'
-    , Set.union from from'
+      Int.min at_least at_least', Set.union from from'
     in
     (* [reduce_exn] is okay because [invariant t] guarantees [ts] is nonempty. *)
     List.reduce_exn ~f:combine (List.map ~f:min_reviewers ts)
@@ -137,18 +134,16 @@ let num_reviewers_lower_bound t =
 module type Reviewed_by = sig
   type review_obligation
   type t [@@deriving sexp_of]
+
   val synthesize : review_obligation -> t
-end with type review_obligation := t
+end
+with type review_obligation := t
 
 let to_string_hum (module Reviewed_by : Reviewed_by) t =
-  t
-  |> Reviewed_by.synthesize
-  |> [%sexp_of: Reviewed_by.t]
-  |> Sexp.to_string_hum
+  t |> Reviewed_by.synthesize |> [%sexp_of: Reviewed_by.t] |> Sexp.to_string_hum
 ;;
 
 let none = All_of User_name.Set.empty
-
 let all_of users = All_of users
 
 let at_least_wide e k users =
@@ -160,7 +155,7 @@ let at_least_wide e k users =
 let or_wide e = function
   | [] -> Error_context.raise_f e "[Or] must have at least one clause" ()
   | [ t ] -> t
-  | (_ :: _ :: _) as ts -> Or_wide ts
+  | _ :: _ :: _ as ts -> Or_wide ts
 ;;
 
 let and_ ts =
@@ -168,20 +163,18 @@ let and_ ts =
   let conjuncts = ref [] in
   let rec loop t =
     match t with
-    | All_of more_users -> users := Set.union !users more_users;
-    | And ts -> List.iter ts ~f:loop;
-    | At_least_wide _ | Or_wide _ -> conjuncts := t :: !conjuncts;
+    | All_of more_users -> users := Set.union !users more_users
+    | And ts -> List.iter ts ~f:loop
+    | At_least_wide _ | Or_wide _ -> conjuncts := t :: !conjuncts
   in
   List.iter ts ~f:loop;
   let conjuncts =
-    if Set.is_empty !users
-    then !conjuncts
-    else All_of !users :: !conjuncts
+    if Set.is_empty !users then !conjuncts else All_of !users :: !conjuncts
   in
   match conjuncts with
   | [] -> none
   | [ t ] -> t
-  | _     -> And (List.sort conjuncts ~cmp:compare)
+  | _ -> And (List.sort conjuncts ~cmp:compare)
 ;;
 
 let rec may_reviewers = function
@@ -207,22 +200,23 @@ let is_satisfied t ~by =
   let rec loop = function
     | All_of users -> Set.is_subset users ~of_:by
     | At_least_wide (k, users) -> Set.length (Set.inter users by) >= k
-    | Or_wide ts -> List.exists  ts ~f:loop
-    | And ts     -> List.for_all ts ~f:loop
+    | Or_wide ts -> List.exists ts ~f:loop
+    | And ts -> List.for_all ts ~f:loop
   in
   loop t
 ;;
 
 let de_alias t user_name_by_alias =
   let de_alias user_name =
-    User_name_by_alternate_name.to_user_name user_name_by_alias
+    User_name_by_alternate_name.to_user_name
+      user_name_by_alias
       (User_name.to_unresolved_name user_name)
   in
   let de_alias_users user_names = User_name.Set.map user_names ~f:de_alias in
   let rec loop = function
     | All_of users -> All_of (de_alias_users users)
     | At_least_wide (k, users) -> At_least_wide (k, de_alias_users users)
-    | And ts     -> And     (List.map ts ~f:loop)
+    | And ts -> And (List.map ts ~f:loop)
     | Or_wide ts -> Or_wide (List.map ts ~f:loop)
   in
   loop t
@@ -230,7 +224,6 @@ let de_alias t user_name_by_alias =
 
 let%test_module _ =
   (module struct
-
     module Generator = Quickcheck.Generator
 
     let users_generator ?(at_least = 0) () =
@@ -248,15 +241,14 @@ let%test_module _ =
     let t_generator =
       let open Generator in
       recursive (fun t ->
-        size >>= fun size ->
+        size
+        >>= fun size ->
         let all_of = map (users_generator ()) ~f:(fun users -> All_of users) in
         let at_least_wide =
           let open Monad_infix in
           users_generator () ~at_least:1
           >>= fun users ->
-          Int.gen_incl 1 (Set.length users)
-          >>| fun k ->
-          At_least_wide (k, users)
+          Int.gen_incl 1 (Set.length users) >>| fun k -> At_least_wide (k, users)
         in
         let or_wide =
           if size = 0
@@ -264,13 +256,14 @@ let%test_module _ =
           else Some (map ~f:(fun ts -> Or_wide ts) (List.gen' ~length:(`At_least 1) t))
         in
         let and_ =
-          if size = 0
-          then None
-          else Some (map ~f:(fun ts -> And ts) (List.gen t))
+          if size = 0 then None else Some (map ~f:(fun ts -> And ts) (List.gen t))
         in
         filter_map
-          (union (List.filter_opt [Some all_of; Some at_least_wide; or_wide; and_]))
-          ~f:(fun t -> Option.try_with (fun () -> invariant t; t)))
+          (union (List.filter_opt [ Some all_of; Some at_least_wide; or_wide; and_ ]))
+          ~f:(fun t ->
+            Option.try_with (fun () ->
+              invariant t;
+              t)))
     ;;
 
     let t_with_may_reviewers_generator =
@@ -278,8 +271,7 @@ let%test_module _ =
       t_generator
       >>= fun t ->
       List.gen_permutations (Set.to_list (may_reviewers t))
-      >>| fun may_reviewers ->
-      t, may_reviewers
+      >>| fun may_reviewers -> t, may_reviewers
     ;;
 
     let%test_unit _ =
@@ -288,90 +280,93 @@ let%test_module _ =
         t_with_may_reviewers_generator
         ~sexp_of:[%sexp_of: t * User_name.t list]
         ~f:(fun (t, may_reviewers) ->
-          let num_reviewers_lower_bound = num_reviewers_lower_bound t in
-          (* O(n) subsets is sufficient testing and a good compromise as opposed to
+        let num_reviewers_lower_bound = num_reviewers_lower_bound t in
+        (* O(n) subsets is sufficient testing and a good compromise as opposed to
              exhaustively testing the [2^n] subsets of [may_reviewers]. *)
-          let (_all_users, subsets) =
-            List.fold may_reviewers
-              ~init:(User_name.Set.empty, [User_name.Set.empty])
-              ~f:(fun (users, subsets) user ->
-                let users = Set.add users user in
-                users, users :: subsets)
-          in
-          let increasing_subsets = List.rev subsets in
-          if debug then
-            Debug.eprints "subsets" increasing_subsets [%sexp_of: User_name.Set.t list];
-          with_return (fun return ->
-            List.iter increasing_subsets ~f:(fun users ->
-              if is_satisfied t ~by:users
+        let _all_users, subsets =
+          List.fold
+            may_reviewers
+            ~init:(User_name.Set.empty, [ User_name.Set.empty ])
+            ~f:(fun (users, subsets) user ->
+            let users = Set.add users user in
+            users, users :: subsets)
+        in
+        let increasing_subsets = List.rev subsets in
+        if debug
+        then Debug.eprints "subsets" increasing_subsets [%sexp_of: User_name.Set.t list];
+        with_return (fun return ->
+          List.iter increasing_subsets ~f:(fun users ->
+            if is_satisfied t ~by:users
+            then (
+              if debug
               then (
-                if debug
-                then (
-                  let rec is_satisfied_tautology = function
-                    | All_of users when Set.is_empty users -> true
-                    | And ts -> List.for_all ts ~f:is_satisfied_tautology
-                    | Or_wide ts -> List.exists ts
-                                      ~f:is_satisfied_tautology
-                    | _ -> false
-                  in
-                  if not (is_satisfied_tautology t)
-                  then
-                    Debug.eprints "is_satisfied" (t, users) [%sexp_of: t * User_name.Set.t]);
-                [%test_pred: int] (fun num -> num <= Set.length users)
-                  num_reviewers_lower_bound;
-                (* All remaining subsets include that subset so they also satisfy [t] and
+                let rec is_satisfied_tautology = function
+                  | All_of users when Set.is_empty users -> true
+                  | And ts -> List.for_all ts ~f:is_satisfied_tautology
+                  | Or_wide ts -> List.exists ts ~f:is_satisfied_tautology
+                  | _ -> false
+                in
+                if not (is_satisfied_tautology t)
+                then
+                  Debug.eprints "is_satisfied" (t, users) [%sexp_of: t * User_name.Set.t]);
+              [%test_pred: int]
+                (fun num -> num <= Set.length users)
+                num_reviewers_lower_bound;
+              (* All remaining subsets include that subset so they also satisfy [t] and
                    their length is strictly bigger, so the predicate checked by the test is
                    implied.  Just skip them then. *)
-                return.return ()))))
+              return.return ()))))
     ;;
 
-    let users strings =
-      User_name.Set.of_list (List.map strings ~f:User_name.of_string)
-    ;;
+    let users strings = User_name.Set.of_list (List.map strings ~f:User_name.of_string)
 
     let%test_unit _ =
-      let t = At_least_wide (1, users ["foo"; "bar"; "baz"]) in
+      let t = At_least_wide (1, users [ "foo"; "bar"; "baz" ]) in
       [%test_result: int] (num_reviewers_lower_bound t) ~expect:1
     ;;
 
     let%test_unit _ =
-      let t = All_of (users ["foo"; "bar"; "baz"]) in
+      let t = All_of (users [ "foo"; "bar"; "baz" ]) in
       [%test_result: int] (num_reviewers_lower_bound t) ~expect:3
     ;;
 
     let%test_unit _ =
       let t =
-        And [ At_least_wide (1, users [ "foo"; "bar"])
-            ; At_least_wide (1, users [ "baz"; "quux"])
-            ]
+        And
+          [ At_least_wide (1, users [ "foo"; "bar" ])
+          ; At_least_wide (1, users [ "baz"; "quux" ])
+          ]
       in
       [%test_result: int] (num_reviewers_lower_bound t) ~expect:2
     ;;
 
     let%test_unit _ =
       let t =
-        Or_wide [ All_of (users ["foo"; "bar"; "baz"])
-                ; At_least_wide (1, users ["foo"; "bar"; "baz"])
-                ]
+        Or_wide
+          [ All_of (users [ "foo"; "bar"; "baz" ])
+          ; At_least_wide (1, users [ "foo"; "bar"; "baz" ])
+          ]
       in
       [%test_result: int] (num_reviewers_lower_bound t) ~expect:1
     ;;
 
     let%test_unit _ =
       let t =
-        And [ At_least_wide (1, users ["foo"; "bar"; "baz"])
-            ; At_least_wide (1, users ["foo"; "bar"; "baz"])
-            ]
+        And
+          [ At_least_wide (1, users [ "foo"; "bar"; "baz" ])
+          ; At_least_wide (1, users [ "foo"; "bar"; "baz" ])
+          ]
       in
       [%test_result: int] (num_reviewers_lower_bound t) ~expect:1
     ;;
 
     let%test_unit _ =
       let t =
-        And [ At_least_wide (1, users ["a"; "b"])
-            ; At_least_wide (1, users ["b"; "c"])
-            ; At_least_wide (1, users ["c"; "d"])
-            ]
+        And
+          [ At_least_wide (1, users [ "a"; "b" ])
+          ; At_least_wide (1, users [ "b"; "c" ])
+          ; At_least_wide (1, users [ "c"; "d" ])
+          ]
       in
       (* This is a case where it would be nice to return 2, but we cannot, because we only
          process the sets one-by-one, rather than doing the full inclusion-exclusion. *)
@@ -380,42 +375,46 @@ let%test_module _ =
 
     let%test_unit _ =
       let t =
-        And [ Or_wide [ At_least_wide (1, users ["a"])
-                      ; At_least_wide (1, users ["b"; "c"])
-                      ]
-            ; At_least_wide (1, users ["b"; "c"])
-            ]
+        And
+          [ Or_wide
+              [ At_least_wide (1, users [ "a" ]); At_least_wide (1, users [ "b"; "c" ]) ]
+          ; At_least_wide (1, users [ "b"; "c" ])
+          ]
       in
       [%test_result: int] (num_reviewers_lower_bound t) ~expect:1
     ;;
-
   end)
 ;;
 
 module Stable = struct
   module V1 = struct
     let hash = hash
-    include Make_stable.Of_stable_format.V1 (Stable_format.V1) (struct
-        type nonrec t = t [@@deriving compare]
 
-        module V1 = Stable_format.V1
+    include
+      Make_stable.Of_stable_format.V1
+        (Stable_format.V1)
+        (struct
+          type nonrec t = t [@@deriving compare]
 
-        let rec to_stable_format : t -> V1.t = function
-          | All_of users             -> All users
-          | At_least_wide (k, users) -> At_least_wide (k, users)
-          | And ts                   -> And     (List.map ts ~f:to_stable_format)
-          | Or_wide ts               -> Or_wide (List.map ts ~f:to_stable_format)
-        ;;
+          module V1 = Stable_format.V1
 
-        let rec of_stable_format : V1.t -> t = fun v1 -> H.shared_t (aux v1)
-        and aux : V1.t -> t = function
-          | All users                -> All_of users
-          | At_least_wide (k, users) -> At_least_wide (k, users)
-          | And ts                   -> And     (List.map ts ~f:of_stable_format)
-          | Or_wide  ts              -> Or_wide (List.map ts ~f:of_stable_format)
-          | v1 -> raise_s [%sexp "Review_obligation.of_stable", (v1 : V1.t)]
-        ;;
-      end)
+          let rec to_stable_format : t -> V1.t = function
+            | All_of users -> All users
+            | At_least_wide (k, users) -> At_least_wide (k, users)
+            | And ts -> And (List.map ts ~f:to_stable_format)
+            | Or_wide ts -> Or_wide (List.map ts ~f:to_stable_format)
+          ;;
+
+          let rec of_stable_format : V1.t -> t = fun v1 -> H.shared_t (aux v1)
+
+          and aux : V1.t -> t = function
+            | All users -> All_of users
+            | At_least_wide (k, users) -> At_least_wide (k, users)
+            | And ts -> And (List.map ts ~f:of_stable_format)
+            | Or_wide ts -> Or_wide (List.map ts ~f:of_stable_format)
+            | v1 -> raise_s [%sexp "Review_obligation.of_stable", (v1 : V1.t)]
+          ;;
+        end)
 
     let%expect_test _ =
       print_endline [%bin_digest: t];

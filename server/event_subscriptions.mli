@@ -12,9 +12,7 @@ module Subscription : sig
   (** [closed t] returns a deferred that gets determined when affected by either of
       [drop_all_by_user] or [remove], with a variant indicating which was
       it.  A subscription that gets dropped still needs to be removed. *)
-  val closed : t -> [ `Removed
-                    | `Dropped of Error.t
-                    ] Deferred.t
+  val closed : t -> [ `Removed | `Dropped of Error.t ] Deferred.t
 
   val tick : t -> unit
 end
@@ -32,11 +30,8 @@ val add
   -> Subscription.t Or_error.t
 
 val remove : t -> Subscription.t -> unit
-
 val deserializer : t Deserializer.t
-
 val set_max_subscriptions_per_user : t -> int -> unit
-
 val set_max_subscriptions_global : t -> int -> unit
 
 val drop_all_by_user

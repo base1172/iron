@@ -34,6 +34,7 @@ val to_unresolved_name : t -> Unresolved_name.t
 
 module Or_all : sig
   type user_name
+
   type t =
     [ `All_users
     | `User of user_name
@@ -43,14 +44,16 @@ module Or_all : sig
   include Stringable.S with type t := t
 
   val arg_type
-    : complete_user_name:(Univ_map.t -> part:string -> string list)
+    :  complete_user_name:(Univ_map.t -> part:string -> string list)
     -> t Command.Arg_type.t
 
   val arg_doc : string
-end with type user_name := t
+end
+with type user_name := t
 
 module Or_all_or_all_but : sig
   type user_name
+
   type t =
     [ `All_users_but of Set.t
     | Or_all.t
@@ -58,16 +61,19 @@ module Or_all_or_all_but : sig
   [@@deriving sexp_of]
 
   val mem : t -> user_name -> bool
-end with type user_name := t
+end
+with type user_name := t
 
 module Stable : sig
-  include Validated_string.Stable
-    with type model := t
-    with type comparator_witness := comparator_witness
+  include
+    Validated_string.Stable
+      with type model := t
+      with type comparator_witness := comparator_witness
 
   module Or_all : sig
     module V1 : Stable_without_comparator with type t = Or_all.t
   end
+
   module Or_all_or_all_but : sig
     module V1 : Stable_without_comparator with type t = Or_all_or_all_but.t
   end

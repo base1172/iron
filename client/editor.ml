@@ -2,18 +2,18 @@ open! Core
 open! Async
 
 let with_temp_file ?file f =
-  let base = match file with
+  let base =
+    match file with
     | Some file -> Filename.basename file
     | None -> "tmp"
   in
-  let prefix,suffix = match String.rsplit2 ~on:'.' base with
+  let prefix, suffix =
+    match String.rsplit2 ~on:'.' base with
     | Some (base, ext) -> base, ext
     | None -> base, ".tmp"
   in
   let file = Filename.temp_file prefix suffix in
-  Monitor.protect
-    ~finally:(fun () -> Unix.unlink file)
-    (fun () -> f file)
+  Monitor.protect ~finally:(fun () -> Unix.unlink file) (fun () -> f file)
 ;;
 
 let invoke_editor ?(tmpfile = "tmp") text =
@@ -26,8 +26,5 @@ let invoke_editor ?(tmpfile = "tmp") text =
     | Ok () ->
       let%map contents = Reader.file_contents file in
       Ok contents
-    | stat  ->
-      error "Error editing text" stat [%sexp_of: Unix.Exit_or_signal.t]
-      |> return
-  )
+    | stat -> error "Error editing text" stat [%sexp_of: Unix.Exit_or_signal.t] |> return)
 ;;
