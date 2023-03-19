@@ -414,6 +414,7 @@ end
 
 let print_introduction_summary_for_review
   ~feature_path
+  ~review_session_base
   ~review_session_tip
   ~reviewer_in_session
   ~warn_reviewer
@@ -517,8 +518,9 @@ let print_introduction_summary_for_review
   let count_total = List.length diff4s_to_review in
   let count_reviewed = List.count diff4s_to_review ~f:Diff4_to_review.is_reviewed in
   Print.printf
-    "Reviewing %s to %s.\n"
+    "Reviewing %s from %s to %s.\n"
     (Feature_path.to_string feature_path)
+    (Rev.to_string_12 review_session_base)
     (Rev.to_string_12 review_session_tip);
   let num_lines_in_diff diff4_to_review =
     Diff4_to_review.num_lines diff4_to_review reviewer_in_session
@@ -680,6 +682,7 @@ let confirm_review_session_id_exn
         , { feature_path : Feature_path.t; requested_for = (for_ : User_name.t) }]
   | `Review_session
       { Get_review_session.Review_session.review_session_id
+      ; review_session_base
       ; review_session_tip
       ; reviewer_in_session
       ; reviewer_in_feature
@@ -699,6 +702,7 @@ let confirm_review_session_id_exn
       else (
         print_introduction_summary_for_review
           ~feature_path
+          ~review_session_base
           ~review_session_tip
           ~reviewer_in_session
           ~warn_reviewer:
@@ -821,6 +825,7 @@ let review_or_catch_up
   ~feature_tip
   ~reviewer_in_session
   ~warn_reviewer
+  ~review_session_base
   ~review_session_tip
   ~diff4s_to_review
   ~may_modify_local_repo
@@ -894,6 +899,7 @@ let review_or_catch_up
   if List.is_empty diff4s_to_review then assert false;
   print_introduction_summary_for_review
     ~feature_path
+    ~review_session_base
     ~review_session_tip
     ~reviewer_in_session
     ~warn_reviewer
@@ -1084,6 +1090,7 @@ let catch_up_review_loop
         return (`Finished ())
       | `Catch_up_session
           ({ Get_catch_up_session.Catch_up_session.catch_up_session_id
+           ; catch_up_session_base
            ; catch_up_session_tip
            ; reviewer_in_session
            ; diff4s_to_catch_up
@@ -1124,6 +1131,7 @@ let catch_up_review_loop
             ~feature_tip:tip
             ~reviewer_in_session
             ~warn_reviewer:None
+            ~review_session_base:catch_up_session_base
             ~review_session_tip:catch_up_session_tip
             ~diff4s_to_review
             ~may_modify_local_repo
@@ -1218,6 +1226,7 @@ let review_loop
           return (`Finished ())
         | `Review_session
             { Get_review_session.Review_session.review_session_id
+            ; review_session_base
             ; review_session_tip
             ; reviewer_in_session
             ; reviewer_in_feature
@@ -1292,6 +1301,7 @@ let review_loop
                       ; line_count_to_finish_session
                       ; line_count_to_goal
                       })
+                 ~review_session_base
                  ~review_session_tip
                  ~diff4s_to_review
                  ~may_modify_local_repo

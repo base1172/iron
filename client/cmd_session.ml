@@ -358,6 +358,7 @@ module Attribute = struct
   module T = struct
     type t =
       | Id
+      | Base
       | Tip
       | Is_locked
       | Is_whole_feature_follower
@@ -433,6 +434,7 @@ let show =
           else Error.raise error
         | `Review_session
             { Get_review_session.Review_session.review_session_id
+            ; review_session_base
             ; review_session_tip
             ; reviewer_in_session
             ; reviewer_in_feature
@@ -448,6 +450,7 @@ let show =
           in
           let get_attribute = function
             | Attribute.Id -> review_session_id |> [%sexp_of: Session_id.t]
+            | Base -> Rev.node_hash review_session_base |> [%sexp_of: Node_hash.t]
             | Tip -> Rev.node_hash review_session_tip |> [%sexp_of: Node_hash.t]
             | Is_locked -> [%sexp (is_locked : bool)]
             | Is_whole_feature_follower ->
@@ -484,6 +487,7 @@ let show =
              in
              Cmd_review.print_introduction_summary_for_review
                ~feature_path
+               ~review_session_base
                ~review_session_tip
                ~reviewer_in_session
                ~warn_reviewer:

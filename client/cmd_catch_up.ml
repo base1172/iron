@@ -255,6 +255,7 @@ let show =
       let open! Deferred.Let_syntax in
       let feature_path = ok_exn feature_path in
       let%map ({ Get_catch_up_session.Catch_up_session.catch_up_session_id
+               ; catch_up_session_base
                ; catch_up_session_tip
                ; diff4s_to_catch_up
                ; reviewer_in_session
@@ -279,6 +280,7 @@ let show =
             ~max_output_columns;
         Cmd_review.print_introduction_summary_for_review
           ~feature_path
+          ~review_session_base:catch_up_session_base
           ~review_session_tip:catch_up_session_tip
           ~reviewer_in_session
           ~warn_reviewer:None

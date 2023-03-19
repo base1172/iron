@@ -88,6 +88,7 @@ EOF
  (hgrc $IRON_HGRC)
  (hydra_user as-hydra)
  (domain_name local)
+ (send_email_notices_to_users true)
 )
 EOF
     export IRON_CONFIG="$(cat $IRON_CONFIG_PATH)"		

@@ -41,8 +41,11 @@ And check that this did not create a session.
 
 Now create a session.
 
-  $ fe internal session show-num-lines test
-  8
+  $ fe session show | stabilize_output
+  Reviewing test from {REVISION 0} to {REVISION 1}.
+  2 files to review: 8 lines total
+     [ ] 3 a
+     [ ] 5 b
 
 Requesting an invalid session id fails.
 
@@ -52,7 +55,7 @@ Requesting an invalid session id fails.
 
   $ ID=$(fe session show -id)
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -78,7 +81,7 @@ The lock of a session are persisted.
   $ fe session mark-file test a
   $ fe session show -id | matches ${ID}
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -120,7 +123,7 @@ Can get the session even when review is disabled.
   | +|5
   |_
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -167,7 +170,7 @@ Persistence
   $ fe-server start
 
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -178,7 +181,7 @@ Forget (should work outside of a clone):
   $ cd /
   $ fe session forget test -all -session-id ${ID}
   $ fe session show test | stabilize_output test
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -189,7 +192,7 @@ Persistence
   $ fe-server stop
   $ fe-server start
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -198,7 +201,7 @@ Forget specific files
 
   $ fe session mark-file test a
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
@@ -208,7 +211,7 @@ Forget specific files
 
   $ fe session forget -file a -session-id ${ID}
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -225,7 +228,7 @@ Delete
 
   $ ID=$(fe session show -id)
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -258,7 +261,7 @@ Mark one file.
   5
 
   $ seq 1 10 > b
-  $ hg commit -m "more lines in b"
+  $ hg commit -m "more lines in b"  
   $ hg bookmark test
   $ BOOKMARK=test fe internal hydra ; hg -q update -r test
 
@@ -312,13 +315,13 @@ Check warning about stale session.
   |                    5 |                  5 |                  10 |
   |-----------------------------------------------------------------|
   
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review (1 already reviewed): 8 lines total
      [X] 3 a
      [ ] 5 b
 
   $ fe session commit -session-id ${ID}
   $ fe session show | stabilize_output
-  Reviewing test to {REVISION 2}.
+  Reviewing test from {REVISION 0} to {REVISION 2}.
   1 files to review: 10 lines total
      [ ] 10 b

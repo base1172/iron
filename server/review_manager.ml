@@ -856,6 +856,7 @@ let review_session_to_protocol
     |> Review_lines_to_goal_via_session.map ~f:Review_lines_of_diff4.sum_review_lines
   in
   { review_session_id = Review_session.id session
+  ; review_session_base = Review_session.base session
   ; review_session_tip = Review_session.tip session
   ; reviewer_in_session
   ; reviewer_in_feature = reviewer t

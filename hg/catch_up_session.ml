@@ -71,6 +71,7 @@ module Stable = struct
     module V3 = struct
       type t =
         { session_id : Session_id.V1.t
+        ; session_base : Rev.V1.t
         ; session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; reviewer_in_session : Reviewer.V2.t
@@ -97,6 +98,7 @@ module Stable = struct
     module V2 = struct
       type t =
         { session_id : Session_id.V1.t
+        ; session_base : Rev.V1.t
         ; session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; diff4s_in_session : Diff4_in_session.V2.t array
@@ -120,6 +122,7 @@ module Stable = struct
       let to_v3
         (context : Context.t)
         { session_id
+        ; session_base
         ; session_tip
         ; creation_time
         ; diff4s_in_session
@@ -137,6 +140,7 @@ module Stable = struct
         }
         =
         { V3.session_id
+        ; session_base
         ; session_tip
         ; creation_time
         ; reviewer_in_session =
@@ -226,6 +230,7 @@ module Creation = struct
       let check f = Invariant.check_field t f in
       Fields.iter
         ~session_id:ignore
+        ~session_base:(check Rev.invariant)
         ~session_tip:(check Rev.invariant)
         ~creation_time:ignore
         ~reviewer_in_session:(check Reviewer.invariant)
@@ -450,6 +455,7 @@ let create
   let reviewer = Review_session.reviewer review_session in
   let creation =
     { Creation.session_id = Review_session.id review_session
+    ; session_base = Review_session.base review_session
     ; session_tip = Review_session.tip review_session
     ; creation_time
     ; reviewer_in_session = reviewer

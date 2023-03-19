@@ -27,6 +27,7 @@ end
 
 val print_introduction_summary_for_review
   :  feature_path:Feature_path.t
+  -> review_session_base:Rev.t
   -> review_session_tip:Rev.t
   -> reviewer_in_session:Reviewer.t
   -> warn_reviewer:Account_for_reviewer_warnings.t option

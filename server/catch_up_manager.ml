@@ -99,6 +99,7 @@ let to_protocol t session ~is_archived ~lines_required_to_separate_ddiff_hunks =
   let creation = Catch_up_session.creation session in
   { Iron_protocol.Get_catch_up_session.Catch_up_session.catch_up_session_id =
       Creation.session_id creation
+  ; catch_up_session_base = Creation.session_base creation
   ; catch_up_session_tip = Creation.session_tip creation
   ; creation_time = Catch_up_session.creation_time session
   ; reviewer_in_session = Catch_up_session.reviewer session

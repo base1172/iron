@@ -115,6 +115,7 @@ module Stable = struct
     module V9 = struct
       type t =
         { review_session_id : Session_id.V1.t
+        ; review_session_base : Rev.V1.t
         ; review_session_tip : Rev.V1.t
         ; reviewer_in_session : Reviewer.V2.t
         ; reviewer_in_feature : Reviewer.V2.t
@@ -137,6 +138,7 @@ module Stable = struct
     module V8 = struct
       type t =
         { review_session_id : Session_id.V1.t
+        ; review_session_base : Rev.V1.t
         ; review_session_tip : Rev.V1.t
         ; reviewer_in_session : Reviewer.V2.t
         ; reviewer_in_feature : Reviewer.V2.t
@@ -159,6 +161,7 @@ module Stable = struct
 
       let of_v9
         { V9.review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; reviewer_in_feature
@@ -171,6 +174,7 @@ module Stable = struct
         }
         =
         { review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; reviewer_in_feature
@@ -186,6 +190,7 @@ module Stable = struct
     module V7 = struct
       type t =
         { review_session_id : Session_id.V1.t
+        ; review_session_base : Rev.V1.t
         ; review_session_tip : Rev.V1.t
         ; reviewer_in_session : Reviewer.V2.t
         ; reviewer_in_feature : Reviewer.V2.t
@@ -208,6 +213,7 @@ module Stable = struct
 
       let of_v8
         { V8.review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; reviewer_in_feature
@@ -222,6 +228,7 @@ module Stable = struct
           Line_count.Review.total line_count_to_finish_session
         in
         { review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; reviewer_in_feature
@@ -237,6 +244,7 @@ module Stable = struct
     module V6 = struct
       type t =
         { review_session_id : Session_id.V1.t
+        ; review_session_base : Rev.V1.t
         ; review_session_tip : Rev.V1.t
         ; reviewer_in_session : Reviewer.V2.t
         ; reviewer_in_feature : Reviewer.V2.t
@@ -256,6 +264,7 @@ module Stable = struct
 
       let of_v7
         { V7.review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; reviewer_in_feature
@@ -267,6 +276,7 @@ module Stable = struct
         }
         =
         { review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; reviewer_in_feature
@@ -280,6 +290,7 @@ module Stable = struct
     module V5 = struct
       type t =
         { review_session_id : Session_id.V1.t
+        ; review_session_base : Rev.V1.t
         ; review_session_tip : Rev.V1.t
         ; is_whole_feature_reviewer : bool
         ; diff4s_in_session : Review_session.Diff4_in_session.V2.t array
@@ -298,6 +309,7 @@ module Stable = struct
 
       let of_v6
         { V6.review_session_id
+        ; review_session_base
         ; review_session_tip
         ; reviewer_in_session
         ; diff4s_in_session
@@ -310,6 +322,7 @@ module Stable = struct
           Array.map diff4s_in_session ~f:Diff4_in_session.And_review_kind.diff4_in_session
         in
         { review_session_id
+        ; review_session_base
         ; review_session_tip
         ; is_whole_feature_reviewer = reviewer_in_session.is_whole_feature_reviewer
         ; diff4s_in_session
@@ -322,6 +335,7 @@ module Stable = struct
     module V4 = struct
       type t =
         { review_session_id : Session_id.V1.t
+        ; review_session_base : Rev.V1.t
         ; review_session_tip : Rev.V1.t
         ; is_whole_feature_reviewer : bool
         ; diff4s_in_session : Review_session.Diff4_in_session.V2.t array
@@ -336,6 +350,7 @@ module Stable = struct
 
       let of_v5
         { V5.review_session_id
+        ; review_session_base
         ; review_session_tip
         ; is_whole_feature_reviewer
         ; diff4s_in_session
@@ -344,6 +359,7 @@ module Stable = struct
         }
         =
         { review_session_id
+        ; review_session_base
         ; review_session_tip
         ; is_whole_feature_reviewer
         ; diff4s_in_session

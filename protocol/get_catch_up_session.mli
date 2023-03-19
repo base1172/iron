@@ -14,6 +14,7 @@ end
 module Catch_up_session : sig
   type t =
     { catch_up_session_id : Session_id.t
+    ; catch_up_session_base : Rev.t
     ; catch_up_session_tip : Rev.t
     ; creation_time : Time.t
     ; reviewer_in_session : Reviewer.t

@@ -26,6 +26,7 @@ module Stable = struct
     module V6 = struct
       type t =
         { catch_up_session_id : Session_id.V1.t
+        ; catch_up_session_base : Rev.V1.t
         ; catch_up_session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; reviewer_in_session : Reviewer.V2.t
@@ -56,6 +57,7 @@ module Stable = struct
     module V5 = struct
       type t =
         { catch_up_session_id : Session_id.V1.t
+        ; catch_up_session_base : Rev.V1.t
         ; catch_up_session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; reviewer_in_session : Reviewer.V2.t
@@ -87,6 +89,7 @@ module Stable = struct
 
       let of_v6
         { V6.catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; reviewer_in_session
@@ -108,6 +111,7 @@ module Stable = struct
         }
         =
         { catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; reviewer_in_session
@@ -133,6 +137,7 @@ module Stable = struct
     module V4 = struct
       type t =
         { catch_up_session_id : Session_id.V1.t
+        ; catch_up_session_base : Rev.V1.t
         ; catch_up_session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; reviewer_in_session : Reviewer.V2.t
@@ -163,6 +168,7 @@ module Stable = struct
 
       let of_v5
         { V5.catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; reviewer_in_session
@@ -184,6 +190,7 @@ module Stable = struct
         }
         =
         { catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; reviewer_in_session
@@ -208,6 +215,7 @@ module Stable = struct
     module V3 = struct
       type t =
         { catch_up_session_id : Session_id.V1.t
+        ; catch_up_session_base : Rev.V1.t
         ; catch_up_session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; reviewer_in_session : Reviewer.V2.t
@@ -238,6 +246,7 @@ module Stable = struct
 
       let of_v4
         { V4.catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; reviewer_in_session
@@ -258,6 +267,7 @@ module Stable = struct
         }
         =
         { catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; reviewer_in_session
@@ -283,6 +293,7 @@ module Stable = struct
     module V2 = struct
       type t =
         { catch_up_session_id : Session_id.V1.t
+        ; catch_up_session_base : Rev.V1.t
         ; catch_up_session_tip : Rev.V1.t
         ; creation_time : Time.V1_round_trippable.t
         ; diff4s_to_catch_up : Diff4_to_catch_up.V2.t list
@@ -312,6 +323,7 @@ module Stable = struct
 
       let of_v3
         { V3.catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; diff4s_to_catch_up
@@ -332,6 +344,7 @@ module Stable = struct
         }
         =
         { catch_up_session_id
+        ; catch_up_session_base
         ; catch_up_session_tip
         ; creation_time
         ; diff4s_to_catch_up =

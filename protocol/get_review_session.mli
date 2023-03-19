@@ -26,6 +26,7 @@ end
 module Review_session : sig
   type t =
     { review_session_id : Session_id.t
+    ; review_session_base : Rev.t
     ; review_session_tip : Rev.t
     ; reviewer_in_session : Reviewer.t
     ; reviewer_in_feature : Reviewer.t

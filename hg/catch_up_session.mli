@@ -60,6 +60,7 @@ module Creation : sig
   type t
 
   val session_id : t -> Session_id.t
+  val session_base : t -> Rev.t
   val session_tip : t -> Rev.t
   val diff4s_in_session : t -> Review_session.Diff4_in_session.t array
   val remote_rev_zero : t -> Rev.t
