@@ -1,23 +1,24 @@
 (library
-  (name        iron_client)
-  (public_name iron.client)
-  (libraries
-   async
-   async.lock_file_async
-   async_interactive
-   async_smtp
-   command_rpc
-   core
-   core_extended.appendable_list
-   delimited_parsing
-   iron_common
-   iron_hg
-   iron_obligations
-   iron_protocol
-   iron_public
-   patdiff
-   pdiff4
-   re2
-   shell
-   topological_sort)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+ (name iron_client)
+ (public_name iron.client)
+ (libraries
+  async
+  async.lock_file_async
+  async_interactive
+  async_smtp
+  command_rpc
+  core
+  core_extended.appendable_list
+  delimited_parsing
+  iron_common
+  iron_hg
+  iron_obligations
+  iron_protocol
+  iron_public
+  patdiff
+  pdiff4
+  re2
+  shell
+  topological_sort)
+ (preprocess
+  (pps ppx_jane ppx_js_style -check-doc-comments)))

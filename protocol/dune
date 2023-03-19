@@ -1,12 +1,13 @@
 (library
-  (name        iron_protocol)
-  (public_name iron.protocol)
-  (libraries
-   async
-   async_durable
-   async_interactive
-   command_rpc
-   core
-   iron_common
-   iron_hg)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+ (name iron_protocol)
+ (public_name iron.protocol)
+ (libraries
+  async
+  async_durable
+  async_interactive
+  command_rpc
+  core
+  iron_common
+  iron_hg)
+ (preprocess
+  (pps ppx_jane ppx_js_style -check-doc-comments)))

@@ -1,5 +1,6 @@
 (library
-  (name        hashtbl2)
-  (public_name iron.hashtbl2)
-  (libraries   core)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+ (name hashtbl2)
+ (public_name iron.hashtbl2)
+ (libraries core)
+ (preprocess
+  (pps ppx_jane ppx_js_style -check-doc-comments)))

@@ -1,11 +1,12 @@
 (executables
-  (names program_linking_with_iron_lib)
-  (libraries
-   async
-   core
-   core_unix.command_unix
-   iron_common
-   iron_hg
-   iron_protocol
-   iron_public)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+ (names program_linking_with_iron_lib)
+ (libraries
+  async
+  core
+  core_unix.command_unix
+  iron_common
+  iron_hg
+  iron_protocol
+  iron_public)
+ (preprocess
+  (pps ppx_jane ppx_js_style -check-doc-comments)))

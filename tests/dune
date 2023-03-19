@@ -1,5 +1,5 @@
-(cram (
-  deps
+(cram
+ (deps
   ./bin/common
   ./bin/completion-test
   ./bin/fe

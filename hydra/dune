@@ -1,11 +1,12 @@
 (library
-  (name        iron_hydra)
-  (public_name iron.hydra)
-  (libraries
-   async
-   core
-   core_unix.command_unix
-   iron_common
-   iron_hg
-   iron_protocol)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+ (name iron_hydra)
+ (public_name iron.hydra)
+ (libraries
+  async
+  core
+  core_unix.command_unix
+  iron_common
+  iron_hg
+  iron_protocol)
+ (preprocess
+  (pps ppx_jane ppx_js_style -check-doc-comments)))

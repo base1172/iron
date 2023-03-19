@@ -1,5 +1,6 @@
 (library
-  (name        iron_obligations)
-  (public_name iron.obligations)
-  (libraries async core iron_common re2)
-  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+ (name iron_obligations)
+ (public_name iron.obligations)
+ (libraries async core iron_common re2)
+ (preprocess
+  (pps ppx_jane ppx_js_style -check-doc-comments)))
