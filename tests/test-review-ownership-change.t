@@ -34,7 +34,7 @@ Change the owner from [user1] to [user2].
 The w-f-reviewer has review to do.  The users involved in ownership changes are
 not required to review to release.
 
-  $ fe show -omit-attribute-table | sanitize_output
+  $ fe show -omit-attribute-table | stabilize_output
   root
   ====
   root
@@ -46,16 +46,16 @@ not required to review to release.
   | user1                  |      5 |
   | user2                  |      5 |
   |---------------------------------|
-  $ fe session show -for user1 | sanitize_output
-  Reviewing root to {ELIDED}    .
+  $ fe session show -for user1 | stabilize_output
+  Reviewing root from {REVISION 1} to {REVISION 2}.
   3 files to review: 5 lines total
   
   Ownership changes.
      [ ] 3 .fe/.fe.sexp
      [ ] 1 .fe/obligations-global.sexp
      [ ] 1 .fe/obligations-repo.sexp
-  $ fe session show -for user2 | sanitize_output
-  Reviewing root to {ELIDED}    .
+  $ fe session show -for user2 | stabilize_output
+  Reviewing root from {REVISION 1} to {REVISION 2}.
   3 files to review: 5 lines total
   
   Ownership changes.

@@ -16,7 +16,7 @@ Advance the feature.
   $ echo change2 >file
   $ hg com -m change2
   $ feature_to_server root -fake-valid
-  $ fe show root | sanitize_output
+  $ fe show root | stabilize_output
   root
   ====
   root
@@ -31,8 +31,8 @@ Advance the feature.
   | review is enabled      | true                   |
   | reviewing              | unix-login-for-testing |
   | is permanent           | true                   |
-  | tip                    | {ELIDED}               |
-  | base                   | {ELIDED}               |
+  | tip                    | {REVISION 2}           |
+  | base                   | {REVISION 0}           |
   |-------------------------------------------------|
   
   |---------------------------------|
@@ -48,7 +48,7 @@ still mark a file in it.
 
 But then we still have to review the subsequent diff.
 
-  $ fe session show | sanitize_output
-  Reviewing root to {ELIDED}    .
+  $ fe session show | stabilize_output
+  Reviewing root from {REVISION 0} to {REVISION 2}.
   1 files to review: 2 lines total
      [ ] 2 file

@@ -8,7 +8,7 @@ module Stable = struct
       ; tip : Attributed_file.V2.t
       ; num_lines_in_diff : int [@hash.ignore]
       }
-    [@@deriving bin_io, compare, fields, sexp, hash]
+    [@@deriving bin_io, compare, fields, sexp]
 
     let%expect_test _ =
       print_endline [%bin_digest: t];
@@ -88,7 +88,18 @@ let path_in_repo_at_tip t = Attributed_file.path_in_repo t.tip
 
 module Ignoring_rev = struct
   module T = struct
-    type nonrec t = t [@@deriving sexp, hash]
+    type nonrec t = t [@@deriving sexp]
+
+    let hash_fold_t state { base; tip; num_lines_in_diff = _ } =
+      Attributed_file.Ignoring_rev.hash_fold_t
+        (Attributed_file.Ignoring_rev.hash_fold_t state base)
+        tip
+    ;;
+
+    let hash t =
+      hash_fold_t (Ppx_hash_lib.Std.Hash.create ()) t
+      |> Ppx_hash_lib.Std.Hash.get_hash_value
+    ;;
 
     let compare t { base; tip; num_lines_in_diff = _ } =
       let c = Attributed_file.Ignoring_rev.compare t.base base in

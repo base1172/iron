@@ -26,8 +26,8 @@ Create hg repo.
 Make user1 a whole-feature reviewer and do his review.
 
   $ fe change -add-whole-feature-reviewer user1
-  $ fe session show -for user1 | sanitize_output
-  Reviewing root to {ELIDED}    .
+  $ fe session show -for user1 | stabilize_output
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   1 files to review: 3 lines total
      [ ] 3 file
   $ fe session mark-file root file -for user1 -reason reason
@@ -39,8 +39,8 @@ Delete the file and make sure user1 will see the deleted lines in red.
   $ hg rm file
   $ hg commit -m "delete"
   $ feature_to_server root -fake-valid-obligations
-  $ fe session show -for user1 | sanitize_output
-  Reviewing root to {ELIDED}    .
+  $ fe session show -for user1 | stabilize_output
+  Reviewing root from {REVISION 0} to {REVISION 2}.
   1 files to review: 4 lines total
      [ ] 4 file
   $ fe session diff -for user1 | fe internal remove-color | sanitize_output

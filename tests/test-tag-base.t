@@ -23,7 +23,7 @@ Create a child, and it has a nice name for its base.
 
   $ fe create root/child -desc child
   $ feature_to_server root/child -fake-valid
-  $ fe show | sed -e "s/\[${root_hash}\]/[  {ELIDED}  ]/g"
+  $ fe show | stabilize_output
   root/child
   ==========
   child
@@ -39,8 +39,8 @@ Create a child, and it has a nice name for its base.
   | CRs are enabled        | true                       |
   | reviewing              | unix-login-for-testing     |
   | is permanent           | false                      |
-  | tip                    | root-111.12 [  {ELIDED}  ] |
-  | base                   | root-111.12 [  {ELIDED}  ] |
+  | tip                    | root-111.12 [{REVISION 1}] |
+  | base                   | root-111.12 [{REVISION 1}] |
   |-----------------------------------------------------|
 
 The base gets a nice name even if the rev is not present when [fe create] starts.
@@ -53,22 +53,22 @@ FIXME: This test fails because we don't have jane street's iron_bookmark_manipul
   [255]
   $ IRON_OPTIONS='((workspaces false))' fe create root/child2 -desc child2
   $ feature_to_server root/child2 -fake-valid
-  $ fe show | sed -e "s/\[${root_hash}\]/[  {ELIDED}  ]/g"
+  $ fe show | stabilize_output
   root/child2
   ===========
   child2
   
-  |-----------------------------------------------------|
-  | attribute              | value                      |
-  |------------------------+----------------------------|
-  | next step              | add code                   |
-  | owner                  | unix-login-for-testing     |
-  | whole-feature reviewer | unix-login-for-testing     |
-  | seconder               | not seconded               |
-  | review is enabled      | false                      |
-  | CRs are enabled        | true                       |
-  | reviewing              | unix-login-for-testing     |
-  | is permanent           | false                      |
-  | tip                    | root-111.12 [  {ELIDED}  ] |
-  | base                   | root-111.12 [  {ELIDED}  ] |
-  |-----------------------------------------------------|
+  |-------------------------------------------------|
+  | attribute              | value                  |
+  |------------------------+------------------------|
+  | next step              | add code               |
+  | owner                  | unix-login-for-testing |
+  | whole-feature reviewer | unix-login-for-testing |
+  | seconder               | not seconded           |
+  | review is enabled      | false                  |
+  | CRs are enabled        | true                   |
+  | reviewing              | unix-login-for-testing |
+  | is permanent           | false                  |
+  | tip                    | {REVISION 1}           |
+  | base                   | {REVISION 1}           |
+  |-------------------------------------------------|

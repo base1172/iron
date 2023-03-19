@@ -135,9 +135,9 @@ Change whole feature reviewer
   
   user2:
   
-  $ fe session show -for all
+  $ fe session show -for all | stabilize_output
   jdoe3:
-  Reviewing test to 07c38bb53172.
+  Reviewing test from {REVISION 0} to {REVISION 3}.
   2 files to review: 8 lines total
      [ ] 3 a
      [ ] 5 b
@@ -146,15 +146,15 @@ Change whole feature reviewer
   ("reviewer is up to date, no current session" (test unix-login-for-testing))
   
   user1:
-  Reviewing test to 07c38bb53172.
+  Reviewing test from {REVISION 0} to {REVISION 3}.
   1 files to review: 3 lines total
      [ ] 3 a
   
   user2:
-  Reviewing test to 07c38bb53172.
+  Reviewing test from {REVISION 0} to {REVISION 3}.
   1 files to review: 5 lines total
      [ ] 5 b
-  
+
 Test [-create-catch-up-for-me].
 
   $ fe todo -crs-and-review

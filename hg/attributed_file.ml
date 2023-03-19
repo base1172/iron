@@ -25,14 +25,14 @@ module Stable = struct
     module V2 = struct
       type t =
         { hash : File_contents_hash.V1.t
-        ; owner : User_name.V1.t [@hash.ignore]
-        ; review_obligation : Review_obligation.V1.t [@hash.ignore]
-        ; followers : User_name.V1.Set.t [@hash.ignore]
-        ; scrutiny : File_scrutiny.V1.t [@hash.ignore]
-        ; is_read_by_whole_feature_reviewers : bool [@hash.ignore]
-        ; num_lines : int [@hash.ignore]
+        ; owner : User_name.V1.t
+        ; review_obligation : Review_obligation.V1.t
+        ; followers : User_name.V1.Set.t
+        ; scrutiny : File_scrutiny.V1.t
+        ; is_read_by_whole_feature_reviewers : bool
+        ; num_lines : int
         }
-      [@@deriving bin_io, compare, fields, sexp, hash]
+      [@@deriving bin_io, compare, fields, sexp]
 
       let%expect_test _ =
         print_endline [%bin_digest: t];
@@ -94,7 +94,7 @@ module Stable = struct
       ; rev : Rev.V1.t
       ; attributes : [ `Absent | `Present of Attributes.V2.t ]
       }
-    [@@deriving bin_io, compare, fields, sexp, hash]
+    [@@deriving bin_io, compare, fields, sexp]
 
     let%expect_test _ =
       print_endline [%bin_digest: t];
@@ -238,8 +238,9 @@ module Ignoring_rev = struct
     let hash_fold_t state t =
       let state = Path_in_repo.hash_fold_t state t.path_in_repo in
       match t.attributes with
-      | `Absent -> [%hash_fold: [ `Absent | `Present of Attributes.t ]] state t.attributes
-      | `Present { Attributes.hash; _ } -> File_contents_hash.hash_fold_t state hash
+      | `Absent -> Int.hash_fold_t state 0
+      | `Present { Attributes.hash; _ } ->
+        File_contents_hash.hash_fold_t (Int.hash_fold_t state 1) hash
     ;;
 
     let hash t = Ppx_hash_lib.Std.Hash.run hash_fold_t t

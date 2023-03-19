@@ -8,7 +8,19 @@ module Stable = struct
       ; errors : Error.V1.t list [@default []] [@hash.ignore]
       ; num_lines_in_diff : int [@hash.ignore]
       }
-    [@@deriving bin_io, compare, fields, sexp, hash]
+    [@@deriving bin_io, compare, fields, sexp]
+
+    let hash_fold_t state t =
+      let state = Attributed_file.Ignoring_rev.hash_fold_t state t.diamond.b1 in
+      let state = Attributed_file.Ignoring_rev.hash_fold_t state t.diamond.b2 in
+      let state = Attributed_file.Ignoring_rev.hash_fold_t state t.diamond.f1 in
+      Attributed_file.Ignoring_rev.hash_fold_t state t.diamond.f2
+    ;;
+
+    let hash t =
+      hash_fold_t (Ppx_hash_lib.Std.Hash.create ()) t
+      |> Ppx_hash_lib.Std.Hash.get_hash_value
+    ;;
 
     let%expect_test _ =
       print_endline [%bin_digest: t];

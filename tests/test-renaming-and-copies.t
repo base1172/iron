@@ -45,8 +45,8 @@ from the various edges of the diamond.
   $ fe rebase root/feature > /dev/null
   $ echo changed >> a-renamed; hg commit -m 4
   $ feature_to_server root/feature -fake-valid-obligations
-  $ fe session show | sanitize_output
-  Reviewing root/feature to {ELIDED}    .
+  $ fe session show | stabilize_output
+  Reviewing root/feature from {REVISION 2} to {REVISION 4}.
   1 files to review: 1 lines total
      [ ] 1 a-renamed
   $ fe session diff | grep -i renaming

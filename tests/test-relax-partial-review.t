@@ -93,7 +93,7 @@ last one before review obligations are met, the kind used to move to optional in
 that very user's session, which was confusing.
 
   $ IRON_USER=user1 fe session show root/child | stabilize_output root/child
-  Reviewing root/child to {REVISION 3}.
+  Reviewing root/child from {REVISION 1} to {REVISION 3}.
   2 files to review: 4 lines total
      [ ] 2 file
      [ ] 2 other-file
@@ -101,7 +101,7 @@ that very user's session, which was confusing.
   $ IRON_USER=user1 fe session mark-file root/child file
 
   $ IRON_USER=user1 fe session show root/child | stabilize_output root/child
-  Reviewing root/child to {REVISION 3}.
+  Reviewing root/child from {REVISION 1} to {REVISION 3}.
   1 files to review (1 already reviewed): 4 lines total
      [X] 2 file
      [ ] 2 other-file
@@ -140,7 +140,7 @@ partial review.  Instead what is left to review becomes a follow review.
 User2 has still the same current session.
 
   $ fe session show -for user2 | stabilize_output
-  Reviewing root/child to {REVISION 2}.
+  Reviewing root/child from {REVISION 1} to {REVISION 2}.
   1 files to review (1 already reviewed): 4 lines total
   
   Required review.
@@ -200,7 +200,7 @@ session show] makes this distinction to guide the user.
   |------------------|
 
   $ fe session show -for user2 | stabilize_output
-  Reviewing root/child to {REVISION 3}.
+  Reviewing root/child from {REVISION 1} to {REVISION 3}.
   2 files to review: 4 lines total
   
   Follow review.
@@ -255,7 +255,7 @@ catch-up review.
 The diff on the other-file was not registered as part of the diffs to catch-up.
 
   $ fe catch-up show root/child -for user2 -omit-header -omit-attribute | stabilize_output
-  Reviewing root/child to {REVISION 3}.
+  Reviewing root/child from {REVISION 1} to {REVISION 3}.
   1 files to review: 2 lines total
   
   Catch-up.  The feature was released and you had partial review done on these files.
@@ -346,7 +346,7 @@ user2 have partial review done in their session.
   |                    2 |                  2 |                   0 |
   |-----------------------------------------------------------------|
   
-  Reviewing root/child to {REVISION 5}.
+  Reviewing root/child from {REVISION 3} to {REVISION 5}.
   1 files to review (1 already reviewed): 4 lines total
      [X] 2 file
      [ ] 2 other-file

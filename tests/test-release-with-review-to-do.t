@@ -180,7 +180,7 @@ session, the files he reviewed already do not flicker in user2's todo.
   |-----------------------------|
 
   $ IRON_USER=user2 fe session show root/child | stabilize_output root/child
-  Reviewing root/child to {REVISION 2}.
+  Reviewing root/child from {REVISION 1} to {REVISION 2}.
   2 files to review: 4 lines total
   
   Optional review.
@@ -210,7 +210,7 @@ Iron does not show the lines for user2 both in [fe show] and in user2's [fe todo
 However user2 would be free to review anyway.
 
   $ fe session show -for user2 | stabilize_output
-  Reviewing root/child to {REVISION 2}.
+  Reviewing root/child from {REVISION 1} to {REVISION 2}.
   2 files to review: 4 lines total
   
   Optional review.
@@ -425,7 +425,7 @@ read this diff.
 However user1 would be free to review all the files anyway.
 
   $ fe session show -for user1 | stabilize_output
-  Reviewing root/child2 to {REVISION 5}.
+  Reviewing root/child2 from {REVISION 2} to {REVISION 5}.
   2 files to review: 4 lines total
   
   Follow review.
@@ -505,7 +505,7 @@ started.
   +|new-contents
 
   $ IRON_USER=user1 fe catch-up show root/child2 -omit-header -omit-attribute-table | stabilize_output root
-  Reviewing root/child2 to {REVISION 5}.
+  Reviewing root/child2 from {REVISION 2} to {REVISION 5}.
   1 files to review: 2 lines total
   
   Catch-up.  The feature was released and you had partial review done on these files.
@@ -543,7 +543,7 @@ Unlike user1, user3 needs to catch-up on all the files since they were w-f-follo
   |_
 
   $ IRON_USER=user3 fe catch-up show root/child2 -omit-header -omit-attribute-table | stabilize_output root
-  Reviewing root/child2 to {REVISION 5}.
+  Reviewing root/child2 from {REVISION 2} to {REVISION 5}.
   2 files to review: 4 lines total
   
   Catch-up.  The feature was released and you were a follower.
@@ -561,7 +561,7 @@ The file follower only has catch-up review on the file they follow.
   +|new-contents
 
   $ IRON_USER=file-follower fe catch-up show root/child2 -omit-header -omit-attribute-table | stabilize_output
-  Reviewing root/child2 to {REVISION 5}.
+  Reviewing root/child2 from {REVISION 2} to {REVISION 5}.
   1 files to review: 2 lines total
   
   Catch-up.  The feature was released and you were a follower.

@@ -23,8 +23,8 @@ Can't infer the feature if the bookmark isn't there.
 Review automatically pulls and updates to the bookmark.
 
   $ do_fe_review
-  $ hg book | sanitize_output
-   * root                      1:{ELIDED}    
+  $ hg book | stabilize_output
+   * root                      1:{REVISION 1}
 
 If the repo isn't clean, the review succeeds iff the bookmark is active.
 
@@ -40,8 +40,8 @@ Review pulls and updates to the necessary rev.
   [255]
   $ do_fe_review
   $ hg log -r $rev1 >/dev/null
-  $ hg book | sanitize_output
-   * root                      1:{ELIDED}    
+  $ hg book | stabilize_output
+   * root                      1:{REVISION 1}
 
 Review automatically updates if the bookmark is current but not active.
 

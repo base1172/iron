@@ -164,7 +164,7 @@ When all are enabled, this obviously includes the w-f-followers as well.
   user2
 
   $ IRON_USER=user2 fe session show | stabilize_output
-  Reviewing root/add-follower to {REVISION 2}.
+  Reviewing root/add-follower from {REVISION 1} to {REVISION 2}.
   3 files to review: 11 lines total
   
   Follow review.

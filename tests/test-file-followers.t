@@ -146,7 +146,7 @@ Check what happens when the file is deleted.
   |------------------------------------------|
 
   $ IRON_USER=file-follower fe session show | stabilize_output
-  Reviewing root/add-follower to {REVISION 3}.
+  Reviewing root/add-follower from {REVISION 2} to {REVISION 3}.
   1 files to review: 2 lines total
   
   Follow review.

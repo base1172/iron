@@ -12,7 +12,7 @@ module Attributes : sig
     ; is_read_by_whole_feature_reviewers : bool
     ; num_lines : int
     }
-  [@@deriving fields, sexp_of, hash]
+  [@@deriving fields, sexp_of]
 
   include Invariant.S with type t := t
 
@@ -27,7 +27,7 @@ type t = private
   ; rev : Rev.t
   ; attributes : [ `Absent | `Present of Attributes.t ]
   }
-[@@deriving fields, sexp_of, hash]
+[@@deriving fields, sexp_of]
 
 include Invariant.S with type t := t
 
@@ -64,7 +64,7 @@ end
 
 module Stable : sig
   module V2 : sig
-    type nonrec t = t [@@deriving hash]
+    type nonrec t = t
 
     include Stable_without_comparator with type t := t
   end

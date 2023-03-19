@@ -66,7 +66,7 @@ Reviewing only specific files.
 
   $ echo -e "F\ny\ny" | do_interactive_review -file f1 -file f10 | matches "Current session reviewed."
   $ fe session show | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   8 files to review (2 already reviewed): 20 lines total
      [X] 2 f1
      [X] 2 f10
@@ -83,7 +83,7 @@ Review some file, and not some others.
 
   $ echo -e "F\nn\ny\nn\ny\nn\ny\n\nn\ny\nq" | do_interactive_review | matches "Quit"
   $ fe session show | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   4 files to review (6 already reviewed): 20 lines total
      [X] 2 f1
      [X] 2 f10
@@ -100,7 +100,7 @@ One can select only a subset of the files via the select mode.
 
   $ echo -e "s\nf6\n\ny\nq" | do_interactive_review | matches "Current selection to show:.* 2 f6.*Quit"
   $ fe session show | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   3 files to review (7 already reviewed): 20 lines total
      [X] 2 f1
      [X] 2 f10
@@ -122,7 +122,7 @@ carry one with the next session.
   >   | matches "Really commit this root session?.* f4 Mark as reviewed?.*Quit"
 
   $ fe session show | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   2 files to review (1 already reviewed): 6 lines total
      [ ] 2 f2
      [X] 2 f4
@@ -149,7 +149,7 @@ When there are catch-up lines to review, they are shown first ...
 ... unless one supplies [-skip-catch-up-review] ...
 
   $ echo -e "q\n" | do_interactive_review -skip-catch-up-review | stabilize_output | grep -A 300 'Reviewing.'
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   1 files to review (2 already reviewed): 6 lines total
      [X] 2 f2
      [X] 2 f4
@@ -160,7 +160,7 @@ When there are catch-up lines to review, they are shown first ...
 
   $ echo -e "q\n" | IRON_USER=user1 do_interactive_review -for unix-login-for-testing -reason test \
   >   | stabilize_output | grep -A 300 'Reviewing.'
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   1 files to review (2 already reviewed): 6 lines total
      [X] 2 f2
      [X] 2 f4
@@ -186,7 +186,7 @@ Check that an admin can catch-up for someone else (in fact in test, this is
 always allowed).
 
   $ fe catch-up show -omit-attribute-table -omit-header-and-description | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   1 files to review: 2 lines total
   
   Catch-up.  user1 reviewed this for you, giving the reason as:

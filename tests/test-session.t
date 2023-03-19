@@ -261,7 +261,7 @@ Mark one file.
   5
 
   $ seq 1 10 > b
-  $ hg commit -m "more lines in b"  
+  $ hg commit -m "more lines in b"
   $ hg bookmark test
   $ BOOKMARK=test fe internal hydra ; hg -q update -r test
 
