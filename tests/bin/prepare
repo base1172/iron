@@ -186,6 +186,10 @@ function stabilize_output {
     else
         local repo_path=.
     fi
+    local substitutions=$(hg log --repository "$repo_path" --template 's/{node}/\{REVISION {rev}}/g\n')
+    while read s; do
+        input=$(echo "$input" | sed -e "$s")
+    done <<<$(echo "$substitutions")
     local substitutions=$(hg log --repository "$repo_path" --template 's/{node|short}/\{REVISION {rev}}/g\n')
     while read s; do
         input=$(echo "$input" | sed -e "$s")
