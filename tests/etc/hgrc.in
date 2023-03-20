@@ -13,3 +13,4 @@ active = bookmarks --list . --template '{activebookmark}\n'
 
 [extensions]
 share =
+enforce_username = {BASEDIR}/hg/extensions/enforce_username.py

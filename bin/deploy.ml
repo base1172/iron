@@ -5,8 +5,10 @@ open! Import
 let prod_directory = "/j/office/app/fe/prod"
 let prod_bin_directory = Filename.concat prod_directory "bin"
 let prod_etc_directory = Filename.concat prod_directory "etc"
+let prod_hg_directory = Filename.concat prod_directory "hg"
+let prod_hg_extensions_dir = Filename.concat prod_hg_directory "extensions"
 let deployed_exe = Filename.concat prod_bin_directory "fe"
-let deployed_hgrc = Filename.concat prod_etc_directory "hgrc"
+let deployed_hgrc = Filename.concat prod_hg_directory "hgrc"
 let deployed_bashrc = Filename.concat prod_etc_directory "bashrc"
 let deployed_check_obligations = Filename.concat prod_bin_directory "check-obligations"
 
@@ -91,6 +93,7 @@ let deploy =
            "-hgrc"
            (optional_with_default "default" Filename_unix.arg_type)
            ~doc:"(HGRC|default|none) which hgrc to roll"
+      +> flag "-no-extensions" no_arg ~doc:" don't deploy hg extensions"
       +> flag
            "-bashrc"
            (optional_with_default "default" Filename_unix.arg_type)
@@ -117,7 +120,16 @@ let deploy =
            (optional_with_default "as-fe" string)
            ~doc:"USER username to deploy as (default: as-fe)"
       ++ generic_deploy_arguments)
-    (fun exe hgrc bashrc no_backup_check dry_run hosts user remaining_arguments () ->
+    (fun exe
+         hgrc
+         no_extensions
+         bashrc
+         no_backup_check
+         dry_run
+         hosts
+         user
+         remaining_arguments
+         () ->
       let exe =
         match exe with
         | "none" -> None
@@ -145,13 +157,26 @@ let deploy =
           | None -> Deferred.Or_error.ok_unit
           | Some exe -> check_exe_on_last_backup ~dry_run exe)
       in
-      Deferred.Or_error.List.iter
-        [ exe, deployed_exe; hgrc, deployed_hgrc; bashrc, deployed_bashrc ]
-        ~f:(fun (src_opt, dst) ->
-          match src_opt with
-          | None -> Deferred.Or_error.ok_unit
-          | Some src ->
-            generic_deploy ~dry_run ~hosts ~user ~remaining_arguments ~src ~dst))
+      let files = [ exe, deployed_exe; hgrc, deployed_hgrc; bashrc, deployed_bashrc ] in
+      let%bind files =
+        match no_extensions with
+        | true -> Deferred.Result.return files
+        | false ->
+          let open Deferred.Let_syntax in
+          let%map extensions =
+            let src_dir = Filename.concat exe_dir "../hg/extensions" in
+            Sys.ls_dir src_dir
+            >>| List.filter ~f:(String.is_suffix ~suffix:".py")
+            >>| List.map ~f:(fun src_file ->
+                  ( Some (Filename.concat src_dir src_file)
+                  , Filename.concat prod_hg_extensions_dir (Filename.basename src_file) ))
+          in
+          Ok (extensions @ files)
+      in
+      Deferred.Or_error.List.iter files ~f:(fun (src_opt, dst) ->
+        match src_opt with
+        | None -> Deferred.Or_error.ok_unit
+        | Some src -> generic_deploy ~dry_run ~hosts ~user ~remaining_arguments ~src ~dst))
 ;;
 
 let deploy_check_obligations =

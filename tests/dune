@@ -1,5 +1,5 @@
-(cram
- (deps
+(cram (
+  deps
   ./bin/common
   ./bin/completion-test
   ./bin/fe
@@ -8,11 +8,11 @@
   ./bin/program_linking_with_iron_lib.exe
   ./bin/setup-script
   ./bin/simple-sync-state
-  ./etc/hgrc
+  ./etc/hgrc.in
   (source_tree ./bin/broken_hg)
   (source_tree ./lib)
   (source_tree ./sample-repos)
-  ../hg/hgrc
-  (source_tree ../hg/extensions)
+  ../hg/hgrc.in
+  ../hg/extensions/enforce_username.py
   ../bin/fe.exe
   ../bin/bashrc))

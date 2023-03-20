@@ -6,8 +6,8 @@ Start test.
 Create hg repo.
 
   $ setup_repo_and_root file
-  $ touch file2; hg add file2; hg com -m 'file2' file2
-  $ touch file3; hg add file3; hg com -m 'file3' file3
+  $ touch file2; hg add file2; hg commit --message 'file2' file2
+  $ touch file3; hg add file3; hg commit --message 'file3' file3
   $ feature_to_server root
 
 The log is in reverse-chronological order.

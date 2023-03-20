@@ -1,6 +1,11 @@
 (library
- (name iron_hg)
- (public_name iron.hg)
- (libraries async async_interactive core iron_common iron_obligations re2)
- (preprocess
-  (pps ppx_jane ppx_js_style -check-doc-comments)))
+  (name        iron_hg)
+  (public_name iron.hg)
+  (libraries async async_interactive core iron_common iron_obligations re2)
+  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
+
+(rule
+  (deps hgrc.in)
+  (action (
+    with-stdout-to hgrc (
+      system "cat hgrc.in | sed -e 's|{BASEDIR}|/j/office/app/fe/prod|g'"))))

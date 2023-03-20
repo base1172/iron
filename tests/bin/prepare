@@ -8,6 +8,9 @@ export PATH=$IRON_TEST_DIR/bin:/usr/bin:/bin
 export TERM=xterm
 export COLUMNS=90
 
+cat $IRON_TEST_DIR/etc/hgrc.in   | sed -e "s|{BASEDIR}|$IRON_TEST_DIR/..|g" > "$IRON_TEST_DIR/etc/hgrc"
+cat $IRON_TEST_DIR/../hg/hgrc.in | sed -e "s|{BASEDIR}|$IRON_TEST_DIR/..|g" > "$IRON_TEST_DIR/../hg/hgrc"
+
 # Unset IRON_CONFIG so that we don't unintentionally connect to the prod server.
 unset IRON_CONFIG
 

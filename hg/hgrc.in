@@ -9,6 +9,8 @@ purge =
 blackbox =
 share =
 commitextras =
+enforce_username = {BASEDIR}/hg/extensions/enforce_username.py
+
 # global_tags=/j/office/app/hg/prod/jhg/global_tags_v3.py
 # specifiable_commit_metadata=/j/office/app/hg/prod/jhg/specifiable_commit_metadata.py
 
