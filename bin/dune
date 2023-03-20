@@ -1,43 +1,39 @@
 (executables
- (names fe)
- (libraries
-  async
-  async_inotify
-  core
-  core_unix.command_unix
-  iron_hydra
-  iron_client
-  iron_common
-  iron_hg
-  iron_obligations
-  iron_protocol
-  iron_server)
- (preprocess
-  (pps ppx_jane ppx_js_style -check-doc-comments)))
+  (names fe)
+  (libraries
+   async
+   async_inotify
+   core
+   core_unix.command_unix
+   iron_hydra
+   iron_client
+   iron_common
+   iron_hg
+   iron_obligations
+   iron_protocol
+   iron_server)
+  (preprocess (pps ppx_jane ppx_js_style -check-doc-comments)))
 
-(install
- (section bin)
- (files
-  (fe.exe as fe)))
+(install (section bin) (files (fe.exe as fe)))
 
 (rule
- (deps fe.exe bashrc ../hg/hgrc)
- (mode promote)
- (action
-  (with-stdout-to
-   supported-internal-rpcs-for-review
-   (bash
-    "./fe.exe internal rpc-to-server supported-by-client -max-output-columns 500"))))
+  (deps fe.exe bashrc ../hg/hgrc (glob_files ../hg/extensions/*.py))
+  (mode promote)
+  (action (
+    with-stdout-to
+    supported-internal-rpcs-for-review
+    (bash
+     "./fe.exe internal rpc-to-server supported-by-client -max-output-columns 500"))))
 
 (rule
- (deps fe.exe bashrc ../hg/hgrc)
- (mode promote)
- (action
-  (with-stdout-to
-   supported-public-rpcs-for-review
-   (bash
-    "./fe.exe internal show-supported-iron-rpcs -max-output-columns 500"))))
+  (deps fe.exe bashrc ../hg/hgrc (glob_files ../hg/extensions/*.py))
+  (mode promote)
+  (action (
+    with-stdout-to
+    supported-public-rpcs-for-review
+    (bash
+     "./fe.exe internal show-supported-iron-rpcs -max-output-columns 500"))))
 
 (alias
- (name DEFAULT)
- (deps supported-internal-rpcs-for-review supported-public-rpcs-for-review))
+  (name DEFAULT)
+  (deps supported-internal-rpcs-for-review supported-public-rpcs-for-review))
