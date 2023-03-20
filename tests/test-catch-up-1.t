@@ -69,7 +69,7 @@ Review & Catch up.
   | base                    | {REVISION 0}                         |
   |----------------------------------------------------------------|
   
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review: 3 lines total
   
   Catch-up.  unix-login-for-testing reviewed this for you, giving the reason as:
@@ -104,7 +104,7 @@ Review & Catch up.
   | base                    | {REVISION 0}                         |
   |----------------------------------------------------------------|
   
-  Reviewing test to {REVISION 1}.
+  Reviewing test from {REVISION 0} to {REVISION 1}.
   1 files to review: 3 lines total
   
   Catch-up.  unix-login-for-testing reviewed this for you, giving the reason as:

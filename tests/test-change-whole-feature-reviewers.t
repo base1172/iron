@@ -13,7 +13,7 @@ Create hg repo.
   $ hg com -m file
   $ remote=$(pwd)
   $ fe create root -owner owner -description root -remote-repo-path $remote
-  $ echo >file
+  $ echo abc >file
   $ hg com -m change
   $ feature_to_server root -fake-valid-obligations
   $ fe enable-review
@@ -48,7 +48,7 @@ Lock the session.
 Then remove them as a whole-feature reviewer.  Check that they get a warning.
 
   $ fe change -remove-whole-feature-reviewer user1
-  $ fe session show -for user1
+  $ fe session show -for user1 | stabilize_output
   Warning: what you need to review may have changed since this session was created.
   Consider committing or forgetting your current session:
   
@@ -67,7 +67,7 @@ Then remove them as a whole-feature reviewer.  Check that they get a warning.
   |                    1 |                  0 |                   0 |
   |-----------------------------------------------------------------|
   
-  Reviewing root to 659c3710a572.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   1 files to review: 1 lines total
      [ ] 1 file
 
@@ -78,7 +78,7 @@ review.
   $ fe session diff -for user1 |& matches 'no current session'
   [1]
 
-  $ fe show
+  $ fe show | stabilize_output
   root
   ====
   root
@@ -93,8 +93,8 @@ review.
   | review is enabled      | true         |
   | reviewing              | all          |
   | is permanent           | false        |
-  | tip                    | 659c3710a572 |
-  | base                   | 04da3968e088 |
+  | tip                    | {REVISION 1} |
+  | base                   | {REVISION 0} |
   |---------------------------------------|
   
   |----------------|

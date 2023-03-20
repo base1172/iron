@@ -205,7 +205,7 @@ Create a session with no review, and one can still clear the brain, even if the
 session is locked as long as it has no reviewed files.
 
   $ fe session show | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   2 files to review: 4 lines total
      [ ] 2 file
      [ ] 2 file2
@@ -216,7 +216,7 @@ But if review has been done in the session, one cannot clear the brain.
 
   $ fe session mark-file root file
   $ fe session show | stabilize_output
-  Reviewing root to {REVISION 1}.
+  Reviewing root from {REVISION 0} to {REVISION 1}.
   1 files to review (1 already reviewed): 4 lines total
      [X] 2 file
      [ ] 2 file2

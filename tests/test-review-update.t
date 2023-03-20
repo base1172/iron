@@ -50,7 +50,7 @@ Review automatically updates if the bookmark is current but not active.
   $ hg up -q -r root
   $ hg pull -q -r root
   $ cat .hg/bookmarks.current
-  root (no-eol)
+  root
   $ hg active-bookmark
   [1]
   $ parent_is $rev0

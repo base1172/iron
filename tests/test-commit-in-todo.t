@@ -95,7 +95,7 @@ Create child with changes.
   |--------------------------|
 
   $ IRON_USER=user1 fe session show | stabilize_output
-  Reviewing root/child to {REVISION 2}.
+  Reviewing root/child from {REVISION 1} to {REVISION 2}.
   1 files to review (2 already reviewed): 6 lines total
   
   Required review.
@@ -116,7 +116,7 @@ Create child with changes.
   |--------------------------|
 
   $ IRON_USER=user2 fe session show | stabilize_output
-  Reviewing root/child to {REVISION 2}.
+  Reviewing root/child from {REVISION 1} to {REVISION 2}.
   1 files to review (2 already reviewed): 6 lines total
   
   Required review.
@@ -137,7 +137,7 @@ Create child with changes.
   |--------------------------|
 
   $ IRON_USER=user3 fe session show | stabilize_output
-  Reviewing root/child to {REVISION 2}.
+  Reviewing root/child from {REVISION 1} to {REVISION 2}.
   1 files to review (2 already reviewed): 6 lines total
   
   Required review.

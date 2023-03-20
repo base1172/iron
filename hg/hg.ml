@@ -334,10 +334,15 @@ let is_ok = function
   | Error _ -> false
 ;;
 
-let one_line = function
+let one_line_trimmed = function
   | Error e -> `Error e
   | Ok string ->
-    (match String.split_lines string with
+    let lines =
+      String.split_lines string
+      |> List.map ~f:String.strip
+      |> List.filter ~f:(Fn.non String.is_empty)
+    in
+    (match lines with
      | [ line ] -> `One_line line
      | ([] | _ :: _ :: _) as lines -> `Not_one_line lines)
 ;;
@@ -615,7 +620,7 @@ let get_remote_rev remote_repo_path what_rev =
         ; Remote_repo_path.to_string remote_repo_path
         ]
   in
-  match one_line stdout with
+  match one_line_trimmed stdout with
   | `One_line first_12 -> Node_hash.First_12.of_string first_12
   | `Error e ->
     raise_s
@@ -715,10 +720,10 @@ let active_bookmark repo_root =
     hg
       ~repo_root
       "bookmarks"
-      ~args:[ "--list"; "."; "--template"; "'{activebookmark}\\n'" ]
+      ~args:[ "--list"; "."; "--template"; "{activebookmark}\\n" ]
       ~how:Capture_stdout
   in
-  match one_line stdout with
+  match one_line_trimmed stdout with
   | `One_line line -> Ok line
   | `Error e -> Error e
   | `Not_one_line lines ->
@@ -1086,7 +1091,7 @@ let parent repo_root =
   let%map result =
     hg ~repo_root "parent" ~args:[ "--template"; node_template ] ~how:Capture_stdout
   in
-  match one_line result with
+  match one_line_trimmed result with
   | `Error error -> fail "'hg parent' failed" error [%sexp_of: Error.t]
   | `Not_one_line output ->
     fail "'hg parent' gave unexpected output" output [%sexp_of: string list]
@@ -1323,7 +1328,7 @@ let phase repo_root revision =
   let%map result =
     hg ~repo_root "log" ~how:Capture_stdout ~args:[ "-r"; rev; "--template={phase}" ]
   in
-  match one_line result with
+  match one_line_trimmed result with
   | `Error e ->
     raise_s [%sexp (sprintf "cannot find phase of %s" rev : string), (e : Error.t)]
   | `Not_one_line lines ->
@@ -1869,7 +1874,7 @@ let status repo_root (changed : Status.Changed.t) =
 
 let tags repo_root rev =
   let%map result = log repo_root (Revset.of_rev rev) ~template:"{tags}" in
-  match one_line result with
+  match one_line_trimmed result with
   | `One_line line -> Ok (String.split line ~on:' ')
   | `Error e -> Error e
   | `Not_one_line lines ->
