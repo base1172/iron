@@ -238,12 +238,8 @@ let hg_user_value =
     if is_some (Sys.getenv hg_user_env_var)
     then return `Already_set
     else (
-      let%bind iron_config = force Iron_config.as_per_IRON_CONFIG in
       let user = User_name.(to_string unix_login) in
-      let email = sprintf "%s@%s" user iron_config.domain_name in
-      match%map Unix.Passwd.getbyname user with
-      | None -> `Inferred email
-      | Some { gecos; _ } -> `Inferred (sprintf "%s <%s>" gecos email)))
+      return (`Inferred user)))
 ;;
 
 let env () =
