@@ -301,6 +301,7 @@ let pull_and_update
   ~feature_path
   ~review_session_tip
   ~feature_tip:server_feature_tip
+  ~update_even_if_already_active_bookmark
   =
   let is_known_and_is_ancestor ~ancestor ~descendant =
     match%bind Hg.rev_exists repo_root ancestor with
@@ -373,7 +374,7 @@ let pull_and_update
       | Ok active_bookmark ->
         String.equal active_bookmark (Feature_path.to_string feature_path)
     in
-    if feature_is_active_bookmark
+    if feature_is_active_bookmark && not update_even_if_already_active_bookmark
     then Deferred.unit
     else (
       match%bind Lazy_deferred.force_exn is_clean with
@@ -877,6 +878,7 @@ let review_or_catch_up
         ~feature_path
         ~feature_tip
         ~review_session_tip
+        ~update_even_if_already_active_bookmark:false
   in
   let diff4s_to_review =
     let diff4s_to_review = Array.copy diff4s_to_review in

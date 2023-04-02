@@ -85,5 +85,6 @@ let command =
                  ~remote_repo_path
                  ~feature_path
                  ~review_session_tip:tip
-                 ~feature_tip:tip))))
+                 ~feature_tip:tip
+                 ~update_even_if_already_active_bookmark:true))))
 ;;

@@ -178,7 +178,8 @@ let main { Fe.Release.Action.feature_path; for_; included_features_order } =
                  ~remote_repo_path
                  ~feature_path:parent_path
                  ~review_session_tip:feature.tip
-                 ~feature_tip:feature.tip))))
+                 ~feature_tip:feature.tip
+                 ~update_even_if_already_active_bookmark:true))))
 ;;
 
 let command =

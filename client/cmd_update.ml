@@ -30,6 +30,7 @@ let main (action : Fe.Update.Action.t) =
       ~feature_path
       ~review_session_tip:tip
       ~feature_tip:tip
+      ~update_even_if_already_active_bookmark:true
 ;;
 
 let command =

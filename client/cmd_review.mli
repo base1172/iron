@@ -62,6 +62,7 @@ val pull_and_update
   -> feature_path:Feature_path.t
   -> review_session_tip:Rev.t
   -> feature_tip:Rev.t
+  -> update_even_if_already_active_bookmark:bool
   -> unit Deferred.t
 
 val may_modify_others_review_exn
