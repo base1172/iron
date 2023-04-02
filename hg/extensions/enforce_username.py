@@ -13,17 +13,18 @@ def extsetup(ui):
         if "IRON_FUNCTIONAL_TESTING" not in os.environ:
             os_login = str.encode(os.getlogin())
             if "HGUSER" in os.environ:
-                if str.encode(os.getenv("HGUSER")) != os_login and not str.encode(os.getenv("HGUSER")).startswith(os_login + b'@'):
+                hguser = str.encode(os.getenv("HGUSER"))
+                if hguser != os_login and not hguser.startswith(os_login + b'@'):
                     msg = _(
-                        b"Commit user does not match OS username '%s'"
+                        b"Commit user '%s' does not match OS username '%s'"
                     )
-                    raise error.InputError(msg % os_login)
-            elif 'user' in opts and opts['user'] is not None and opts['user'] != b'':
+                    raise error.InputError(msg % (hguser, os_login))
+            elif 'user' in opts and opts['user'] is not None and opts['user'] != b'':                
                 if opts['user'] != os_login and not opts['user'].startswith(os_login + b'@'):
                     msg = _(
-                        b"Commit user does not match OS username '%s'"
+                        b"Commit user '%s' does not match OS username '%s'"
                     )
-                    raise error.InputError(msg % os_login)            
+                    raise error.InputError(msg % (opts['user'], os_login))
             else:
                 opts['user'] = os_login
         return commit(ui, repo, *pats, **opts)
