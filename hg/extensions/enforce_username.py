@@ -13,7 +13,7 @@ def extsetup(ui):
     def commitwrap(commit, ui, repo, *pats, **opts):
         if "IRON_FUNCTIONAL_TESTING" not in os.environ:
             os_login = str.encode(os.getlogin())
-            pat = re.compile(b"(^%s$|^%s@| <%s@.+>$)" % (os_login, os_login, os_login))
+            pat = re.compile(b'^(%s|%s@\S+|(\S+ )+<%s@\S+>)$' % (os_login, os_login, os_login))
             if "HGUSER" in os.environ:
                 hguser = str.encode(os.getenv("HGUSER"))
                 if pat.match(hguser) is None:
